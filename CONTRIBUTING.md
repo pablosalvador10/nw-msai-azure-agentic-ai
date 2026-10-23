@@ -1,273 +1,77 @@
-# Contributing to Azure AI Foundry Agent Extension
+# Contributing
 
-Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to the project.
+This repository contains teaching materials, a starter service, and a grading harness. A useful change should make a concept easier to understand, fix a reproducible problem, or make the student workflow more reliable.
 
-## Code of Conduct
+If you are taking the course, start with the [FY26 course home](fy26/index.html) or [course README](fy26/README.md). The weekly overview defines your exercise. These notes are for changes to the course itself.
 
-By participating in this project, you agree to maintain a respectful and collaborative environment for all contributors.
+## Work in the current cohort
 
-## Getting Started
+All new course work belongs in [fy26/](fy26/README.md). Run Python commands from that folder and use its Python 3.12 environment. It has its own dependencies and lockfile; the repository-root environment may belong to last year's course.
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/northwestern-fy26-msai-foundry-agentic-ai.git`
-3. Create a branch: `git checkout -b feature/your-feature-name`
-4. Install dependencies: `uv sync --all-extras --dev`
+- Install dependencies with `uv sync --locked`.
+- Add a dependency with `uv add <package>` from the cohort folder; include the updated lockfile in the change.
+- Leave [FY25](fy25/README.md) unchanged except for broken-link repairs.
+- Keep changes focused. Do not mix a content correction, a dependency upgrade, and a redesign in one pull request.
 
-## Development Setup
+## Keep the exercises intact
 
-```bash
-# Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+The starting services are deliberately limited. The students' work is to improve them. Do not replace the starter with a reference solution.
 
-# Install all dependencies
-uv sync --all-extras --dev
+| Area | Where it belongs | What to preserve |
+|---|---|---|
+| Request and response shapes | [fy26/app/contract.py](fy26/app/contract.py) | The HTTP contract used by the harness |
+| Fares, credits and station rules | [fy26/app/domain.py](fy26/app/domain.py) | Deterministic calculations; models must not calculate prices |
+| Agent tools | [fy26/app/tools.py](fy26/app/tools.py) and [fy26/app/mcp_server.py](fy26/app/mcp_server.py) | Clear descriptions, constrained arguments, and recorded results |
+| Public scoring | [fy26/harness/](fy26/harness/__main__.py) | Checks that reward useful behavior rather than constant or fabricated answers |
+| Infrastructure | [fy26/infra/](fy26/infra/README.md) | One resource group per student, keyless Azure access, readable Terraform |
 
-# Set up pre-commit hooks (optional but recommended)
-uv run pre-commit install
-```
+Students must not change the contract or scoring code. If a maintainer needs to change either, update the service, harness, datasets, tests and affected weekly instructions together. Keep hidden data and reference solutions outside this repository.
 
-## Code Quality Standards
+## Python and tests
 
-### 1. Code Style
+- Use type hints and built-in generics such as `list[str]`. Use Pydantic for API models and settings, and plain Python for domain rules.
+- Write a short docstring for public functions. Explain a non-obvious decision near the code; do not restate what each line does.
+- Use logging for service diagnostics. Notebook cells, the CLI, and teaching helpers may print results and commands deliberately.
+- Catch errors where they can be handled. Do not add a blanket `try/except` that hides a failure or reports success when a step did not finish.
+- Add a regression test for a bug. Include an error case as well as the successful path.
+- Tests run offline: no Azure calls, network access or real credentials. Use the fixtures in [fy26/tests/conftest.py](fy26/tests/conftest.py).
 
-- **PEP 8 Compliance**: All code must follow PEP 8 guidelines
-- **Ruff Formatting**: Use Ruff for code formatting
-- **Ruff Linting**: Code must pass Ruff linting checks
-
-```bash
-# Format code with Ruff
-uv run poe fmt
-
-# Check with Ruff linter
-uv run poe lint
-```
-
-### 2. Type Hints
-
-- All functions must have complete type annotations (PEP 484)
-- Use `typing` module for complex types
-- No use of `Any` unless absolutely necessary
-
-```python
-# Good
-def process_data(values: List[int], operation: str) -> Dict[str, Any]:
-    ...
-
-# Bad
-def process_data(values, operation):
-    ...
-```
+From the cohort folder, run `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest`. Ruff is the only formatter. There are no registered `unit`, `integration` or `slow` test markers; register a marker before introducing it because pytest uses strict marker checking.
 
-### 3. Docstrings
-
-- Follow PEP 257 conventions
-- Include parameter descriptions, return types, and exceptions
-- Use complete sentences
+Some Week 8 tests are skipped until the student-built feature exists. That is intentional. Do not silence a new failure by skipping its test or lowering a grading threshold.
 
-```python
-def example_function(param: str) -> bool:
-    """Check if parameter is valid.
-    
-    Args:
-        param: The parameter to validate.
-        
-    Returns:
-        True if valid, False otherwise.
-        
-    Raises:
-        ValueError: If param is empty.
-    """
-    ...
-```
+## Teaching materials
 
-### 4. Logging
+Use direct language. Define a term before relying on it, explain why the example is needed, and say what the student should observe. Avoid promises such as “always correct” when the example only demonstrates a schema or one measured run.
 
-- Use the `logging` module (NO `print()` statements)
-- Include appropriate log levels (DEBUG, INFO, WARNING, ERROR)
-- Add context to log messages
+Each week has a clear division of work:
 
-```python
-# Good
-import logging
-logger = logging.getLogger(__name__)
-logger.info(f"Processing {len(items)} items")
-
-# Bad
-print("Processing items")
-```
-
-### 5. Error Handling
-
-- Use comprehensive try-except blocks
-- Log errors before raising or returning
-- Provide meaningful error messages
-
-```python
-# Good
-try:
-    result = risky_operation()
-    logger.info("Operation completed successfully")
-    return result
-except SpecificError as e:
-    logger.error(f"Operation failed: {str(e)}")
-    raise
-
-# Bad
-result = risky_operation()  # No error handling
-```
-
-## Testing
-
-### Writing Tests
-
-- Write tests for all new functionality
-- Maintain or improve code coverage (target: 80%+)
-- Use pytest fixtures for test data
-- Follow the Arrange-Act-Assert pattern
-
-```python
-def test_example_function(sample_data):
-    """Test example function with sample data."""
-    # Arrange
-    config = FunctionConfig(**sample_data)
-    
-    # Act
-    result = process_function(config)
-    
-    # Assert
-    assert result.status == "success"
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-uv run poe test
-
-# Run with coverage (same as above, coverage is included)
-uv run pytest tests/ -v --cov=src --cov-report=term-missing
-
-# Run specific test file
-uv run pytest tests/test_azure_functions.py -v
-
-# Run tests with markers
-uv run pytest tests/ -v -m unit
-```
-
-### Test Markers
-
-- `@pytest.mark.unit` - Unit tests
-- `@pytest.mark.integration` - Integration tests
-- `@pytest.mark.slow` - Slow-running tests
-
-## Pull Request Process
-
-1. **Update Documentation**: Update README.md and docs/ if needed
-2. **Add Tests**: Include tests for new features
-3. **Run Quality Checks**: Ensure all checks pass
-   ```bash
-   uv run poe check  # Runs fmt, lint, pyright, and test
-   ```
-4. **Update CHANGELOG**: Add your changes to CHANGELOG.md (if exists)
-5. **Write Clear Commit Messages**: Follow conventional commits format
-6. **Create Pull Request**: Provide a clear description of changes
-
-### Commit Message Format
-
-```
-type(scope): subject
-
-body (optional)
-
-footer (optional)
-```
-
-Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-
-Examples:
-```
-feat(azure-functions): add retry logic with exponential backoff
-
-Implements automatic retry for transient failures in Azure Functions
-client with configurable retry attempts and backoff strategy.
-
-Closes #123
-```
-
-## Project Structure
-
-```
-northwestern-msai-foundry-agent-extension/
-├── src/                    # Source code
-│   ├── abstractions/       # Azure service abstractions
-│   └── agent_core.py       # Core agent implementation
-├── tests/                  # Test suite
-├── notebooks/              # Interactive tutorials
-├── docs/                   # Documentation
-└── .github/workflows/      # CI/CD pipelines
-```
-
-## Adding New Features
-
-### Adding a New Azure Service Integration
-
-1. Create abstraction in `src/abstractions/new_service.py`
-2. Follow existing patterns (FunctionConfig, Client, etc.)
-3. Add comprehensive docstrings and type hints
-4. Create tests in `tests/test_new_service.py`
-5. Update `src/abstractions/__init__.py`
-6. Add usage example to README.md
-7. Consider creating a notebook tutorial
-
-### Adding a New Tool Type
-
-1. Extend the agent core in `src/agent_core.py`
-2. Add tool registration method
-3. Update tool invocation logic
-4. Add tests
-5. Document in README.md and notebooks
-
-## Documentation
-
-- Update README.md for user-facing changes
-- Update docs/ for architectural changes
-- Add inline comments for complex logic
-- Create notebooks for new features
-- Include examples in docstrings
-
-## Code Review Checklist
-
-Before submitting, ensure:
-
-- [ ] Code follows PEP 8 and is Black-formatted
-- [ ] All functions have type hints
-- [ ] All functions have docstrings
-- [ ] Tests added for new functionality
-- [ ] All tests pass
-- [ ] Code coverage maintained or improved
-- [ ] No print() statements (use logging)
-- [ ] Error handling is comprehensive
-- [ ] Documentation updated
-- [ ] No hardcoded credentials or secrets
-
-## Questions or Need Help?
-
-- Open an issue for bugs or feature requests
-- Start a discussion for questions or ideas
-- Review existing issues and PRs
-
-## Recognition
-
-Contributors will be recognized in:
-- README.md acknowledgments
-- Release notes
-- Project documentation
-
-Thank you for contributing! 🎉
+- The weekly overview describes preparation, the exercise, grading and submission.
+- The Markdown lecture is the source for the reading page. Keep numbered sections and copied Python examples aligned with the HTML version in the week's documentation folder.
+- The slides summarize the same concepts for class. They are not an additional assignment.
+- The main notebook is the required lab. Mark extensions as optional, and leave enough time to deploy before the session ends.
+- The deep-dive notebook contains optional experiments. It must not become a hidden prerequisite for the main lab.
+
+Link to official documentation for the concepts taught. Label approximate timings, model-dependent behavior and measured examples. An observation from one run is not a benchmark or a guarantee.
+
+Before saving a notebook for commit, clear all outputs and execution counts in VS Code. Then check its links from the notebook's actual folder. Do not include account details, resource names, endpoints or keys in committed examples or outputs.
+
+For browser changes, check a lecture and a slide deck at desktop and phone widths. Check keyboard navigation, contents links, reduced-motion behavior and print output. The shared styles and scripts live in [fy26/assets/](fy26/assets/lecture.css); a change there affects every week.
+
+## Safety and privacy
+
+- Never commit environment files, Terraform variable files, state, plan files, reports or credentials. Ignore rules are a safeguard, not a substitute for reviewing the diff.
+- Use managed identity or `DefaultAzureCredential` for Azure access. Do not add Azure API keys to make an example easier to run.
+- Keep course scenarios fictional and original. Do not copy customer code, data, screenshots or internal material into a lesson.
+- A local design reference is not course content. Leave it untracked unless its provenance and publication rights have been checked.
+- Do not deploy, destroy resources, push a branch or publish materials as part of an unrelated edit.
+
+## Before opening a pull request
+
+1. Explain the problem and how the change addresses it. For a teaching change, name what students should understand or be able to do differently.
+2. Run the checks above. For infrastructure changes, also run `terraform fmt -check -recursive`, initialize the provider with no backend, and run `terraform validate` from the infrastructure folder. Validation does not prove that a deployment will succeed in Azure.
+3. Review every changed file, including notebooks, lockfiles and generated pages. Remove outputs, private values and unrelated edits.
+4. Check the affected reading page, slides and notebook agree. The tests in [fy26/tests/test_teaching_consistency.py](fy26/tests/test_teaching_consistency.py) and [fy26/tests/test_presentation_assets.py](fy26/tests/test_presentation_assets.py) cover section and code drift, shared assets, and local HTML links.
+5. Use a conventional commit prefix: `fix:`, `docs:`, `feat:`, `test:` or `refactor:`. In the pull request, record which checks ran and any behavior that remains unverified.
+
+The [CI workflow](.github/workflows/ci.yml) checks the locked install, Ruff, offline tests, clean notebook outputs, and Terraform formatting and validation. Keep it green before merging.

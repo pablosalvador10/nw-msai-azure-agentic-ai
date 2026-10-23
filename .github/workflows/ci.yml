@@ -1,34 +1,96 @@
-name: CI - Lint
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, fy26 ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  lint:
-    name: Code Quality Checks
+  python:
+    name: Lint and test (${{ matrix.cohort }})
     runs-on: ubuntu-latest
-    
+    strategy:
+      fail-fast: false
+      matrix:
+        cohort: [ fy26 ]
+    defaults:
+      run:
+        working-directory: ${{ matrix.cohort }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Install uv
       uses: astral-sh/setup-uv@v4
       with:
         version: "latest"
-        
-    - name: Set up Python
-      run: uv python install 3.11
-        
-    - name: Install dependencies
-      run: uv sync --all-extras --dev
-        
+
+    - name: Install dependencies (from uv.lock)
+      run: uv sync --locked
+
     - name: Run Ruff (formatting check)
-      run: uv run ruff format --check src/ tests/
-        
+      run: uv run ruff format --check .
+
     - name: Run Ruff (linting)
-      run: uv run ruff check src/ tests/ --output-format=github
+      run: uv run ruff check . --output-format=github
+
+    - name: Run tests (offline, no Azure)
+      run: uv run pytest
+
+    - name: Check notebooks (valid JSON, no outputs)
+      run: |
+        uv run python - <<'PY'
+        import json
+        import sys
+        from pathlib import Path
+
+        bad = []
+        for path in sorted(Path(".").rglob("*.ipynb")):
+            if {".venv", ".ipynb_checkpoints"} & set(path.parts):
+                continue
+            try:
+                notebook = json.loads(path.read_text(encoding="utf-8"))
+            except ValueError as exc:
+                bad.append(f"{path}: invalid JSON ({exc})")
+                continue
+            for index, cell in enumerate(notebook.get("cells", [])):
+                if cell.get("cell_type") == "code" and (cell.get("outputs") or cell.get("execution_count")):
+                    bad.append(f"{path}: cell {index} has outputs; clear them before committing")
+                    break
+        print("\n".join(bad) or "Notebooks OK")
+        sys.exit(1 if bad else 0)
+        PY
+
+  terraform:
+    name: Terraform (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [fy26/infra, fy26/web/infra]
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform fmt
+      run: terraform fmt -check -recursive
+
+    - name: Terraform init (no backend)
+      run: terraform init -backend=false -input=false
+
+    - name: Terraform validate
+      run: terraform validate

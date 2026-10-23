@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 · Harnesses and Agentic Coding · Slides</title>
+<meta name="description" content="Week 8 slides: evaluation and agent harnesses, context engineering, the Model Context Protocol (revision 2026-07-28), MCP security, coding agents, and spec-driven development.">
+<link rel="stylesheet" href="../../assets/deck.css">
+</head>
+<body>
+<main class="stage" data-week="Week 8" data-topic="Harnesses and Agentic Coding">
+
+<!-- 1 -->
+<section class="slide title-slide" data-title="Harnesses and Agentic Coding">
+  <div class="build">
+    <p class="kicker">Week 8</p>
+    <h1>Harnesses and Agentic Coding</h1>
+    <p class="lede">A model on its own only produces text. What makes it an agent is the harness around it: the loop, the context, the tools, the permissions, and the checks that tell it whether it succeeded. Today you work on both sides: you publish your tools to any agent, and you use a coding agent to build a feature against a specification written as tests.</p>
+    <div class="meta-row">
+      <span class="meta"><b>Author</b> · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</span>
+      <span class="meta"><b>Lecture</b> · <a href="lecture.html">lecture.html</a></span>
+      <span class="meta"><b>Lab</b> · <a href="../lab.ipynb">lab.ipynb</a>, required</span>
+      <span class="meta"><b>Deep dive</b> · <a href="../deep-dive.ipynb">deep-dive.ipynb</a>, optional</span>
+      <span class="meta"><b>Logistics</b> · <a href="../README.md">README</a></span>
+      <span class="meta"><b>Submit</b> · one URL, before Week 10</span>
+    </div>
+  </div>
+  <p class="hint"><kbd>&rarr;</kbd> next · <kbd>&larr;</kbd> back · <kbd>C</kbd> contents · <kbd>F</kbd> full screen</p>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-title="Two sides of one idea">
+  <p class="kicker">Why this week matters</p>
+  <h2>This week you look at harnesses from both sides</h2>
+  <div class="cols cols-2 build-row" style="margin-top:10px">
+    <div class="card"><h3>Your service becomes a tool server</h3><p>You publish <code>search_handbook</code>, <code>quote_fare</code> and <code>get_station</code> over the <b>Model Context Protocol</b>. Any agent can now use them: VS Code, Agent Framework, Foundry.</p></div>
+    <div class="card azure"><h3>A coding agent builds a feature</h3><p>A specification written as tests, instructions in <code>AGENTS.md</code>, your harness as the judge. You write the prompt, review the diff, and decide what ships.</p></div>
+  </div>
+  <div class="callout purple build" style="margin-top:22px"><p><b>The common thread is verification.</b> An agent that can measure its own work, by running the tests and the harness, can iterate without you. One that cannot will report success anyway.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-title="By the end you can">
+  <p class="kicker">Objectives</p>
+  <h2>By the end of today you can</h2>
+  <div class="cols cols-60">
+    <ul class="check-list build">
+      <li>Name the parts of an agent harness, and tell an agent harness from an evaluation harness.</li>
+      <li>Explain MCP, including why revision 2026-07-28 is stateless, and expose your tools at <code>/mcp</code>.</li>
+      <li>Call those tools from the MCP client, from an Agent Framework agent, and from VS Code.</li>
+      <li>Run the service locally and test it end to end before you deploy.</li>
+      <li>Use a coding agent well: <code>AGENTS.md</code>, a spec as tests, small steps, review of every diff.</li>
+    </ul>
+    <div class="stack build">
+      <div class="callout purple"><p><b>You ship</b> <code>POST /mcp</code> with a fourth tool, <code>nearest_station_with_docks</code>, written by a coding agent and reviewed by you.</p></div>
+      <div class="callout"><p><b>You submit</b> one URL. The harness speaks MCP to it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-title="Today: lecture, lab, deep dive">
+  <p class="kicker">Today</p>
+  <h2>Learn it, build it, ship it; then go deeper if you want</h2>
+  <div class="cols cols-60">
+    <div class="timeline build">
+      <div class="row"><span class="t">1</span><span>What a harness is; coding agents as harnesses; MCP</span><span class="w">Lecture</span></div>
+      <div class="row"><span class="t">2</span><span>Run the service locally; speak MCP by hand</span><span class="w">Lab Parts 1-2</span></div>
+      <div class="row"><span class="t">3</span><span>Your tools in other agents: MCP client, Agent Framework, VS Code</span><span class="w">Lab Part 3</span></div>
+      <div class="row"><span class="t">4</span><span>Your turn: agentic coding, a feature from a spec written as tests</span><span class="w">Lab Part 4, graded</span></div>
+      <div class="row"><span class="t">5</span><span>Deploy, score the live URL; write your own check</span><span class="w">Lab Parts 5-6</span></div>
+      <div class="row break"><span class="t">+</span><span>Optional: MCP errors, tool poisoning, a harness agent with skills, a Foundry agent with remote MCP</span><span class="w"><a href="../deep-dive.ipynb">Deep dive</a></span></div>
+    </div>
+    <div class="stack build">
+      <div class="card plain"><h3>Before class</h3><p>Read <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a> and <a href="https://modelcontextprotocol.io/docs/getting-started/intro">What is MCP?</a></p></div>
+      <div class="card plain"><h3>Bring a working coding agent</h3><p>GitHub Copilot in agent mode, or Claude Code, or Codex, working in your VS Code.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-title="Two kinds of harness">
+  <p class="kicker">Vocabulary</p>
+  <h2>An evaluation harness measures. An agent harness acts</h2>
+  <div class="table-wrap build">
+    <table>
+      <tr><th></th><th>Evaluation harness</th><th>Agent harness</th></tr>
+      <tr><td><b>What it is</b></td><td>Code that runs a system against tasks and scores it</td><td>The runtime that turns a model into an agent that does work</td></tr>
+      <tr><td><b>In this course</b></td><td><code>harness/</code>: checks per week, public data, proofs</td><td>Agent Framework's loop (Weeks 6-7); Copilot, Codex, Claude Code</td></tr>
+      <tr><td><b>Its job</b></td><td>Measure</td><td>Act</td></tr>
+      <tr><td><b>Its output</b></td><td>Scores, failures, evidence</td><td>Tool calls, file edits, answers</td></tr>
+    </table>
+  </div>
+  <div class="callout purple build" style="margin-top:16px"><p><b>They meet in verification.</b> Today's coding agent edits code, runs <code>pytest</code> and the harness, reads the failures, and tries again. The vocabulary comes from <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Demystifying evals for AI agents (Anthropic)</a>.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-title="Anatomy of an agent harness">
+  <p class="kicker">Lab Part 1</p>
+  <h2>The model supplies judgment. The harness makes judgment safe and productive</h2>
+  <div class="cols cols-2 center">
+    <svg viewBox="0 0 560 360" width="560" height="360" role="img" aria-label="An agent harness: the loop sits between the model and the tools; context feeds the loop; permissions gate the tools; verification feeds results back into the loop; observability records everything." font-family="Segoe UI, Inter, system-ui, sans-serif" class="build">
+      <defs><marker id="arr8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3341b8"/></marker></defs>
+      <rect x="10" y="10" width="540" height="340" rx="18" fill="#fbfbff" stroke="#d9dcf5" stroke-dasharray="6 5"/>
+      <text x="30" y="36" font-size="12" font-weight="800" fill="#3341b8" letter-spacing="1.5">AGENT HARNESS</text>
+      <rect x="205" y="140" width="150" height="70" rx="14" fill="#3341b8"/>
+      <text x="280" y="170" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">Loop</text>
+      <text x="280" y="191" font-size="12" fill="#e3e6fb" text-anchor="middle">model, tools, repeat</text>
+      <g font-size="14" font-weight="700" fill="#18191b" text-anchor="middle">
+        <rect x="35" y="60" width="150" height="56" rx="10" fill="#fff" stroke="#cfd2d6"/><text x="110" y="84">Context</text>
+        <rect x="375" y="60" width="150" height="56" rx="10" fill="#fff" stroke="#cfd2d6"/><text x="450" y="84">Tools</text>
+        <rect x="375" y="240" width="150" height="56" rx="10" fill="#ecf8f4" stroke="#9fd6c5"/><text x="450" y="264">Verification</text>
+        <rect x="35" y="240" width="150" height="56" rx="10" fill="#fff" stroke="#cfd2d6"/><text x="110" y="264">Observability</text>
+        <rect x="375" y="150" width="150" height="50" rx="10" fill="#fff7e4" stroke="#ead39b"/><text x="450" y="180">Permissions</text>
+      </g>
+      <g font-size="11.5" fill="#626970" text-anchor="middle">
+        <text x="110" y="102">AGENTS.md, files, memory</text>
+        <text x="450" y="102">edit, shell, search, MCP</text>
+        <text x="450" y="282">tests, linters, harness</text>
+        <text x="110" y="282">transcript, traces, diffs</text>
+      </g>
+      <g stroke="#3341b8" stroke-width="2" fill="none">
+        <path d="M185 100 L230 138" marker-end="url(#arr8)"/>
+        <path d="M330 138 L380 116" marker-end="url(#arr8)"/>
+        <path d="M450 200 L450 238" marker-end="url(#arr8)"/>
+        <path d="M375 262 L330 212" marker-end="url(#arr8)"/>
+        <path d="M230 212 L185 250" marker-end="url(#arr8)" stroke-dasharray="5 4"/>
+      </g>
+    </svg>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Part</th><th>Question it answers</th></tr>
+        <tr><td><b>Loop</b></td><td>When does the agent stop? Limits, budgets, "until tests pass"</td></tr>
+        <tr><td><b>Context</b></td><td>What does the model see on each call?</td></tr>
+        <tr><td><b>Tools</b></td><td>What can it do?</td></tr>
+        <tr><td><b>Permissions</b></td><td>What may it do without asking?</td></tr>
+        <tr><td><b>Verification</b></td><td>How does it know it succeeded?</td></tr>
+        <tr><td><b>Observability</b></td><td>How do <i>you</i> know what it did?</td></tr>
+      </table>
+      <p class="small" style="padding:8px 12px 0">Two products on the same model can differ enormously, because their harnesses differ.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-title="Context engineering">
+  <p class="kicker">Context engineering</p>
+  <h2>Every token in the context costs money, time and attention. Choose them</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Technique</th><th>Idea</th></tr>
+        <tr><td><b>Repository instructions</b></td><td>A file the harness always loads: <a href="../../AGENTS.md"><code>AGENTS.md</code></a>, <code>copilot-instructions.md</code></td></tr>
+        <tr><td><b>Path-scoped instructions</b></td><td>Rules that load only for matching files</td></tr>
+        <tr><td><b>Just-in-time retrieval</b></td><td>The agent searches instead of receiving everything up front</td></tr>
+        <tr><td><b>Skills</b></td><td>Folders of instructions and scripts; only a description loads until needed</td></tr>
+        <tr><td><b>Compaction</b></td><td>Summarize or drop old turns when the window fills</td></tr>
+        <tr><td><b>Subagents</b></td><td>Delegate to a fresh context; get back only the result</td></tr>
+        <tr><td><b>Memory</b></td><td>Notes that persist across sessions</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card green"><h3>Short, specific, testable</h3><p>"Do not change <code>app/contract.py</code>" changes behavior. "Write clean code" wastes tokens.</p></div>
+      <div class="card"><h3>A map, not an encyclopedia</h3><p>Point to where things live; do not paste them in (<a href="https://openai.com/index/harness-engineering/">Harness engineering, OpenAI</a>).</p></div>
+      <p class="small">Read: <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering (Anthropic)</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide section-slide" data-title="Part 1 · The Model Context Protocol">
+  <p class="kicker">Part 1 · Lab Parts 2-3</p>
+  <h1>The Model Context Protocol</h1>
+  <p>One protocol for tools and context, so a tool written once works in every agent. What Language Server Protocol did for editors and languages.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-title="Hosts, clients, servers">
+  <p class="kicker">MCP</p>
+  <h2>Write a tool once; every MCP host can use it</h2>
+  <div class="cols center" style="grid-template-columns:1fr 70px 1fr; gap:0">
+    <div class="box-group build">
+      <p class="label">Hosts: AI applications, one client per server</p>
+      <div class="tiles">
+        <div class="tile"><b>VS Code with GitHub Copilot</b>agent mode</div>
+        <div class="tile"><b>Codex CLI, Claude Code</b>terminal agents</div>
+        <div class="tile"><b>Agent Framework agent</b><code>MCPStreamableHTTPTool</code></div>
+        <div class="tile"><b>Foundry agent</b>the MCP tool, or a toolbox</div>
+      </div>
+    </div>
+    <div class="flow" style="margin:0"><div class="arrow" style="width:70px">&harr;<small>JSON-RPC over HTTP or stdio</small></div></div>
+    <div class="box-group build">
+      <p class="label">Servers: capabilities</p>
+      <div class="tiles">
+        <div class="tile hl"><b>Your service: /mcp</b>search_handbook · quote_fare · get_station</div>
+        <div class="tile"><b>Microsoft Learn MCP</b>documentation search</div>
+        <div class="tile"><b>Azure MCP, Foundry MCP</b>resources, deployments, evaluations</div>
+        <div class="tile"><b>GitHub MCP</b>issues, pull requests, code</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-title="What a server offers">
+  <p class="kicker">MCP features</p>
+  <h2>Tools are what the model calls. Resources and prompts are what people pick</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table>
+        <tr><th>Feature</th><th>Offered by</th><th>Controlled by</th><th>Example</th></tr>
+        <tr class="hl"><td><b>Tools</b></td><td>Server</td><td>The model decides to call them</td><td><code>quote_fare(plan, minutes, ebike)</code></td></tr>
+        <tr><td><b>Resources</b></td><td>Server</td><td>The application or user loads them</td><td>A handbook page by URI</td></tr>
+        <tr><td><b>Prompts</b></td><td>Server</td><td>The user picks them</td><td>"Draft a reply to a damaged-bike case"</td></tr>
+        <tr><td><b>Elicitation</b></td><td>Client</td><td>The server needs user input mid-request</td><td>"Which rider id?"</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card amber"><h3>Deprecated in the current revision</h3><p>Roots, sampling and logging. Pass paths as tool arguments, call model APIs directly, log with OpenTelemetry.</p></div>
+      <div class="card azure"><h3>Optional extensions</h3><p>Long-running <b>tasks</b>, skills over MCP, and MCP Apps: interactive UI inside the conversation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-title="MCP on the wire: revision 2026-07-28">
+  <p class="kicker">MCP on the wire</p>
+  <h2>Revision 2026-07-28 is stateless: every request carries its version and its client</h2>
+  <div class="cols cols-60">
+    <div class="build">
+      <p class="code-label">Discovery replaces the old handshake</p>
+<pre class="code small-code"><code>POST /mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2026-07-28
+Mcp-Method: server/discover
+
+{"jsonrpc": "2.0", "id": 1, "method": "server/discover",
+ "params": {"_meta": {
+   "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+   "io.modelcontextprotocol/clientInfo": {"name": "notebook", "version": "1"},
+   "io.modelcontextprotocol/clientCapabilities": {}}}}</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="table-wrap">
+        <table class="compact">
+          <tr><th>Method</th><th>Returns</th></tr>
+          <tr><td><code>server/discover</code></td><td>Supported versions, capabilities, server identity</td></tr>
+          <tr><td><code>tools/list</code></td><td>Each tool's name, description, <code>inputSchema</code></td></tr>
+          <tr><td><code>tools/call</code></td><td><code>content</code>, <code>structuredContent</code>, <code>isError</code>. Header <code>Mcp-Name</code> repeats the tool name</td></tr>
+        </table>
+      </div>
+      <div class="callout purple"><p><b>Why stateless?</b> Any replica of your Container App can answer any request: no sticky sessions, no session store. The headers let gateways route and log without reading the body.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-title="What else changed in 2026-07-28">
+  <p class="kicker">The current revision</p>
+  <h2>Changes you will meet in real servers</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Change</th><th>What it means</th></tr>
+        <tr><td><b>Multi round-trip requests</b></td><td>The server returns "input required"; the client gathers the input and retries the original request. Servers no longer send their own requests</td></tr>
+        <tr><td><b><code>subscriptions/listen</code></b></td><td>One long-lived stream for change notifications the client opted into</td></tr>
+        <tr><td><b>Cacheable lists</b></td><td><code>tools/list</code> carries <code>ttlMs</code> and <code>cacheScope</code>; a stable order also helps prompt caching</td></tr>
+        <tr><td><b>Trace context</b></td><td><code>traceparent</code> in <code>_meta</code> carries OpenTelemetry traces into the tool server</td></tr>
+        <tr><td><b>Tasks</b></td><td>Long-running work moves to an official extension</td></tr>
+        <tr><td><b>Authorization</b></td><td>OAuth-based; the server validates that tokens were issued for it</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Older clients still work</h3><p>Revisions up to 2025-11-25 opened a session with an <code>initialize</code> handshake. The MCP Python SDK serves both eras on the same endpoint.</p></div>
+      <p class="small">Read: <a href="https://modelcontextprotocol.io/specification/2026-07-28/changelog">What changed in 2026-07-28</a> · <a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning">Versioning and compatibility</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-title="MCP by hand, then with clients">
+  <p class="kicker">Lab Parts 2-3</p>
+  <h2>Speak the protocol by hand once, then let clients speak it for you</h2>
+  <div class="cols cols-2">
+    <div class="build">
+      <p class="code-label">Lab Part 3 · the official MCP client</p>
+<pre class="code small-code"><code>from mcp import Client
+
+async with Client(f"{LOCAL}/mcp") as mcp_client:
+    listed = await mcp_client.list_tools()
+    result = await mcp_client.call_tool(
+        "get_station", {"station_id": "LS-08"})
+    print(result.structured_content)</code></pre>
+      <p class="code-label" style="margin-top:12px">Lab Part 3 · inside an Agent Framework agent</p>
+<pre class="code small-code"><code>async with (
+    MCPStreamableHTTPTool(name="lakeshore", url=f"{LOCAL}/mcp") as lakeshore,
+    MCPStreamableHTTPTool(name="learn",
+                          url="https://learn.microsoft.com/api/mcp") as learn,
+):
+    agent = Agent(client=client, name="concierge",
+                  instructions=..., tools=[lakeshore, learn])</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="card plain"><h3>One run on the course sandbox</h3><p style="font-size:15.5px">"A 75-minute classic ride on the student plan costs <b>$2.25</b>. At LS-08 (Arts Campus) there are <b>3 e-bikes</b> available."</p><p class="small">The agent discovered your tools over MCP at start-up. Add Microsoft Learn's server and the same agent combines your business data with documentation.</p></div>
+      <div class="card azure"><h3>In VS Code</h3><p><b>MCP: Add Server</b>, choose HTTP, enter <code>http://127.0.0.1:8000/mcp</code>. Then ask Copilot in agent mode for a fare, and expand the tool call. <a href="https://code.visualstudio.com/docs/copilot/customization/mcp-servers">Add MCP servers in VS Code</a></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="MCP security">
+  <p class="kicker">MCP security</p>
+  <h2>Tools are arbitrary code execution. Trust servers deliberately</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Threat</th><th>What happens</th><th>Defense</th></tr>
+      <tr><td><b>Tool poisoning</b></td><td>A description hides instructions the model obeys</td><td>Install servers you trust; review descriptions; pin versions</td></tr>
+      <tr><td><b>Injection through results</b></td><td>A tool returns text with instructions in it</td><td>Results are data; guardrails on tool responses; least privilege</td></tr>
+      <tr><td><b>Token passthrough</b></td><td>A server forwards the client's token to another service</td><td>Accept only tokens issued for you; never pass one through</td></tr>
+      <tr><td><b>Over-broad servers</b></td><td>One server with fifty write tools</td><td>Enable only what the task needs; separate read and write</td></tr>
+      <tr><td><b>Supply chain</b></td><td><code>npx some-mcp-server</code> runs unreviewed code</td><td>Treat a server like any dependency: source, version, publisher</td></tr>
+      <tr><td><b>DNS rebinding</b></td><td>A web page reaches a server on your laptop through your browser</td><td>Validate <code>Host</code> and <code>Origin</code>: our <a href="../../app/main.py"><code>app/main.py</code></a> allows only its own names</td></tr>
+      <tr><td><b>Anonymous remote servers</b></td><td>Anyone can call your <code>/mcp</code></td><td>Authenticate (the API key in Week 10; OAuth or Entra ID in production)</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:10px">Read: <a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/security_best_practices">MCP security best practices</a></p>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-title="MCP across Azure">
+  <p class="kicker">MCP across Azure</p>
+  <h2>MCP is the common tool interface across Microsoft's AI stack</h2>
+  <div class="tiles t3 build-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="tile"><b>Foundry Agent Service · MCP tool</b>Prompt and hosted agents call remote servers, with key, Entra ID or OAuth.</div>
+    <div class="tile hl"><b>Foundry toolboxes</b>One managed MCP endpoint in front of many tools, with central auth, guardrails, versioning and tool search.</div>
+    <div class="tile"><b>Foundry and Azure MCP servers</b>Let a coding agent list models, deploy, evaluate, and query resources.</div>
+    <div class="tile"><b>Azure Functions</b>MCP tools as serverless functions. Last year's cohort built one.</div>
+    <div class="tile"><b>Azure API Management</b>Turn REST APIs into MCP servers; add auth, limits and logs in front.</div>
+    <div class="tile"><b>Azure API Center</b>A registry of an organization's approved MCP servers.</div>
+  </div>
+  <p class="small" style="margin-top:16px">Learn module: <a href="https://learn.microsoft.com/en-us/training/modules/connect-agent-to-mcp-tools/">Integrate MCP tools with Azure AI agents</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview">Toolbox</a></p>
+</section>
+
+<!-- 16 -->
+<section class="slide section-slide" data-title="Part 2 · Coding agents">
+  <p class="kicker">Part 2 · Lab Part 4</p>
+  <h1>Coding agents: harnesses built for software</h1>
+  <p>Where they run, how they are customized, how they are kept safe, and how to work with one.</p>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="Where coding agents run">
+  <p class="kicker">Coding agents in 2026</p>
+  <h2>Where the agent runs decides what it may touch</h2>
+  <div class="cols cols-3 build-row">
+    <div class="card"><h3>In your editor</h3><p>GitHub Copilot agent mode, Codex IDE extension.</p><p class="small"><b>Sandbox:</b> your machine, with approvals for commands.<br><b>Best for:</b> interactive work you watch and steer.</p></div>
+    <div class="card azure"><h3>In your terminal</h3><p>GitHub Copilot CLI, Codex CLI, Claude Code.</p><p class="small"><b>Sandbox:</b> your machine, configurable modes.<br><b>Best for:</b> scripting, CI, longer runs.</p></div>
+    <div class="card green"><h3>In the cloud</h3><p>Copilot cloud agent on GitHub, Codex Cloud.</p><p class="small"><b>Sandbox:</b> an ephemeral, firewalled environment, one branch.<br><b>Best for:</b> delegated tasks that end in a pull request.</p></div>
+  </div>
+  <div class="table-wrap build" style="margin-top:16px">
+    <table class="compact">
+      <tr><th>Primitive</th><th>GitHub Copilot</th><th>OpenAI Codex</th></tr>
+      <tr><td>Always-on instructions</td><td><code>.github/copilot-instructions.md</code>, <code>AGENTS.md</code></td><td><code>AGENTS.md</code></td></tr>
+      <tr><td>On-demand procedures</td><td>Agent skills (<code>SKILL.md</code>)</td><td>Skills and plugins</td></tr>
+      <tr><td>Specialist personas</td><td>Custom agents (<code>.github/agents/</code>)</td><td>Agent configuration, subagents</td></tr>
+      <tr><td>Guaranteed checks</td><td>Hooks (<code>.github/hooks/</code>)</td><td>Approval policies, automatic review</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide" data-title="Customize by trigger">
+  <p class="kicker">GitHub Copilot, by file</p>
+  <h2>Choose a customization by when it should apply</h2>
+  <div class="cols cols-4 build-row">
+    <div class="card"><h3>Instructions</h3><p>Rules that always apply.</p><p class="small"><code>copilot-instructions.md</code>, <code>*.instructions.md</code>, <code>AGENTS.md</code></p></div>
+    <div class="card azure"><h3>Skills</h3><p>Procedures needed sometimes, loaded when relevant.</p><p class="small"><code>.github/skills/&lt;name&gt;/SKILL.md</code></p></div>
+    <div class="card green"><h3>Custom agents</h3><p>Roles you switch into, with their own tools.</p><p class="small"><code>.github/agents/&lt;name&gt;.md</code></p></div>
+    <div class="card amber"><h3>Hooks</h3><p>Things that must happen every time: format after each edit, block commands that touch secrets.</p><p class="small"><code>.github/hooks/*.json</code></p></div>
+  </div>
+  <div class="callout purple build" style="margin-top:18px"><p><b>This repository is a worked example.</b> <code>.github/copilot-instructions.md</code> holds course conventions, <code>.github/skills/</code> holds skills, <code>fy26/AGENTS.md</code> holds the service's rules. Open them and judge them by the standard of the context-engineering slide.</p></div>
+</section>
+
+<!-- 18b -->
+<section class="slide" data-title="The Copilot cloud agent">
+  <p class="kicker">GitHub Copilot, in the cloud</p>
+  <h2>Assign an issue; get a pull request you review</h2>
+  <div class="flow build-row">
+    <div class="node"><b>Issue or task</b><span>assigned to Copilot</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node az"><b>Ephemeral environment</b><span>firewalled; set up by <code>copilot-setup-steps.yml</code></span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node hl"><b>Research, plan, edit</b><span>runs tests and linters</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node gr"><b>Pull request</b><span>one branch, session logs</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node am"><b>You review</b><span>branch protections still apply</span></div>
+  </div>
+  <div class="cols cols-3 build-row" style="margin-top:6px">
+    <div class="card"><h3>Deliberate boundaries</h3><p>One repository, one branch, one pull request per task. A 59-minute limit per session: break large tasks into smaller ones.</p></div>
+    <div class="card azure"><h3>Tools</h3><p>MCP access defaults to the GitHub MCP server scoped to the repository; more servers are configured in repository settings.</p></div>
+    <div class="card amber"><h3>Logs are not a review</h3><p>Session logs show every step. Required reviews still decide what merges.</p></div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide" data-title="Sandbox and approval policy">
+  <p class="kicker">Permissions</p>
+  <h2>Two separate questions: what may it touch, and when must it ask</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table>
+        <tr><th>Control</th><th>Decides</th><th>Example (Codex)</th></tr>
+        <tr><td><b>Sandbox</b></td><td>Which files and network the agent can touch at all</td><td><code>workspace-write</code>: edit inside the workspace only</td></tr>
+        <tr><td><b>Approval policy</b></td><td>When the agent pauses to ask</td><td><code>on-request</code>: before crossing the sandbox</td></tr>
+        <tr><td><b>Reviewer</b></td><td>Who answers the approval</td><td>You, or an automatic reviewer that escalates unsafe actions</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card red"><h3>Full access only in a disposable environment</h3><p>An agent runs with your permissions. Treat it as a fast, literal-minded colleague who can be tricked.</p></div>
+      <div class="card"><h3>The same ideas in code</h3><p>The OpenAI Agents SDK and Agent Framework expose them as guardrails, approvals and middleware.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-title="A harness for your own agents">
+  <p class="kicker">Agent Framework</p>
+  <h2>The anatomy diagram, as a library: <code>create_harness_agent</code></h2>
+  <div class="cols cols-2">
+    <div class="build">
+<pre class="code small-code"><code>agent = create_harness_agent(
+    client=state.models.agent_client(),
+    name="ops-analyst",
+    harness_instructions="Use tools deliberately and report verified results.",
+    agent_instructions="You analyze Lakeshore Ride station data "
+                       "and propose rebalancing plans.",
+    tools=[get_station, search_handbook],
+    max_context_window_tokens=128_000,
+    file_access_store=FileSystemAgentFileStore("agent-files"),
+)
+session = agent.create_session()
+result = await agent.run(
+    "Which stations will run out of docks this evening?", session=session)</code></pre>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Capability</th><th>Default</th></tr>
+        <tr><td>Tool loop with an iteration limit</td><td>On</td></tr>
+        <tr><td>History saved after every model call</td><td>On</td></tr>
+        <tr><td>Context compaction</td><td>On, with token limits</td></tr>
+        <tr><td>Todos and plan / execute modes</td><td>On</td></tr>
+        <tr><td>Session file memory</td><td>On</td></tr>
+        <tr><td>Tool approvals with standing rules</td><td>On</td></tr>
+        <tr><td>OpenTelemetry</td><td>On</td></tr>
+        <tr><td>Skills, sub-agents, shell tools</td><td>Opt-in</td></tr>
+      </table>
+      <p class="small" style="padding:8px 12px 0">Read: <a href="https://learn.microsoft.com/en-us/agent-framework/concepts/harness">Agent harness in Agent Framework</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 20b -->
+<section class="slide" data-title="Foundry for agentic development">
+  <p class="kicker">Microsoft Foundry and coding agents</p>
+  <h2>Coding agents drive Foundry, and Foundry hosts agents built with their SDKs</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="card"><h3>Driving Foundry from a coding agent</h3><p>The <b>Microsoft Foundry Skill</b>, with the Foundry and Azure MCP servers, teaches Copilot or Claude Code to create projects, deploy models, scaffold and deploy hosted agents, run evaluations, and check RBAC and quota.</p></div>
+<pre class="code small-code" data-plain><code>/plugin marketplace add microsoft/azure-skills
+/plugin install azure@azure-skills
+/mcp show</code></pre>
+      <p class="small">Ask for outcomes; review the plan before approving any command that creates resources or costs money.</p>
+    </div>
+    <div class="stack build">
+      <div class="card azure"><h3>Hosting what you build</h3><p>Foundry hosted agents accept code written with Agent Framework, LangGraph, the OpenAI Agents SDK, the Anthropic Agent SDK or the GitHub Copilot SDK: a managed endpoint, a dedicated Entra identity, per-session sandboxes, tracing.</p></div>
+      <div class="callout purple"><p><b>The point:</b> instructions, skills, MCP, approvals and verification are the same skills in your editor and in production on Foundry.</p></div>
+      <p class="small">Read: <a href="https://learn.microsoft.com/en-us/azure/foundry/how-to/develop/use-microsoft-foundry-skill">Use the Microsoft Foundry Skill in coding agents</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide" data-title="Spec-driven development">
+  <p class="kicker">Working with a coding agent</p>
+  <h2>Write the spec as tests, let the agent iterate, review what it did</h2>
+  <div class="flow build-row">
+    <div class="node hl"><b>Spec as tests</b><span><code>test_week08_nearest_station.py</code></span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Prompt</b><span>goal, constraints, done means</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node az"><b>Agent edits</b><span><code>domain.py</code>, <code>mcp_server.py</code></span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node gr"><b>Agent verifies</b><span>pytest, ruff, harness; on failure, edit again</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node am"><b>You review</b><span>approve, or refine the prompt</span></div>
+  </div>
+  <div class="cols cols-3 build-row" style="margin-top:6px">
+    <div class="card"><h3>Small steps</h3><p>Each diff is reviewable; failures stay local.</p></div>
+    <div class="card red"><h3>Protect the judge</h3><p><code>AGENTS.md</code> forbids editing <code>harness/</code> and the contract. An agent that edits tests to pass them is <b>reward hacking</b>: the score rises, the software does not improve.</p></div>
+    <div class="card green"><h3>Measure, then decide</h3><p>The tests and the harness say whether it worked, not the agent's summary of its own work.</p></div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-title="The exercise: nearest_station_with_docks">
+  <p class="kicker">The exercise · Lab Part 4</p>
+  <h2>A tool for riders at a full station: <code>nearest_station_with_docks</code></h2>
+  <div class="cols cols-2">
+    <div class="card plain build"><h3>The specification</h3><p>Input: a station id. Output: the closest <b>other</b> station that is <b>open</b> and has <b>at least one free dock</b>, by great-circle distance (<code>distance_km</code>). Returns <code>station_id</code>, <code>name</code>, <code>distance_km</code>, <code>docks_available</code>. Unknown id: <code>{"error": ...}</code>.</p><p class="small">Written as tests in <code>tests/test_week08_nearest_station.py</code>. They are skipped until the function exists.</p></div>
+    <div class="callout build"><p><b>A prompt that works:</b> read <code>AGENTS.md</code> and the test file; implement the function in <code>app/domain.py</code> so every test passes; publish it as an MCP tool with a clear docstring; do not modify any test; run <code>pytest</code> and <code>ruff</code> and show me the output.</p></div>
+  </div>
+</section>
+
+<!-- 22b -->
+<section class="slide" data-title="Review the diff, then grade">
+  <p class="kicker">The exercise · Lab Part 4</p>
+  <h2>You review every change. The harness decides whether it is done</h2>
+  <div class="cols cols-2">
+    <div class="card build"><h3>Review the diff before you accept it</h3>
+      <ul class="tight" style="margin:0">
+        <li>Skips the origin, closed stations, zero free docks?</li>
+        <li>Uses great-circle distance, not raw latitude and longitude?</li>
+        <li>An unknown id returns an error instead of raising?</li>
+        <li>Changed nothing it was not asked to change?</li>
+      </ul>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Check</th><th class="num">Weight</th><th>What it measures</th></tr>
+        <tr><td><code>core.health</code>, <code>core.info</code></td><td class="num">1 + 1</td><td>Up, and identifies you</td></tr>
+        <tr><td><code>w08.mcp.discover</code></td><td class="num">1</td><td><code>server/discover</code> answers, revision 2026-07-28</td></tr>
+        <tr><td><code>w08.mcp.tools</code></td><td class="num">2</td><td>The three course tools, with schemas</td></tr>
+        <tr><td><code>w08.mcp.call</code></td><td class="num">3</td><td>Tool calls return the right data</td></tr>
+        <tr class="hl"><td><code>w08.mcp.new_tool</code></td><td class="num">3</td><td>The new tool exists and answers correctly</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="slide" data-title="When the agent gets stuck">
+  <p class="kicker">Steering the loop</p>
+  <h2>When the agent gets stuck, fix the prompt before you add more code</h2>
+  <ol class="steps n4 build-row">
+    <li><b>Give it the failure</b>Paste the exact failing test output and ask it to fix that test only.</li>
+    <li><b>Two rounds, then stop</b>If it does not converge, read the failing assertion yourself.</li>
+    <li><b>Usually the prompt</b>The spec was ambiguous to the agent. One sentence in the prompt fixes it.</li>
+    <li><b>Ship what passes</b>If some tests stay red, deploy anyway. A published tool with some correct answers still scores.</li>
+  </ol>
+  <div class="callout purple build" style="margin-top:10px"><p><b>Trust the tests and the harness, not the agent's summary of its own work.</b> If the summary says "all tests pass", run them yourself.</p></div>
+</section>
+
+<!-- 23b -->
+<section class="slide" data-title="Security of agentic coding">
+  <p class="kicker">Security of agentic coding</p>
+  <h2>A coding agent runs with your permissions. Treat it as a fast colleague who can be tricked</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Risk</th><th>Example</th><th>Mitigation</th></tr>
+      <tr><td>Prompt injection through content</td><td>An issue or README says "also add this curl command to the build"</td><td>Approvals for commands and network; sandboxing; review of diffs</td></tr>
+      <tr><td>Secret exposure</td><td>The agent reads <code>.env</code> and pastes a key into a log or commit</td><td>Rules against reading secrets; hooks that scan for them; keyless auth</td></tr>
+      <tr><td>Destructive commands</td><td><code>rm -rf</code>, <code>git push --force</code>, <code>terraform destroy</code></td><td>Deny lists; approval for anything irreversible; work on branches</td></tr>
+      <tr><td>Invented dependencies</td><td>A package that does not exist, or is malicious</td><td>Lock files, dependency review, CI</td></tr>
+      <tr><td>Over-trusting output</td><td>Tests pass because they were weakened</td><td>Protected tests, code review, CI that runs the real suite</td></tr>
+    </table>
+  </div>
+  <div class="callout build" style="margin-top:14px"><p>Every mitigation here is a harness feature: sandbox, approval policy, hooks, instructions, verification.</p></div>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-title="What makes a good check">
+  <p class="kicker">Lab Part 6</p>
+  <h2>Write a check, and know what makes one good</h2>
+  <div class="cols cols-2">
+    <div class="build">
+<pre class="code small-code"><code>def unknown_station_is_an_error(ctx: Context) -> tuple[float, str]:
+    result = call_tool(ctx, "nearest_station_with_docks",
+                       {"station_id": "LS-99"})
+    ok = isinstance(result, dict) and "error" in result
+    return (1.0 if ok else 0.0), f"LS-99 -> {result}"</code></pre>
+      <p class="small" style="margin-top:10px">A check takes a <code>Context</code> and returns a score and a detail line. Instructors add checks like this to the private harness.</p>
+    </div>
+    <ul class="check-list build" style="font-size:17px">
+      <li><b>Grade the outcome, not the path.</b> Check the answer, not which helper produced it.</li>
+      <li><b>Separate capability from regression.</b> Can it do the new thing? Does the old thing still work?</li>
+      <li><b>One run is one sample.</b> pass@k: at least one of k runs succeeds. pass^k: all k do. Users experience pass^k.</li>
+      <li><b>Read the transcripts.</b> A score says that something failed; the proof says why.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide" data-title="Deploy, submit, go further">
+  <p class="kicker">Lab Part 5</p>
+  <h2>Deploy, score the live URL, and connect it to any agent</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+<pre class="code"><code>url = course.deploy()
+proof = course.check(8, url)
+print(f"MCP endpoint: {url}/mcp")</code></pre>
+      <div class="callout purple"><p><b>Submit the URL</b> by the deadline in the <a href="../README.md">README</a>.</p></div>
+    </div>
+    <div class="card plain build"><h3>Go further</h3>
+      <ul class="tight" style="margin:0">
+        <li>Connect VS Code to your deployed <code>/mcp</code> (with the API key header after Week 10).</li>
+        <li>Publish the handbook pages as MCP <b>resources</b>.</li>
+        <li>Ask your coding agent to add the error-case check to <code>harness/checks/week08.py</code>, and review it.</li>
+        <li>Read <a href="https://www.anthropic.com/engineering/code-execution-with-mcp">Code execution with MCP (Anthropic)</a>: agents with hundreds of tools call them from code.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 25b -->
+<section class="slide" data-title="After you submit: the deep dive">
+  <p class="kicker">Optional · not graded</p>
+  <h2>After you submit, the deep dive takes today's ideas further</h2>
+  <div class="cols cols-40">
+    <div class="stack build">
+      <div class="card green"><h3>Lab · required</h3><p>Changes <code>app/</code> and deploys it. The harness grades the deployed URL, and nothing else.</p></div>
+      <div class="card azure"><h3>Deep dive · optional</h3><p>The lecture as code you run. It does not edit <code>app/</code> or deploy, so it cannot change your score.</p></div>
+      <div class="callout"><p>Same setup as the lab. Run the setup cell, then the parts in order. A few cents; Part 5 creates an agent and deletes it.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Part</th><th>What you explore</th><th>Sections</th></tr>
+        <tr><td>1</td><td>MCP on the wire: discovery, calls, errors (no model)</td><td>4, 5</td></tr>
+        <tr><td>2</td><td>Tool schemas are prompts: <code>string</code> against an <code>enum</code></td><td>4</td></tr>
+        <tr><td>3</td><td>Tool descriptions as an attack surface: poisoning</td><td>6</td></tr>
+        <tr><td>4</td><td>A harness agent: skills, approvals, checking its work</td><td>2, 11</td></tr>
+        <tr><td>5</td><td>A Foundry agent with a remote MCP server</td><td>7, 12</td></tr>
+        <tr><td>6</td><td>What a coding agent reads here, and its cost (no model)</td><td>3, 9</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-title="What to remember">
+  <p class="kicker">Summary</p>
+  <h2>What to remember</h2>
+  <div class="cols cols-2">
+    <ul class="check-list build">
+      <li>An evaluation harness measures; an agent harness acts. They meet in verification.</li>
+      <li>A harness is loop, context, tools, permissions, verification, observability.</li>
+      <li>Context engineering: short, testable instructions; just-in-time retrieval; skills; compaction; subagents.</li>
+      <li>MCP makes your tools available to any agent. Revision 2026-07-28 is stateless: discover, list, call.</li>
+    </ul>
+    <ul class="check-list build">
+      <li>MCP is arbitrary code execution: trust servers deliberately, treat results as data, authenticate remote servers.</li>
+      <li>Copilot and Codex share the same primitives under different names: instructions, skills, agents, hooks, MCP.</li>
+      <li>Work spec-first, in small steps, with a protected judge and a human review.</li>
+      <li>Trust the tests and the harness, not the agent's summary.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="slide" data-title="Learn more">
+  <p class="kicker">Learn more</p>
+  <h2>Where to go deeper</h2>
+  <div class="cols cols-2">
+    <ul class="links build">
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/modules/github-copilot-agent-mode/">Building Applications with GitHub Copilot Agent Mode</a></span></li>
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/modules/connect-agent-to-mcp-tools/">Integrate MCP tools with Azure AI agents</a></span></li>
+      <li><span class="src">MCP</span><span><a href="https://modelcontextprotocol.io/specification/2026-07-28/changelog">What changed in 2026-07-28</a> · <a href="https://py.sdk.modelcontextprotocol.io/">Python SDK</a></span></li>
+      <li><span class="src">GitHub</span><span><a href="https://docs.github.com/en/copilot/reference/customization-cheat-sheet">Copilot customization cheat sheet</a></span></li>
+      <li><span class="src">Agent Framework</span><span><a href="https://learn.microsoft.com/en-us/agent-framework/concepts/harness">Agent harness</a></span></li>
+    </ul>
+    <ul class="links build">
+      <li><span class="src">Anthropic</span><span><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a></span></li>
+      <li><span class="src">Anthropic</span><span><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Demystifying evals for AI agents</a></span></li>
+      <li><span class="src">Anthropic</span><span><a href="https://code.claude.com/docs/en/best-practices">Claude Code best practices</a></span></li>
+      <li><span class="src">OpenAI</span><span><a href="https://openai.com/index/harness-engineering/">Harness engineering</a> · <a href="https://openai.github.io/openai-agents-python/">Agents SDK</a></span></li>
+      <li><span class="src">This course</span><span><a href="lecture.html">Lecture</a> · <a href="../lab.ipynb">Lab</a> · <a href="../deep-dive.ipynb">Deep dive (optional)</a> · <a href="../../AGENTS.md">AGENTS.md</a></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 28 -->
+<section class="slide" data-title="Next session: production agentic systems">
+  <p class="kicker">Next session · Week 10</p>
+  <h2>Next session: make it hold up in production</h2>
+  <div class="cols cols-3 build-row" style="margin-top:12px">
+    <div class="card red"><h3>Attackers</h3><p>Prompt injection, direct and hidden in documents; harmful requests; floods of traffic.</p></div>
+    <div class="card azure"><h3>Observation</h3><p>Every request a trace; every trace readable with KQL.</p></div>
+    <div class="card green"><h3>Evaluation</h3><p>An LLM judge, calibrated against people, and a regression harness for every change.</p></div>
+  </div>
+  <p class="lede" style="margin-top:26px">Before class: deploy this week's service and read <a href="https://genai.owasp.org/llmrisk/llm01-prompt-injection/">LLM01:2025 Prompt Injection</a> from the OWASP Top 10 for LLM applications.</p>
+</section>
+
+</main>
+<script src="../../assets/deck.js"></script>
+</body>
+</html>

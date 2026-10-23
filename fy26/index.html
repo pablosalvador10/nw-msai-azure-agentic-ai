@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Start here · Agentic AI on Microsoft Foundry</title>
+  <meta name="description" content="One place to find the setup, foundations, lectures, slides and labs for the Lakeshore Ride agentic AI course.">
+  <link rel="stylesheet" href="assets/lecture.css">
+  <link rel="stylesheet" href="assets/course.css">
+</head>
+<body class="course-home">
+<a class="skip" href="#content">Skip to the course</a>
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar"><div class="topbar__inner">
+  <span class="brand-copy"><b>Agentic AI on Microsoft Foundry</b><span>Course home · FY26</span></span>
+  <div class="topbar__right">
+    <span class="author"><b>Pablo Salvador Lopez</b><a href="https://github.com/pablosalvador10">github.com/pablosalvador10</a></span>
+    <button class="button" id="print" type="button">Print / PDF</button>
+  </div>
+</div></header>
+<div class="layout">
+  <nav class="toc" aria-label="Course contents"></nav>
+  <main id="content" tabindex="-1">
+    <header class="hero">
+      <p class="eyebrow">Start here</p>
+      <h1>Build and test an AI support service<span class="hero-subtitle">Course materials and weekly labs</span></h1>
+      <p class="hero-copy">You will improve a support API for <strong>Lakeshore Ride</strong>, a fictional bike-share company. Each week adds a capability to the same service. Use the lecture for reading, the slides in class, and the main lab for the exercise. Deep dives are optional.</p>
+      <div class="home-actions">
+        <a class="primary-link" href="setup/README.md">New to the course? Start setup <span aria-hidden="true">→</span></a>
+        <a href="#weeks">Already set up? Choose your week</a>
+        <a href="foundations/docs/agents.html">Stuck? Ask the course agents</a>
+      </div>
+      <p class="muted">Read HTML in a browser. Open notebooks in VS Code with the Python 3.12 environment inside the cohort folder. Browser notebook links may download a file rather than run it.</p>
+    </header>
+
+    <section id="start" data-group="Get oriented">
+      <h2>Your first three steps</h2>
+      <ol class="flow">
+        <li><b>Set up once</b><span>Follow <a href="setup/README.md">the setup guide</a>, then run <a href="setup/setup.ipynb">the setup notebook</a>. Finish with a deployed URL that responds to the harness.</span></li>
+        <li><b>Review an unfamiliar tool</b><span>If Terraform, HTTP APIs, containers, identity or the harness are new, read the <a href="foundations/docs/primers.html">Foundations primers</a>. Use the <a href="foundations/README.md">Foundations overview</a> to choose a practice notebook.</span></li>
+        <li><b>Start this week's lab</b><span>Use the <a href="#weeks">weekly materials below</a>. Read the overview, learn the concepts, then build in the main lab. Leave the optional deep dive until after you submit.</span></li>
+      </ol>
+      <div class="callout callout--green"><p><strong>Stuck at any step? You do not have to work it out alone.</strong> VS Code's Copilot Chat has five agents that know this course. Open Chat, pick <strong>FY26 Guide</strong>, and say where you are, even if that is "I am lost". It gives you one next step. <a href="foundations/docs/agents.html">Your course agents</a> shows how, in five minutes; read it before setup.</p></div>
+      <div class="callout"><p><strong>Work from the FY26 folder.</strong> Open it in VS Code and use its Python environment, not an environment at the repository root. The <a href="README.md">course README</a> contains the calendar, deadlines and grading policy.</p></div>
+    </section>
+
+    <section id="formats" data-group="Get oriented">
+      <h2>Which file should I open?</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Material</th><th>Use it for</th><th>Required or optional?</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Weekly overview</strong></td><td>Prerequisites, the task, files to edit, grading and submission.</td><td>Read first. This defines the exercise.</td></tr>
+          <tr><td><strong>Lecture</strong></td><td>A continuous explanation with diagrams and examples. Works in a browser and prints to PDF.</td><td>Reading and reference.</td></tr>
+          <tr><td><strong>Slides</strong></td><td>The same concepts presented one idea at a time for class. Use arrows to move, C for contents.</td><td>An alternative presentation, not another assignment.</td></tr>
+          <tr><td><strong>Main lab</strong></td><td>Runnable steps that lead from a concept to your deployed API.</td><td>The core work for the session. Follow its stop-and-deploy checkpoint.</td></tr>
+          <tr><td><strong>Deep dive</strong></td><td>The lecture as code you run, part by part, once you have submitted.</td><td>Optional and not graded. It does not edit your service or deploy, so it cannot change your score.</td></tr>
+          <tr><td><strong>Markdown notes</strong></td><td>The editable lecture source and a plain-text reference in VS Code or GitHub.</td><td>The same lecture, not a second reading requirement.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="weeks" data-group="Weekly materials">
+      <h2>Choose your week</h2>
+      <p>The service is cumulative: keep earlier routes working as you add the next capability. Weeks 1–4 and 9 are taught separately and have no materials here.</p>
+      <div class="week-list">
+        <article class="week-card" id="week-5">
+          <div class="week-number">05</div><div>
+            <p class="eyebrow">Begin with a deployed starter</p>
+            <h3>Fundamentals of Azure AI</h3>
+            <p>Call models with your identity, request structured output, and improve ticket triage by measuring failures.</p>
+            <p class="week-deliverable"><strong>You improve:</strong> <code>POST /v1/classify</code> and <code>/v1/chat</code>.</p>
+            <nav class="material-links" aria-label="Week 5 materials">
+              <a href="week05-fundamentals-of-azure-ai/README.md">Overview</a>
+              <a href="week05-fundamentals-of-azure-ai/docs/lecture.html">Read lecture</a>
+              <a href="week05-fundamentals-of-azure-ai/docs/slides.html">View slides</a>
+              <a href="week05-fundamentals-of-azure-ai/lab.ipynb">Main lab · VS Code</a>
+              <a href="week05-fundamentals-of-azure-ai/deep-dive.ipynb">Optional deep dive</a>
+            </nav>
+          </div>
+        </article>
+        <article class="week-card" id="week-6">
+          <div class="week-number">06</div><div>
+            <p class="eyebrow">After Week 5</p>
+            <h3>RAG and tool calling</h3>
+            <p>Answer from the handbook, cite evidence, and use deterministic tools for fares and station availability.</p>
+            <p class="week-deliverable"><strong>You improve:</strong> <code>POST /v1/ask</code>.</p>
+            <nav class="material-links" aria-label="Week 6 materials">
+              <a href="week06-rag-and-tool-calling/README.md">Overview</a>
+              <a href="week06-rag-and-tool-calling/docs/lecture.html">Read lecture</a>
+              <a href="week06-rag-and-tool-calling/docs/slides.html">View slides</a>
+              <a href="week06-rag-and-tool-calling/lab.ipynb">Main lab · VS Code</a>
+              <a href="week06-rag-and-tool-calling/deep-dive.ipynb">Optional deep dive</a>
+            </nav>
+          </div>
+        </article>
+        <article class="week-card" id="week-7">
+          <div class="week-number">07</div><div>
+            <p class="eyebrow">After Week 6</p>
+            <h3>Multi-agent systems</h3>
+            <p>Route a case to the specialists it needs, combine their evidence, and apply action and approval rules.</p>
+            <p class="week-deliverable"><strong>You improve:</strong> <code>POST /v1/resolve</code>.</p>
+            <nav class="material-links" aria-label="Week 7 materials">
+              <a href="week07-multi-agent-systems/README.md">Overview</a>
+              <a href="week07-multi-agent-systems/docs/lecture.html">Read lecture</a>
+              <a href="week07-multi-agent-systems/docs/slides.html">View slides</a>
+              <a href="week07-multi-agent-systems/lab.ipynb">Main lab · VS Code</a>
+              <a href="week07-multi-agent-systems/deep-dive.ipynb">Optional deep dive</a>
+            </nav>
+          </div>
+        </article>
+        <article class="week-card" id="week-8">
+          <div class="week-number">08</div><div>
+            <p class="eyebrow">After Week 7</p>
+            <h3>Harnesses and agentic coding</h3>
+            <p>Expose tools over MCP and use a coding agent to build a feature from a specification you can test.</p>
+            <p class="week-deliverable"><strong>You add:</strong> <code>nearest_station_with_docks</code>, published at <code>/mcp</code>.</p>
+            <nav class="material-links" aria-label="Week 8 materials">
+              <a href="week08-harnesses-and-agentic-coding/README.md">Overview</a>
+              <a href="week08-harnesses-and-agentic-coding/docs/lecture.html">Read lecture</a>
+              <a href="week08-harnesses-and-agentic-coding/docs/slides.html">View slides</a>
+              <a href="week08-harnesses-and-agentic-coding/lab.ipynb">Main lab · VS Code</a>
+              <a href="week08-harnesses-and-agentic-coding/deep-dive.ipynb">Optional deep dive</a>
+            </nav>
+          </div>
+        </article>
+        <article class="week-card" id="week-10">
+          <div class="week-number">10</div><div>
+            <p class="eyebrow">Harden all earlier capabilities</p>
+            <h3>Production agentic systems</h3>
+            <p>Measure guardrails and regressions, enforce access and request limits, and trace failures across the service.</p>
+            <p class="week-deliverable"><strong>You submit:</strong> the final cumulative service URL; share its API key privately through the course site.</p>
+            <nav class="material-links" aria-label="Week 10 materials">
+              <a href="week10-production-agentic-systems/README.md">Overview</a>
+              <a href="week10-production-agentic-systems/docs/lecture.html">Read lecture</a>
+              <a href="week10-production-agentic-systems/docs/slides.html">View slides</a>
+              <a href="week10-production-agentic-systems/lab.ipynb">Main lab · VS Code</a>
+              <a href="week10-production-agentic-systems/deep-dive.ipynb">Optional deep dive</a>
+            </nav>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="workflow" data-group="Build and submit">
+      <h2>What counts as finished?</h2>
+      <ol class="points">
+        <li><b>Understand one failure</b>Run the weekly harness and inspect the failed exchanges. Change one thing in the service; do not hard-code public answers.</li>
+        <li><b>Keep the contract and earlier work intact</b>Run the offline tests and score the current week. In-process scoring runs your local service code; it is not a deployment and can still call real models unless offline mode is selected.</li>
+        <li><b>Deploy and check the deployed URL</b>Use the main lab's deployment steps. Confirm the version and student identity, then check the current and earlier weeks on that URL.</li>
+        <li><b>Submit the URL, not the notebook</b>Follow the week's overview for its deadline and evidence. Keep the service available until grading finishes. Never put API keys, environment files or reports in public commits.</li>
+      </ol>
+      <div class="callout callout--amber"><p><strong>A teaching simulation, not a live business.</strong> Station availability comes from a fixed snapshot. Credit and maintenance tools return simulated action records; they do not move money or create tickets in an external system. Read the <a href="app/data/handbook/">handbook</a> for policy and <a href="app/domain.py">the domain code</a> for deterministic rules.</p></div>
+    </section>
+
+    <section id="folders" data-group="Reference">
+      <h2>Where to find the files</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Where</th><th>What belongs there</th></tr></thead>
+        <tbody>
+          <tr><td><code>weekNN-topic/README.md</code></td><td>The weekly overview, exercise and grading.</td></tr>
+          <tr><td><code>weekNN-topic/docs/</code></td><td>The browser lecture and slides, together.</td></tr>
+          <tr><td><code>weekNN-topic/lab.ipynb</code></td><td>The main runnable lab. Open this in VS Code.</td></tr>
+          <tr><td><code>weekNN-topic/deep-dive.ipynb</code></td><td>The optional deep dive: not graded, for after you submit.</td></tr>
+          <tr><td><code>weekNN-topic/lecture.md</code></td><td>The Markdown lecture source.</td></tr>
+          <tr><td><code>assets/</code></td><td>Shared page and slide styles and scripts.</td></tr>
+          <tr><td><code>app/</code></td><td>The service you improve. Each weekly overview names the files to edit.</td></tr>
+          <tr><td><code>harness/</code>, <code>tests/</code>, <code>infra/</code></td><td>Scoring, offline checks and Terraform. The HTTP contract and grading checks are fixed.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Need help? In VS Code's Copilot Chat, pick <strong>FY26 Guide</strong> from the Agent dropdown. It routes you to setup, lab, deployment or submission help; <a href="foundations/docs/agents.html">Your course agents</a> explains all five. If browsing is easier, keep this page open and return to the weekly overview whenever you are unsure what to do next.</p>
+      <p><a href="README.md">Full course README and calendar</a> · <a href="foundations/docs/agents.html">Course agents</a> · <a href="foundations/docs/primers.html">Read Foundations</a> · <a href="foundations/README.md">Foundations notebooks</a> · <a href="setup/README.md">Setup</a></p>
+    </section>
+    <p class="page-end">Agentic AI on Microsoft Foundry · Pablo Salvador Lopez · <a href="https://github.com/pablosalvador10">@pablosalvador10</a></p>
+  </main>
+</div>
+<button id="back-to-top" type="button" aria-label="Back to top">↑</button>
+<script src="assets/lecture.js"></script>
+</body>
+</html>

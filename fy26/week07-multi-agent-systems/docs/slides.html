@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 7 · Multi-Agent Systems · Slides</title>
+<meta name="description" content="Week 7 slides: when to split an agent, Microsoft Agent Framework agents, middleware and workflows, the five orchestration patterns, routing, approvals, least privilege, and the cost of a team.">
+<link rel="stylesheet" href="../../assets/deck.css">
+</head>
+<body>
+<main class="stage" data-week="Week 7" data-topic="Multi-Agent Systems">
+
+<!-- 1 -->
+<section class="slide title-slide" data-title="Multi-Agent Systems">
+  <div class="build">
+    <p class="kicker">Week 7</p>
+    <h1>Multi-Agent Systems</h1>
+    <p class="lede">Your service can answer questions. Now it must resolve cases: decide what a rider is owed, issue credit, open maintenance tickets, and reply. Today: when to split one agent into a team, how to orchestrate it, how to keep a person in the loop, and how to prove the split paid off.</p>
+    <div class="meta-row">
+      <span class="meta"><b>Author</b> · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</span>
+      <span class="meta"><b>Lecture</b> · <a href="lecture.html">lecture.html</a></span>
+      <span class="meta"><b>Lab</b> · <a href="../lab.ipynb">lab.ipynb</a>, required</span>
+      <span class="meta"><b>Deep dive</b> · <a href="../deep-dive.ipynb">deep-dive.ipynb</a>, optional</span>
+      <span class="meta"><b>Logistics</b> · <a href="../README.md">README</a></span>
+      <span class="meta"><b>Submit</b> · one URL, before Week 8</span>
+    </div>
+  </div>
+  <p class="hint"><kbd>&rarr;</kbd> next · <kbd>&larr;</kbd> back · <kbd>C</kbd> contents · <kbd>F</kbd> full screen</p>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-title="One agent with every tool">
+  <p class="kicker">Why this week matters</p>
+  <h2>One agent with every tool works, until the prompt and the tool list grow</h2>
+  <div class="cols cols-3 build-row">
+    <div class="card"><h3>Confused responsibilities</h3><p>One prompt holds billing rules, operations rules and tone rules. Each new rule can break another.</p></div>
+    <div class="card red"><h3>Too much power</h3><p>Every part of the agent can issue credit, including the part answering a policy question.</p></div>
+    <div class="card amber"><h3>Hard to debug</h3><p>When a credit is wrong, which "part" of the prompt caused it?</p></div>
+  </div>
+  <div class="callout purple build" style="margin-top:22px"><p><b>Splitting into specialists</b> addresses all three: each has its own instructions and only the tools it needs. It also costs more calls, more latency and more ways to fail. This week is about when to split, how to orchestrate, and how to prove the split paid off.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-title="By the end you can">
+  <p class="kicker">Objectives</p>
+  <h2>By the end of today you can</h2>
+  <div class="cols cols-60">
+    <ul class="check-list build">
+      <li>Choose between one agent, a workflow and a team, and justify it with cost: calls, tokens, latency, compounding errors.</li>
+      <li>Name the orchestration patterns and when each fits: sequential, concurrent, agent as tool, handoff, group chat, Magentic.</li>
+      <li>Build sequential and concurrent workflows with <b>Microsoft Agent Framework</b>.</li>
+      <li>Route work with a <b>triage agent</b> that returns structured output.</li>
+      <li>Give each agent least privilege, and require <b>human approval</b> for actions that move money.</li>
+      <li>Measure a team on its <b>actions</b>, not just its prose.</li>
+    </ul>
+    <div class="stack build">
+      <div class="callout purple"><p><b>You ship</b> <code>POST /v1/resolve</code>: a triage agent plus specialists that issue the right credits and tickets.</p></div>
+      <div class="callout"><p><b>You submit</b> one URL. Credits are money: the harness checks rider, amount and status.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-title="Today: lecture, lab, deep dive">
+  <p class="kicker">Today</p>
+  <h2>Learn it, build it, ship it; then go deeper if you want</h2>
+  <div class="cols cols-60">
+    <div class="timeline build">
+      <div class="row"><span class="t">1</span><span>Agents versus workflows; when to split; the patterns</span><span class="w">Lecture</span></div>
+      <div class="row"><span class="t">2</span><span>One agent with every tool: where it breaks</span><span class="w">Lab Part 1</span></div>
+      <div class="row"><span class="t">3</span><span>Sequential and concurrent workflows from scratch</span><span class="w">Lab Part 2</span></div>
+      <div class="row"><span class="t">4</span><span>Routing with a triage agent; approvals for actions</span><span class="w">Lab Part 3</span></div>
+      <div class="row"><span class="t">5</span><span>Your turn: measure the resolution team, add triage, measure again</span><span class="w">Lab Part 4, graded</span></div>
+      <div class="row"><span class="t">6</span><span>Deploy, score the live URL; was the split worth it?</span><span class="w">Lab Part 5</span></div>
+      <div class="row break"><span class="t">+</span><span>Optional: graph workflows, middleware, checkpoints, group chat, handoff, team cost</span><span class="w"><a href="../deep-dive.ipynb">Deep dive</a></span></div>
+    </div>
+    <div class="stack build">
+      <div class="card plain"><h3>Before class</h3><p>Your Week 6 service is deployed. Read <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents (Anthropic)</a>: note workflows versus agents.</p></div>
+      <div class="card plain"><h3>Skim</h3><p><a href="https://learn.microsoft.com/en-us/training/modules/orchestrate-semantic-kernel-multi-agent-solution/">Orchestrate a multi-agent solution using the Microsoft Agent Framework</a> (Learn).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-title="Single agent, workflow, multi-agent system">
+  <p class="kicker">Three designs</p>
+  <h2>Three designs, in increasing order of autonomy and cost</h2>
+  <div class="table-wrap build">
+    <table>
+      <tr><th>Design</th><th>Who decides the next step</th><th>Strength</th><th>Weakness</th></tr>
+      <tr><td><b>Single agent</b> with tools</td><td>The model, in one loop</td><td>Simple; one context; cheapest</td><td>One long prompt; every tool always available</td></tr>
+      <tr class="hl"><td><b>Workflow</b></td><td>Your code: a fixed graph of steps, some of them agents</td><td>Predictable, testable, auditable</td><td>Handles only the paths you drew</td></tr>
+      <tr><td><b>Multi-agent system</b></td><td>Agents decide together: handoffs, a manager, a group chat</td><td>Flexible on open-ended tasks</td><td>More calls, more latency, more ways to fail</td></tr>
+    </table>
+  </div>
+  <div class="callout purple build" style="margin-top:16px"><p><b>Agent Framework's own rule:</b> if you can write a function to handle the task, do that instead of using an agent. Use a workflow when the process has well-defined steps; use an agent when the task is open-ended.</p></div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-title="Patterns, and where they live in the framework">
+  <p class="kicker">A shared vocabulary</p>
+  <h2>Five patterns from practice, each one buildable in Agent Framework</h2>
+  <div class="table-wrap build">
+    <table>
+      <tr><th>Pattern</th><th>Shape</th><th>Agent Framework construct</th></tr>
+      <tr><td><b>Prompt chaining</b></td><td>Step A's output is step B's input</td><td><code>SequentialBuilder</code>, or edges in <code>WorkflowBuilder</code></td></tr>
+      <tr><td><b>Routing</b></td><td>Classify, then send to one specialist</td><td>Triage agent with structured output, switch-case edges</td></tr>
+      <tr><td><b>Parallelization</b></td><td>Independent subtasks at once, then merge</td><td><code>ConcurrentBuilder</code>, fan-out and fan-in edges</td></tr>
+      <tr><td><b>Orchestrator-workers</b></td><td>A manager plans and delegates dynamically</td><td><code>MagenticBuilder</code>, or agents as tools</td></tr>
+      <tr><td><b>Evaluator-optimizer</b></td><td>One agent drafts, another critiques, repeat</td><td>A loop edge, or <code>GroupChatBuilder</code> with two participants</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:12px">Pattern names from <a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents (Anthropic)</a>.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-title="What splitting costs">
+  <p class="kicker">Reasons to split, and the bill</p>
+  <h2>Split for a reason you can name, and estimate the bill before you build</h2>
+  <div class="cols cols-2">
+    <ul class="check-list build" style="font-size:17px">
+      <li><b>Instructions conflict.</b> "Be concise" and "explain every clause" are different roles.</li>
+      <li><b>Least privilege.</b> Only one role should move money.</li>
+      <li><b>Parallelism.</b> Independent lookups can run at once.</li>
+      <li><b>Context hygiene.</b> A specialist sees only what it needs.</li>
+      <li><b>Separate evaluation.</b> Measure and improve each role alone.</li>
+    </ul>
+    <div class="stack build">
+      <div class="cols cols-2">
+        <div class="stat"><span class="n">&asymp; 15&times;</span><span class="l">tokens of a chat, for Anthropic's multi-agent research system</span></div>
+        <div class="stat"><span class="n">86%</span><span class="l">three agents, each right 95% of the time, failing independently: 0.95&sup3;</span></div>
+      </div>
+      <div class="callout amber"><p><b>Practitioners disagree, and both sides are right for their task.</b> <a href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic</a> wins on broad research with many agents; <a href="https://cognition.ai/blog/dont-build-multi-agents">Cognition</a> argues one agent with full context is more reliable for tightly coupled work. You decide with measurements.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide section-slide" data-title="Part 1 · Microsoft Agent Framework">
+  <p class="kicker">Part 1</p>
+  <h1>Microsoft Agent Framework, in depth</h1>
+  <p>Agents, sessions, composition, and middleware: the code that enforces what prompts can only request.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-title="The framework map">
+  <p class="kicker">The map</p>
+  <h2>One framework for agents and workflows, successor to Semantic Kernel and AutoGen</h2>
+  <div class="cols cols-60">
+    <div class="stack build">
+      <div class="box-group">
+        <p class="label">Your application</p>
+        <div class="tiles t3">
+          <div class="tile hl"><b>Agent</b>Instructions, tools, session · <span class="accent">Week 6</span></div>
+          <div class="tile hl"><b>Workflows</b>Executors, edges, checkpoints, orchestrations · <span class="accent">today</span></div>
+          <div class="tile"><b>Harness agent</b>Todos, compaction, approvals · <span class="accent">Week 8</span></div>
+        </div>
+      </div>
+      <div class="box-group">
+        <p class="label">Building blocks</p>
+        <div class="tiles t4">
+          <div class="tile"><b>Middleware</b>agent · chat · function</div>
+          <div class="tile"><b>Context providers</b>memory, RAG, history</div>
+          <div class="tile"><b>Tools</b>@tool, MCP, hosted</div>
+          <div class="tile"><b>OpenTelemetry</b>every run and call</div>
+        </div>
+      </div>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Three packages you have</h3><p><code>agent-framework-core</code>: agents, tools, middleware, workflows.<br><code>agent-framework-foundry</code>: the Foundry client, agents and tools.<br><code>agent-framework-orchestrations</code>: the patterns.</p></div>
+      <div class="card azure"><h3>Chat clients are swappable</h3><p>Ours is <code>FoundryChatClient</code>: a Foundry project, Entra ID. OpenAI, Anthropic, Ollama and others have their own. Swap the client, keep the agent.</p></div>
+      <p class="small">Read: <a href="https://learn.microsoft.com/en-us/agent-framework/overview/">Agent Framework overview</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-title="The agent in depth">
+  <p class="kicker">The agent</p>
+  <h2>An agent is a client, instructions, tools and options. A session holds the conversation</h2>
+  <div class="cols cols-2">
+    <div class="build">
+<pre class="code small-code"><code>billing = Agent(
+    client=client,                  # FoundryChatClient here
+    name="billing",                 # appears in traces and transcripts
+    instructions=BILLING_RULES,
+    tools=[search_handbook, quote_fare, issue_credit],
+    default_options={"reasoning": {"effort": "low"}},
+    middleware=[cap_credits],       # next slide
+)
+
+result = await billing.run(case)                          # one turn
+result = await billing.run(case,
+    options={"response_format": Notes})                   # typed: result.value
+
+session = billing.create_session()                        # multi-turn
+await billing.run("My name is Ada.", session=session)
+await billing.run("What is my name?", session=session)    # remembers</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="table-wrap">
+        <table class="compact">
+          <tr><th>Agents compose</th><th>Turns the agent into</th></tr>
+          <tr><td><code>agent.as_tool()</code></td><td>A tool another agent can call: manager-worker without a workflow</td></tr>
+          <tr><td><code>agent.as_mcp_server()</code></td><td>An MCP server any client can use (Week 8)</td></tr>
+        </table>
+      </div>
+      <div class="card"><h3>Context providers</h3><p>Run before each call to add context (a profile, passages, memory) and after it to store what was learned.</p></div>
+      <div class="card azure"><h3>Providers are swappable</h3><p>Change the client, keep the instructions and tools: the fair way to compare models.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-title="Middleware enforces">
+  <p class="kicker">Middleware</p>
+  <h2>Prompts ask. Middleware enforces</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="table-wrap">
+        <table class="compact">
+          <tr><th>Layer</th><th>Wraps</th><th>Typical uses</th></tr>
+          <tr><td><b>Agent</b></td><td>A whole <code>agent.run</code></td><td>Input screening, logging, timing</td></tr>
+          <tr><td><b>Chat</b></td><td>Each model call</td><td>Redact secrets, token budgets, swap models</td></tr>
+          <tr class="hl"><td><b>Function</b></td><td>Each tool call</td><td>Authorization, validation, approvals, audit</td></tr>
+        </table>
+      </div>
+      <div class="callout purple"><p><b>Any rule that involves money, permissions or safety belongs in code,</b> with the prompt as a second line of defense. Tool approval is the built-in case of function middleware.</p></div>
+    </div>
+    <div class="build">
+      <p class="code-label">A business rule the model cannot talk around</p>
+<pre class="code small-code"><code>from app.domain import CREDIT_LIMIT
+
+@function_middleware
+async def cap_credits(context: FunctionInvocationContext,
+                      call_next) -> None:
+    if (context.function.name == "issue_credit"
+            and context.arguments["amount"] > CREDIT_LIMIT):
+        context.result = "Supervisor approval required above $25."
+        return                 # short-circuit: the tool never runs
+    await call_next()          # otherwise run the tool</code></pre>
+      <p class="small">The $25 limit comes from the domain code. This gate stops a call; it does not issue a credit or queue a real review.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide section-slide" data-title="Part 2 · Workflows">
+  <p class="kicker">Part 2 · Lab Part 2</p>
+  <h1>Workflows: you fix the order, agents fill the steps</h1>
+  <p>Most production systems are workflows with agents inside them.</p>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-title="Executors, edges, supersteps">
+  <p class="kicker">Workflows</p>
+  <h2>A workflow is a typed graph: executors are nodes, edges carry messages</h2>
+  <div class="cols cols-2">
+    <div class="build">
+<pre class="code small-code"><code>class Normalize(Executor):
+    @handler
+    async def run(self, case: str, ctx: WorkflowContext[str]) -> None:
+        await ctx.send_message(case.strip())    # to the next executor
+
+class Shout(Executor):
+    @handler
+    async def run(self, text: str, ctx: WorkflowContext[Never, str]) -> None:
+        await ctx.yield_output(text.upper())    # a result for the caller
+
+normalize, shout = Normalize(id="normalize"), Shout(id="shout")
+workflow = (WorkflowBuilder(start_executor=normalize)
+            .add_edge(normalize, shout).build())
+result = await workflow.run("  battery died  ")
+print(result.get_outputs())                     # ['BATTERY DIED']</code></pre>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Concept</th><th>Why it matters</th></tr>
+        <tr><td><b>Typed messages</b></td><td>The graph is validated at <code>build()</code>: incompatible edges fail before anything runs</td></tr>
+        <tr><td><b>Supersteps</b></td><td>Rounds: every ready executor runs, then messages are delivered together. Parallel branches stay deterministic</td></tr>
+        <tr><td><b>Messages vs outputs</b></td><td><code>send_message</code> feeds the graph; <code>yield_output</code> answers the caller</td></tr>
+        <tr><td><b>Agents as executors</b></td><td>Mix deterministic steps with model steps</td></tr>
+        <tr><td><b>Workflow as agent</b></td><td><code>workflow.as_agent()</code>: a team usable wherever one agent is</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="Routing, fan-out, fan-in">
+  <p class="kicker">Edges</p>
+  <h2>The resolution service as a graph: route, fan out, fan in, write</h2>
+  <div class="flow build-row" style="margin-top:6px">
+    <div class="node"><b>Case</b><span>from the rider</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node hl"><b>Triage agent</b><span>structured output: specialists, reason</span></div>
+    <div class="arrow">&rarr;<small>select</small></div>
+    <div class="node" style="flex:1.3;padding:8px"><div class="tiles" style="gap:6px"><div class="tile"><b>Policy</b>search_handbook</div><div class="tile"><b>Billing</b>quote_fare · issue_credit</div><div class="tile"><b>Operations</b>get_station · open_ticket</div></div></div>
+    <div class="arrow">&rarr;<small>fan in</small></div>
+    <div class="node gr"><b>Writer agent</b><span>no tools</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Response</b><span>resolution, route, actions</span></div>
+  </div>
+  <div class="table-wrap build" style="margin-top:4px">
+    <table class="compact">
+      <tr><th>Edge</th><th>Method</th><th>Use</th></tr>
+      <tr><td>Direct, conditional</td><td><code>add_edge(a, b, condition=fn)</code></td><td>Always, or only if <code>fn(message)</code></td></tr>
+      <tr><td>Switch-case</td><td><code>add_switch_case_edge_group(a, [Case(...), Default(...)])</code></td><td>Exactly one branch: routing</td></tr>
+      <tr><td>Multi-selection</td><td><code>add_multi_selection_edge_group(...)</code></td><td>A chosen subset: our triage</td></tr>
+      <tr><td>Fan-out, fan-in</td><td><code>add_fan_out_edges(a, [...])</code>, <code>add_fan_in_edges([...], e)</code></td><td>Parallel work, then wait for all</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-title="Five orchestration patterns">
+  <p class="kicker">Orchestrations</p>
+  <h2>Five orchestrations, from the most constrained to the most autonomous</h2>
+  <div class="cols cols-5 build-row" style="grid-template-columns:repeat(5,1fr); gap:12px">
+    <div class="card plain" style="padding:12px">
+      <svg viewBox="0 0 200 90" width="100%" height="90" aria-hidden="true"><g fill="#eef0fc" stroke="#3341b8"><rect x="6" y="30" width="44" height="30" rx="6"/><rect x="78" y="30" width="44" height="30" rx="6"/><rect x="150" y="30" width="44" height="30" rx="6"/></g><g stroke="#3341b8" stroke-width="2"><line x1="50" y1="45" x2="76" y2="45"/><line x1="122" y1="45" x2="148" y2="45"/></g><g font-size="13" font-weight="700" text-anchor="middle" fill="#18191b"><text x="28" y="50">A</text><text x="100" y="50">B</text><text x="172" y="50">C</text></g></svg>
+      <h3>Sequential</h3><p class="small"><code>SequentialBuilder</code><br>Fixed order. Draft, edit, check.<br><b>Cost:</b> latency is the sum.</p>
+    </div>
+    <div class="card plain" style="padding:12px">
+      <svg viewBox="0 0 200 90" width="100%" height="90" aria-hidden="true"><g fill="#eef0fc" stroke="#3341b8"><rect x="6" y="32" width="36" height="26" rx="6"/><rect x="82" y="2" width="36" height="24" rx="6"/><rect x="82" y="33" width="36" height="24" rx="6"/><rect x="82" y="64" width="36" height="24" rx="6"/><rect x="158" y="32" width="36" height="26" rx="6"/></g><g stroke="#3341b8" stroke-width="2"><line x1="42" y1="45" x2="82" y2="14"/><line x1="42" y1="45" x2="82" y2="45"/><line x1="42" y1="45" x2="82" y2="76"/><line x1="118" y1="14" x2="158" y2="45"/><line x1="118" y1="45" x2="158" y2="45"/><line x1="118" y1="76" x2="158" y2="45"/></g></svg>
+      <h3>Concurrent</h3><p class="small"><code>ConcurrentBuilder</code><br>All at once, then aggregate.<br><b>Cost:</b> every participant, every time.</p>
+    </div>
+    <div class="card plain" style="padding:12px">
+      <svg viewBox="0 0 200 90" width="100%" height="90" aria-hidden="true"><g fill="#eef0fc" stroke="#3341b8"><rect x="6" y="32" width="50" height="26" rx="6"/><rect x="128" y="6" width="66" height="26" rx="6"/><rect x="128" y="58" width="66" height="26" rx="6"/></g><g stroke="#3341b8" stroke-width="2" fill="none"><path d="M56 40 L126 20"/><path d="M56 50 L126 70"/><path d="M160 32 L160 56" stroke-dasharray="4 3"/></g><g font-size="11" font-weight="700" text-anchor="middle" fill="#18191b"><text x="31" y="49">Triage</text><text x="161" y="23">Billing</text><text x="161" y="75">Ops</text></g></svg>
+      <h3>Handoff</h3><p class="small"><code>HandoffBuilder</code><br>The active agent passes control.<br><b>Watch:</b> ping-pong; set termination.</p>
+    </div>
+    <div class="card plain" style="padding:12px">
+      <svg viewBox="0 0 200 90" width="100%" height="90" aria-hidden="true"><circle cx="100" cy="45" r="22" fill="#edf6ff" stroke="#0078d4"/><g fill="#eef0fc" stroke="#3341b8"><rect x="6" y="8" width="44" height="24" rx="6"/><rect x="150" y="8" width="44" height="24" rx="6"/><rect x="78" y="70" width="44" height="18" rx="6"/></g><g stroke="#3341b8" stroke-width="2"><line x1="50" y1="22" x2="80" y2="36"/><line x1="150" y1="22" x2="120" y2="36"/><line x1="100" y1="67" x2="100" y2="70"/></g><text x="100" y="49" font-size="10" font-weight="700" text-anchor="middle" fill="#0078d4">picks next</text></svg>
+      <h3>Group chat</h3><p class="small"><code>GroupChatBuilder</code><br>A shared conversation; debate, critique.<br><b>Watch:</b> everyone reads everything.</p>
+    </div>
+    <div class="card plain" style="padding:12px">
+      <svg viewBox="0 0 200 90" width="100%" height="90" aria-hidden="true"><rect x="62" y="2" width="76" height="28" rx="6" fill="#edf6ff" stroke="#0078d4"/><text x="100" y="21" font-size="11" font-weight="700" text-anchor="middle" fill="#0078d4">Manager</text><g fill="#eef0fc" stroke="#3341b8"><rect x="6" y="60" width="50" height="26" rx="6"/><rect x="75" y="60" width="50" height="26" rx="6"/><rect x="144" y="60" width="50" height="26" rx="6"/></g><g stroke="#3341b8" stroke-width="2"><line x1="90" y1="30" x2="31" y2="60"/><line x1="100" y1="30" x2="100" y2="60"/><line x1="110" y1="30" x2="169" y2="60"/></g></svg>
+      <h3>Magentic</h3><p class="small"><code>MagenticBuilder</code><br>A manager plans, delegates, re-plans.<br><b>Watch:</b> most calls, least predictable.</p>
+    </div>
+  </div>
+  <div class="callout purple build" style="margin-top:16px"><p><b>Rule of thumb:</b> start with the most constrained pattern that can express the task. In a graded service where money moves, constrained wins. Read <a href="https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/">Orchestrations in Agent Framework</a>.</p></div>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-title="Sequential and concurrent in the lab">
+  <p class="kicker">Lab Part 2</p>
+  <h2>Concurrent runs take the time of the slowest agent, not the sum</h2>
+  <div class="cols cols-60">
+    <div class="build">
+<pre class="code small-code"><code>money = Agent(client=client, name="money",
+              instructions="List only what the rider may be owed, with amounts.",
+              tools=[search_handbook, quote_fare])
+fleet = Agent(client=client, name="fleet",
+              instructions="List only what the operations team must do.",
+              tools=[get_station])
+
+team = ConcurrentBuilder(participants=[money, fleet]).build()
+outputs = (await team.run(CASE)).get_outputs()</code></pre>
+      <p class="small" style="margin-top:10px">Notice the tools: <code>money</code> can price rides but cannot open tickets; <code>fleet</code> can read stations but cannot touch money. Least privilege for agents, the same principle as the managed identity in Week 5.</p>
+    </div>
+    <div class="stack build">
+      <div class="stat"><span class="n">8.9 s</span><span class="l">for both agents on the lab's battery case, one run on the course sandbox. Each runs its own tool loop.</span></div>
+      <div class="card amber"><h3>Concurrency cuts latency, not cost</h3><p>Two agents in parallel still pay for two agents. Sequential pays the sum of both latencies.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="Events, checkpoints, people">
+  <p class="kicker">Durable and interactive</p>
+  <h2>Real processes pause, fail, and wait for people</h2>
+  <div class="cols cols-3 build-row">
+    <div class="card"><h3>Events</h3><p><code>workflow.run(input, stream=True)</code> yields executor starts and ends, agent updates, outputs, requests and errors. A UI shows progress; a log records every step.</p></div>
+    <div class="card azure"><h3>Checkpoints</h3><p>With <code>checkpoint_storage</code> the workflow saves state at superstep boundaries. After a crash, <code>run(checkpoint_id=...)</code> resumes instead of re-paying for every model call.</p></div>
+    <div class="card green"><h3>People in the loop</h3><p>An executor calls <code>ctx.request_info(...)</code>; the workflow pauses until <code>run(responses={...})</code> brings the answer: a supervisor approves a $60 credit.</p></div>
+  </div>
+  <p class="small" style="margin-top:18px">Read: <a href="https://learn.microsoft.com/en-us/agent-framework/workflows/">Workflows in Agent Framework</a>.</p>
+</section>
+
+<!-- 18 -->
+<section class="slide section-slide" data-title="Part 3 · Routing and approvals">
+  <p class="kicker">Part 3 · Lab Part 3</p>
+  <h1>Routing with data, and a person in the loop</h1>
+  <p>A triage decision your code can log and test, and an approval your code controls.</p>
+</section>
+
+<!-- 19 -->
+<section class="slide" data-title="Triage with structured output">
+  <p class="kicker">Routing</p>
+  <h2>Make routing a decision your code can log, test and enforce</h2>
+  <div class="cols cols-2">
+    <div class="build">
+<pre class="code small-code"><code>class TriageDecision(BaseModel):
+    specialists: list[Literal["policy", "billing", "operations"]]
+    reason: str
+
+triage = Agent(client=client, name="triage", instructions=TRIAGE)
+decision = (await triage.run(case,
+    options={"response_format": TriageDecision})).value</code></pre>
+      <div class="callout" style="margin-top:14px"><p><b>The writer has no tools,</b> on purpose: the component that talks to the rider cannot take actions, so a manipulated reply cannot also move money.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Case (one run on the course sandbox)</th><th>Triage chose</th></tr>
+        <tr><td>Member R-1042: e-bike battery died at LS-14; wants the charge back and the bike checked</td><td><span class="chip ghost">policy</span> <span class="chip ghost">billing</span> <span class="chip ghost">operations</span></td></tr>
+        <tr><td>A parent asks whether a 15-year-old can ride this weekend</td><td><span class="chip ghost">policy</span></td></tr>
+        <tr><td>Is LS-05 a good place to pick up an e-bike right now?</td><td><span class="chip ghost">operations</span></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-title="Approvals: a person in the loop">
+  <p class="kicker">Human in the loop</p>
+  <h2>A tool can pause the run until a person approves</h2>
+  <div class="cols cols-60">
+    <div class="build">
+<pre class="code small-code"><code>@tool(name="issue_credit", approval_mode="always_require")
+def issue_credit_with_approval(rider_id: str, amount: float, reason: str) -> dict:
+    """Give a rider ride credit in US dollars. A person approves every credit."""
+    return domain.issue_credit(rider_id, amount, reason)
+
+session = cashier.create_session()
+result = await cashier.run(CASE, session=session)      # pauses here
+
+decisions = []
+for request in result.user_input_requests:
+    arguments = json.loads(request.function_call.arguments)
+    approved = arguments["amount"] <= 25               # a person decides
+    decisions.append(Message(role="user",
+        contents=[request.to_function_approval_response(approved)]))
+final = await cashier.run(decisions, session=session)   # resumes</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="card plain"><h3>One run on the course sandbox</h3><p style="font-family:var(--mono);font-size:13.5px">paused: issue_credit(rider_id='R-1042', amount=7.2, ...) &rarr; approved</p><p style="font-size:15.5px">"Refund issued for R-1042: $7.20 credited back for the e-bike charge."</p></div>
+      <div class="card green"><h3>Bound to the session</h3><p>A forged or replayed approval does not count.</p></div>
+      <div class="card amber"><h3>In the HTTP service</h3><p>Nobody waits on the request, so the same idea runs asynchronously: credits above $25 come back <code>escalated</code> for a supervisor.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide" data-title="Least privilege for a team">
+  <p class="kicker">Safety for agent teams</p>
+  <h2>Give side effects to one agent, then layer protections around them</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Agent</th><th>Tools</th><th>Moves money?</th><th>Sends people?</th></tr>
+        <tr><td><b>Triage</b></td><td>none</td><td>No</td><td>No</td></tr>
+        <tr><td><b>Policy</b></td><td><code>search_handbook</code></td><td>No</td><td>No</td></tr>
+        <tr class="hl"><td><b>Billing</b></td><td><code>search_handbook</code>, <code>quote_fare</code>, <code>issue_credit</code></td><td><b>Yes</b>, the only one</td><td>No</td></tr>
+        <tr><td><b>Operations</b></td><td><code>get_station</code>, <code>open_ticket</code>, <code>search_handbook</code></td><td>No</td><td><b>Yes</b>: tickets</td></tr>
+        <tr><td><b>Writer</b></td><td>none</td><td>No</td><td>No</td></tr>
+      </table>
+    </div>
+    <ol class="steps vertical build">
+      <li><b>Scope</b>Only one agent holds <code>issue_credit</code>.</li>
+      <li><b>Validate in code</b>The domain checks rider and amount; middleware can cap it.</li>
+      <li><b>Escalate by design</b>Above $25, the credit comes back <code>escalated</code>.</li>
+      <li><b>Approve when it matters</b><code>approval_mode="always_require"</code>.</li>
+      <li><b>Bound the run</b>Round limits, termination, call limits, time budgets.</li>
+      <li><b>Record everything</b>Every call is in the proof and the trace.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-title="Cost and latency of a team">
+  <p class="kicker">Cost and latency</p>
+  <h2>Latency follows the critical path. Cost follows the sum</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="card plain"><h3>Latency</h3><p style="font-family:var(--mono);font-size:15px">t<sub>triage</sub> + max(t<sub>chosen specialists</sub>) + t<sub>writer</sub></p></div>
+      <div class="card plain"><h3>Tokens</h3><p style="font-family:var(--mono);font-size:15px">&Sigma; over every call (input + output)</p><p class="small">Each specialist's time includes its own tool loop: decide, call, summarize.</p></div>
+    </div>
+    <ul class="check-list build" style="font-size:17px">
+      <li><b>Concurrency cuts latency, not cost.</b> Three specialists cost three, even when they take the time of one.</li>
+      <li><b>Triage pays for itself</b> when it removes at least one specialist on most cases.</li>
+      <li><b>Context grows along chains.</b> In sequential and group-chat patterns each agent reads everything before it.</li>
+      <li><b>Quota is shared.</b> 100,000 tokens and 100 requests a minute for every call. A team that makes eight calls per case reaches 429 eight times sooner. Your service answers 503 with <code>Retry-After</code>; the harness waits.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="slide section-slide" data-title="Part 4 · The resolution service">
+  <p class="kicker">Part 4 · Lab Part 4</p>
+  <h1>The resolution service: measure, add triage, measure again</h1>
+  <p>Judge a team by its actions and its latency, case by case.</p>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-title="Designs for the resolution team">
+  <p class="kicker">Design choices</p>
+  <h2>From "everyone works every case" to a team that fits the case</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Design</th><th>Model calls per case</th><th>Route accuracy</th><th>Risk</th></tr>
+      <tr><td><b>Fan-out to all</b> <span class="chip gray">starting code</span></td><td>3 specialists + writer, plus tool loops</td><td>Low by construction</td><td>Specialists act on cases that are not theirs: unowed credits</td></tr>
+      <tr class="hl"><td><b>Triage + chosen specialists</b> <span class="chip">the lab</span></td><td>1 + 1 to 3 + 1</td><td>As good as the triage prompt</td><td>A missed specialist means a missed action</td></tr>
+      <tr><td><b>Triage + handoff</b></td><td>1 + a chain</td><td>Good when cases need one owner</td><td>Ping-pong between agents</td></tr>
+      <tr><td><b>+ Verifier</b></td><td>Above + 1</td><td>Same</td><td>Catches wrong credits; may add new errors</td></tr>
+      <tr><td><b>Magentic manager</b></td><td>Many</td><td>Unpredictable</td><td>Overkill for a known process</td></tr>
+    </table>
+  </div>
+  <div class="cols cols-2 build-row" style="margin-top:14px">
+    <div class="callout green"><p><b>Actions come from execution.</b> <code>recording(state)</code> captures every tool call; <code>actions</code> are built from it, not from what an agent says.</p></div>
+    <div class="callout"><p><b>The route is reported, not inferred.</b> <code>route</code> lists the agents that ran, so you can compare intent with behavior.</p></div>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide" data-title="The exercise: POST /v1/resolve">
+  <p class="kicker">The exercise · Lab Part 4</p>
+  <h2>Add triage and make the money right: <code>POST /v1/resolve</code></h2>
+  <div class="cols cols-40">
+    <ol class="steps vertical build">
+      <li><b>Add triage</b><code>TriageDecision</code> and <code>TRIAGE</code> from Part 3; run it first.</li>
+      <li><b>Build the team</b>Only <code>decision.specialists</code>. With one, call <code>team[0].run(case)</code>: <code>ConcurrentBuilder</code> needs two.</li>
+      <li><b>Report the route</b><code>route=["triage", *chosen, "writer"]</code>.</li>
+      <li><b>Measure</b>Routing alone usually moves the score most.</li>
+      <li><b>Make the money right</b>A playbook from the handbook: per-minute charges only; <code>issue_credit</code> even above $25; no policy, no credit.</li>
+      <li><b>Route by need</b>Money requests go to billing; broken bikes and docks to operations. Report only what the tools returned.</li>
+    </ol>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Check</th><th class="num">Weight</th><th>What it measures</th></tr>
+        <tr><td><code>core.health</code>, <code>core.info</code></td><td class="num">1 + 1</td><td>Up, and identifies you</td></tr>
+        <tr><td><code>w07.resolve.schema</code></td><td class="num">1</td><td>Every response matches the contract</td></tr>
+        <tr class="hl"><td><code>w07.resolve.route</code></td><td class="num">2</td><td>The right specialists, and no others</td></tr>
+        <tr class="hl"><td><code>w07.resolve.actions</code></td><td class="num">3</td><td>Credits (rider, amount, status) and tickets (category, station) correct; no unowed credit</td></tr>
+        <tr><td><code>w07.resolve.answer</code></td><td class="num">1</td><td>Replies state the key facts</td></tr>
+        <tr><td><code>w07.latency</code></td><td class="num">1</td><td>Median at or under 20 s</td></tr>
+      </table>
+      <p class="small" style="padding:8px 12px 0">Rules start in <a href="../../app/data/handbook/refunds-and-credits.md"><code>refunds-and-credits.md</code></a>. A credit issued when none was owed scores zero for that case.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-title="Observe and evaluate a team">
+  <p class="kicker">Observe and evaluate</p>
+  <h2>A good reply can hide a bad path. Measure outcome, actions, route and efficiency</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Level</th><th>Question</th><th>In this course</th></tr>
+        <tr><td><b>Outcome</b></td><td>Is the reply right?</td><td><code>w07.resolve.answer</code></td></tr>
+        <tr class="hl"><td><b>Actions</b></td><td>Are credits and tickets exactly right, with no extras?</td><td><code>w07.resolve.actions</code></td></tr>
+        <tr><td><b>Route</b></td><td>Did the right specialists, and only those, work?</td><td><code>w07.resolve.route</code></td></tr>
+        <tr><td><b>Efficiency</b></td><td>How many calls and seconds?</td><td><code>w07.latency</code>; the per-case table in the lab</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Traces</h3><p>One span per agent run (<code>invoke_agent</code>), model call (<code>chat</code>) and tool call (<code>execute_tool</code>). One request becomes a tree: Week 10 reads it in Application Insights.</p></div>
+      <div class="card azure"><h3>DevUI, locally</h3><p>A web UI that runs agents and workflows and shows every message and event.</p></div>
+      <p class="small">Managed trajectory evaluators: <a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/agent-evaluators">Agent evaluators in Foundry</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="slide" data-title="Beyond one process">
+  <p class="kicker">Beyond one process</p>
+  <h2>A team does not have to live in one Python process</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Need</th><th>Agent Framework integration</th></tr>
+      <tr><td>Run the agent on Foundry's managed runtime</td><td>Package it as a Foundry <b>hosted agent</b>: your container, Foundry's endpoint, identity and scaling</td></tr>
+      <tr><td>Call an agent that already exists in Foundry</td><td><code>FoundryAgent(...)</code> behaves like any agent, so it can join a workflow</td></tr>
+      <tr><td>Talk to agents built with other frameworks, across organizations</td><td>The <b>A2A</b> (Agent-to-Agent) protocol: <code>A2AAgent</code></td></tr>
+      <tr><td>Stream agent state to a web UI</td><td><b>AG-UI</b> endpoints for FastAPI</td></tr>
+      <tr><td>Define agents and workflows in configuration</td><td>Declarative YAML</td></tr>
+      <tr><td>Expose a team as a tool server</td><td><code>workflow.as_agent().as_mcp_server()</code>: Week 8</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:12px">Read: <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents">Hosted agents in Foundry Agent Service</a>.</p>
+</section>
+
+<!-- 28 -->
+<section class="slide" data-title="Deploy, submit, go further">
+  <p class="kicker">Lab Part 5</p>
+  <h2>Deploy, score the live URL, submit it</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+<pre class="code"><code>url = course.deploy()
+proof = course.check(7, url)</code></pre>
+      <div class="callout amber"><p><b>Many calls per case use quota fast.</b> If a report shows many 503s, wait a minute before the next run. Fewer, smaller calls per case is also the cheapest way to go faster.</p></div>
+      <div class="callout purple"><p><b>Submit the URL</b> by the deadline in the <a href="../README.md">README</a>.</p></div>
+    </div>
+    <div class="card plain build"><h3>Go further</h3>
+      <ul class="tight" style="margin:0">
+        <li><code>HandoffBuilder</code> instead of the fixed fan-out.</li>
+        <li>Rebuild the team as <b>agents as tools</b>: one resolver calls <code>billing.as_tool()</code>.</li>
+        <li>Add a <b>verifier</b> that checks each credit before the writer runs.</li>
+        <li>Count tokens per case with <code>usage_details</code>: which specialist costs most?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 28b -->
+<section class="slide" data-title="After you submit: the deep dive">
+  <p class="kicker">Optional · not graded</p>
+  <h2>After you submit, the deep dive takes today's ideas further</h2>
+  <div class="cols cols-40">
+    <div class="stack build">
+      <div class="card green"><h3>Lab · required</h3><p>Changes <code>app/</code> and deploys it. The harness grades the deployed URL, and nothing else.</p></div>
+      <div class="card azure"><h3>Deep dive · optional</h3><p>The lecture as code you run. It does not edit <code>app/</code> or deploy, so it cannot change your score.</p></div>
+      <div class="callout"><p>Same setup as the lab. Run the setup cell, then the parts in order. A few cents of model calls.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Part</th><th>What you explore</th><th>Sections</th></tr>
+        <tr><td>1</td><td>A workflow from scratch: executors, edges, events</td><td>5</td></tr>
+        <tr><td>2</td><td>Fan-out and fan-in without a model: supersteps</td><td>5, 6</td></tr>
+        <tr><td>3</td><td>Switch-case routing from a structured triage agent</td><td>6</td></tr>
+        <tr><td>4</td><td>Middleware: a policy the model cannot talk around</td><td>4, 10</td></tr>
+        <tr><td>5</td><td>A person in the loop that survives a restart</td><td>7</td></tr>
+        <tr><td>6</td><td>Group chat and handoff</td><td>8</td></tr>
+        <tr><td>7</td><td>Agents as tools, and what a team costs</td><td>8, 11</td></tr>
+        <tr><td>8</td><td>Evaluating an agent with <code>evaluate_agent</code></td><td>12</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="slide" data-title="What to remember">
+  <p class="kicker">Summary</p>
+  <h2>What to remember</h2>
+  <div class="cols cols-2">
+    <ul class="check-list build">
+      <li>Start with one agent. Split for conflicting instructions, least privilege, parallelism, context hygiene or separate evaluation, and only when the measurement says it pays.</li>
+      <li>Workflows fix the order; agents choose it. Prefer the most constrained orchestration that fits.</li>
+      <li>Make routing data: structured triage your code can log and test.</li>
+    </ul>
+    <ul class="check-list build">
+      <li>Middleware enforces what prompts can only request. Give side effects to one agent; approve the ones that are hard to undo.</li>
+      <li>Report actions from execution, not from prose.</li>
+      <li>Latency follows the critical path; cost follows the sum.</li>
+      <li>Judge a team by its actions and its latency, case by case.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 30 -->
+<section class="slide" data-title="Learn more">
+  <p class="kicker">Learn more</p>
+  <h2>Where to go deeper</h2>
+  <div class="cols cols-2">
+    <ul class="links build">
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/modules/orchestrate-semantic-kernel-multi-agent-solution/">Orchestrate a multi-agent solution using the Microsoft Agent Framework</a></span></li>
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/paths/develop-ai-agents-azure/">Develop AI Agents on Azure</a> (learning path)</span></li>
+      <li><span class="src">Agent Framework</span><span><a href="https://learn.microsoft.com/en-us/agent-framework/workflows/">Workflows</a> · <a href="https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/">Orchestrations</a></span></li>
+      <li><span class="src">Agent Framework</span><span><a href="https://learn.microsoft.com/en-us/agent-framework/agents/tools/tool-approval">Tool approvals</a></span></li>
+      <li><span class="src">Certification</span><span><a href="https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-500/">AI-500: Designing and Implementing Multi-Agent AI Solutions</a></span></li>
+    </ul>
+    <ul class="links build">
+      <li><span class="src">Anthropic</span><span><a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a></span></li>
+      <li><span class="src">Anthropic</span><span><a href="https://www.anthropic.com/engineering/multi-agent-research-system">How we built our multi-agent research system</a></span></li>
+      <li><span class="src">Cognition</span><span><a href="https://cognition.ai/blog/dont-build-multi-agents">Don't build multi-agents</a> (the counter-argument)</span></li>
+      <li><span class="src">OpenAI</span><span><a href="https://developers.openai.com/api/docs/guides/agents/orchestration">Agent orchestration: handoffs and agents as tools</a></span></li>
+      <li><span class="src">This course</span><span><a href="lecture.html">Lecture</a> · <a href="../lab.ipynb">Lab</a> · <a href="../deep-dive.ipynb">Deep dive (optional)</a> · <a href="../README.md">README</a></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 31 -->
+<section class="slide" data-title="Next week: harnesses and agentic coding">
+  <p class="kicker">Next week</p>
+  <h2>Next week: harnesses, MCP, and a coding agent</h2>
+  <div class="cols cols-3 build-row" style="margin-top:12px">
+    <div class="card"><h3>Publish your tools</h3><p>Your service becomes an MCP server any agent can use: VS Code, Agent Framework, Foundry.</p></div>
+    <div class="card amber"><h3>A spec written as tests</h3><p>A coding agent builds a new tool; the tests and your harness decide whether it is done.</p></div>
+    <div class="card azure"><h3>Harnesses from both sides</h3><p>The program that runs an agent, and the program that grades it.</p></div>
+  </div>
+  <p class="lede" style="margin-top:26px">Before class: deploy this week's service, read <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents</a>, and make sure a coding agent works in your VS Code.</p>
+</section>
+
+</main>
+<script src="../../assets/deck.js"></script>
+</body>
+</html>

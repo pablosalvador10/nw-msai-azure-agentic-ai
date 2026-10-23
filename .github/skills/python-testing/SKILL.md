@@ -1,6 +1,6 @@
 ---
 name: python-testing
-description: Helps write pytest tests for Python code including Azure Functions, MCP tools, and API endpoints. Use this skill when creating unit tests, integration tests, fixtures, or mocking external services.
+description: 'FY25 archived cohort only (fy25/ labs). Helps write pytest tests for Python code including Azure Functions, MCP tools, and API endpoints. Use this skill when creating unit tests, integration tests, fixtures, or mocking external services in fy25/. Not for fy26: follow fy26/AGENTS.md and fy26/tests/conftest.py.'
 ---
 
 # Python Testing Skill

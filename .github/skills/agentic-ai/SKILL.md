@@ -1,6 +1,6 @@
 ---
 name: agentic-ai
-description: Helps build AI agents using Azure AI Foundry with tool calling capabilities. Use this skill when creating agents, configuring tool definitions, implementing the agent loop, or integrating agents with Azure Functions and MCP servers.
+description: 'FY25 archived cohort only (fy25/ labs). Helps build AI agents using Azure AI Foundry with tool calling capabilities. Use this skill when creating agents, configuring tool definitions, implementing the agent loop, or integrating agents with Azure Functions and MCP servers in fy25/. Not for fy26: use the fy26-labs skill.'
 ---
 
 # Agentic AI Development Skill

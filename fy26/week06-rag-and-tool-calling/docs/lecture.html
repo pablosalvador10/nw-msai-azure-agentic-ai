@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 6 · RAG and Tool Calling · Lecture</title>
+<meta name="description" content="Week 6 lecture: embeddings, the RAG pipeline, chunking, hybrid retrieval and reranking, grounding with citations and abstention, evaluating RAG, RAG on Azure, the tool-calling protocol, tool design, and one agent with Microsoft Agent Framework.">
+<link rel="stylesheet" href="../../assets/lecture.css">
+</head>
+<body>
+<a class="skip" href="#content">Skip to the document</a>
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar"><div class="topbar__inner">
+  <span class="brand-copy"><b>Agentic AI on Microsoft Foundry</b><span>Week 6 · RAG and Tool Calling</span></span>
+  <div class="topbar__right">
+    <span class="author"><b>Pablo Salvador Lopez</b><a href="https://github.com/pablosalvador10">github.com/pablosalvador10</a></span>
+    <button class="button" id="print" type="button">Print / PDF</button>
+  </div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents"></nav>
+<main id="content" tabindex="-1">
+
+<header class="hero" id="top">
+  <p class="eyebrow">Week 6 · Lecture</p>
+  <h1>RAG and Tool Calling<span class="hero-subtitle"><strong>Answers from your documents, numbers from your code, and one agent that knows which to use.</strong></span></h1>
+  <p class="hero-copy">Last week the model answered from what it learned in training. This week it answers from your data and your code. Retrieval-augmented generation (RAG) puts the right handbook passage in front of the model, with citations and an honest "I don't know" when the handbook is silent. Tool calling lets the model ask your code for exact prices and live station data, because a bill cannot be "sometimes right". Microsoft Agent Framework then packages both into one agent, and you put it behind <code>/v1/ask</code>.</p>
+  <div class="table-wrap"><table><thead><tr><th>This week at a glance</th><th></th></tr></thead><tbody>
+    <tr><td>You build</td><td><code>POST /v1/ask</code>: an agent with three tools (<code>search_handbook</code>, <code>quote_fare</code>, <code>get_station</code>) that returns an answer, citations, the tools it called, and whether it abstained</td></tr>
+    <tr><td>You submit</td><td>One URL, before the Week 7 session</td></tr>
+    <tr><td>Lab (required)</td><td><a href="../lab.ipynb">lab.ipynb</a>, eight parts; Part 8 lists optional ideas. It ships the graded service.</td></tr>
+    <tr><td>Deep dive (optional)</td><td><a href="../deep-dive.ipynb">deep-dive.ipynb</a>: nine parts on retrieval engineering and tools: retrieval metrics, BM25 and hybrid search, chunking, embedding size, the protocol at its edges. Not graded, and it does not edit or deploy your service. Open it after you submit (<a href="#deep-dive">what it covers</a>).</td></tr>
+    <tr><td>Slides</td><td><a href="slides.html">slides.html</a>: the same content, one idea per slide</td></tr>
+    <tr><td>Source</td><td><a href="../lecture.md">lecture.md</a> · logistics and grading in the <a href="../README.md">README</a></td></tr>
+    <tr><td>Stack</td><td><code>text-embedding-3-small</code> and <code>gpt-5.4-mini</code> on Microsoft Foundry, the Responses API, Microsoft Agent Framework 1.23</td></tr>
+    <tr><td>Numbers in this page</td><td>Measured on the course sandbox, one run each, unless marked otherwise</td></tr>
+  </tbody></table></div>
+  <div class="callout"><p><strong>Reading guide.</strong> Sections 1 to 14 follow the lecture notes, with the same numbers and titles. Sections 2 to 8 are RAG, 9 to 11 are tool calling, 12 and 13 combine them in one agent, and 14 is the summary. After it, the lab is walked through part by part, with the exercise and the grading. A short section then describes the optional deep dive, followed by a glossary and further reading.</p></div>
+</header>
+
+<section id="s0" data-group="Before you start">
+  <h2>What you will be able to do</h2>
+  <ul>
+    <li>Explain embeddings and cosine similarity, and build retrieval from scratch.</li>
+    <li>Ground an answer in retrieved passages and return citations.</li>
+    <li>Make the model say "I don't know" when the sources are silent: abstention.</li>
+    <li>Write the tool-calling loop by hand: tool schema, function call, result, final answer.</li>
+    <li>Design tools a model uses well: clear names, "when to use" descriptions, constrained arguments, errors as data.</li>
+    <li>Build the same thing with Microsoft Agent Framework, and know what it does for you.</li>
+  </ul>
+  <h3>Before the session (about one hour)</h3>
+  <ol>
+    <li>Your Week 5 service is deployed and scores in the harness.</li>
+    <li>Read the Learn module <a href="https://learn.microsoft.com/en-us/training/modules/use-generative-ai-tools/">Develop generative AI apps that use tools</a>.</li>
+    <li>Skim the handbook your service answers from: <a href="../../app/data/handbook/"><code>app/data/handbook/</code></a>, ten short pages.</li>
+  </ol>
+</section>
+
+<section id="s1" data-group="Retrieval">
+  <h2>1. Why models need sources and tools</h2>
+  <p class="lede">A model has three blind spots that no prompt can fix.</p>
+  <div class="table-wrap"><table><thead><tr><th>Blind spot</th><th>Example at Lakeshore Ride</th><th>Fix</th></tr></thead><tbody>
+    <tr><td><strong>Private knowledge.</strong> It never read your documents.</td><td>"What is the lost e-bike fee?"</td><td>Retrieval (RAG)</td></tr>
+    <tr><td><strong>Freshness.</strong> Its knowledge stops at a training cutoff.</td><td>"Did the student plan change this month?"</td><td>Retrieval over current documents</td></tr>
+    <tr><td><strong>Computation and live state.</strong> It predicts text; it does not calculate or observe.</td><td>"What does a 50-minute ride cost?" "Are there e-bikes at LS-08 now?"</td><td>Tools: your code</td></tr>
+  </tbody></table></div>
+  <div class="grid grid-2">
+    <div class="tile tile--red"><h4>Without the handbook</h4><p>Asked for the lost e-bike fee, one run answered "I don't have enough information to know Lakeshore Ride's specific policy…", then general guesses.</p></div>
+    <div class="tile tile--green"><h4>What the handbook says</h4><p><strong>$2,500</strong>, in <code>damage-and-lost-bikes.md</code>. The model cannot know it unless you put it in front of it.</p></div>
+  </div>
+  <h3>Three ways to put knowledge into an answer</h3>
+  <div class="table-wrap"><table><thead><tr><th>Approach</th><th>How</th><th>Good for</th><th>Bad for</th></tr></thead><tbody>
+    <tr><td><strong>Long context</strong></td><td>Put all documents in the instructions</td><td>Small, stable corpora; prototypes. Pairs well with prompt caching</td><td>Large or growing corpora: cost and latency grow with every token; quality drops as context grows</td></tr>
+    <tr class="hl"><td><strong>RAG</strong></td><td>Retrieve only the relevant passages per question</td><td>Large, changing, permissioned knowledge; answers that must cite sources</td><td>Questions that need the whole corpus at once</td></tr>
+    <tr><td><strong>Fine-tuning</strong></td><td>Train the model on examples</td><td>Style, format, narrow tasks, smaller and cheaper models</td><td>Facts that change; facts you must cite. It teaches behavior, not a database</td></tr>
+  </tbody></table></div>
+  <p>Our handbook is ten pages: it would fit in the prompt (the Week 5 lab did exactly that to show caching). We use RAG anyway because the technique is what scales, and because citations need passages.</p>
+  <div class="lab"><p><strong>Part 1</strong> asks the model a handbook question with no sources and reads the guess.</p></div>
+</section>
+
+<section id="s2" data-group="Retrieval">
+  <h2>2. Embeddings and similarity</h2>
+  <p class="lede">An embedding model maps text to a vector so that texts with similar meaning point in similar directions, even with no words in common. <code>text-embedding-3-small</code> returns 1,536 numbers per text.</p>
+  <div class="formula">cos(a, b) = (a &middot; b) / (&#8214;a&#8214; &#8214;b&#8214;)</div>
+  <p>Cosine is 1 for the same direction and near 0 for unrelated texts. These embeddings are normalized to length 1, so cosine equals the plain dot product, which is why vector indexes can compare millions of vectors quickly.</p>
+  <div class="table-wrap"><table><thead><tr><th>Compared with "fee for a lost e-bike"</th><th class="num">Cosine</th></tr></thead><tbody>
+    <tr class="hl"><td>"what you pay if an electric bike goes missing"</td><td class="num">0.801</td></tr>
+    <tr><td>"station opening hours"</td><td class="num">0.183</td></tr>
+  </tbody><caption>Lab Part 2, one run. The first pair shares almost no words and still scores high.</caption></table></div>
+  <ul>
+    <li><strong>Similarity is a ranking signal, not a probability.</strong> Scores for relevant and irrelevant passages are often close (0.62 versus 0.48). Compare scores with each other; do not hard-code "relevant above 0.7".</li>
+    <li><strong>Embed queries and documents with the same model.</strong> Vectors from different models live in different spaces.</li>
+    <li><strong>Dimensions are a cost knob.</strong> The <code>dimensions</code> parameter shortens vectors with little quality loss: less storage, faster search.</li>
+    <li><strong>Embeddings miss exact tokens.</strong> Station ids (<code>LS-08</code>), fee names and product codes are often better matched by keywords. Section 5 combines both.</li>
+    <li><strong>Re-embed when you change models.</strong> An index is tied to the model that built it.</li>
+  </ul>
+  <div class="lab"><p><a href="../../app/rag.py"><code>app/rag.py</code></a> embeds every handbook section once at startup and ranks sections by cosine for each question. Offline mode replaces the model with a hashed bag-of-words vector, so tests run without Azure.</p></div>
+</section>
+
+<section id="s3" data-group="Retrieval">
+  <h2>3. The RAG pipeline</h2>
+  <p class="lede">RAG has two pipelines: one runs when documents change, one runs on every question.</p>
+  <div class="diagram" role="img" aria-label="Ingestion: load, clean, chunk, enrich, embed, index.">
+    <div class="diagram__col" style="flex:.6"><span class="diagram__label">Ingestion</span></div>
+    <div class="diagram__col"><div class="diagram__node">Load<small>markdown, PDF, HTML</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Clean<small>extract structure</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-accent">Chunk</div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Enrich<small>title, section, doc_id, ACL</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-azure">Embed</div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Index<small>vectors, text, metadata</small></div></div>
+  </div>
+  <div class="diagram" role="img" aria-label="Query: question, optional rewrite, retrieve top k, optional rerank, assemble context, generate.">
+    <div class="diagram__col" style="flex:.6"><span class="diagram__label">Every question</span></div>
+    <div class="diagram__col"><div class="diagram__node">Question</div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Rewrite<small>optional</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Retrieve top k<small>vector, keyword, hybrid</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Rerank<small>optional</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Assemble context<small>with ids</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-accent">Generate<small>answer, citations, abstained</small></div></div>
+  </div>
+  <div class="verdict"><p><strong>Find which box fails before you change anything.</strong> If the right passage is not in the top <em>k</em>, no prompt will fix the answer.</p></div>
+</section>
+
+<section id="s4" data-group="Retrieval">
+  <h2>4. Chunking</h2>
+  <p class="lede">A chunk is the unit you embed, retrieve and cite. Its size is a trade-off.</p>
+  <div class="table-wrap"><table><thead><tr><th>Chunks that are…</th><th>Retrieval</th><th>Generation</th><th>Citations</th></tr></thead><tbody>
+    <tr><td>Too large</td><td>The vector averages many topics; matches get vague</td><td>Lots of irrelevant text in the context</td><td>Coarse: "somewhere on this page"</td></tr>
+    <tr><td>Too small</td><td>Precise matches</td><td>Missing the sentence that gives the answer its meaning</td><td>Precise, but context is lost</td></tr>
+  </tbody></table></div>
+  <div class="table-wrap"><table><thead><tr><th>Strategy</th><th>Idea</th><th>When</th></tr></thead><tbody>
+    <tr><td>Fixed size with overlap</td><td>Every <em>n</em> tokens, overlapping by <em>m</em></td><td>Unstructured text, baselines</td></tr>
+    <tr class="hl"><td><strong>Structure-aware</strong></td><td>Split on headings, paragraphs, table rows</td><td>Documents with structure: our handbook, one chunk per <code>##</code> section</td></tr>
+    <tr><td>Semantic</td><td>Split where the topic shifts, measured by embedding distance</td><td>Long prose without structure</td></tr>
+    <tr><td>Parent-child ("small to big")</td><td>Retrieve small chunks, send their larger parent section</td><td>Precise matching and full context</td></tr>
+  </tbody></table></div>
+  <div class="callout"><p><strong>Always attach metadata</strong>: document id, title, section, date, and access-control information. Metadata powers citations, filters ("only the student plan pages") and permission trimming.</p></div>
+  <div class="lab"><p><strong>Part 2, step 1</strong> splits the handbook on <code>##</code> headings and counts the chunks.</p></div>
+</section>
+
+<section id="s5" data-group="Retrieval">
+  <h2>5. Retrieval: vector, keyword, hybrid, reranking</h2>
+  <div class="table-wrap"><table><thead><tr><th>Method</th><th>Matches</th><th>Strength</th><th>Weakness</th></tr></thead><tbody>
+    <tr><td><strong>Keyword</strong> (BM25)</td><td>Shared terms, weighted by rarity</td><td>Exact ids, names, codes, numbers</td><td>Synonyms and paraphrases</td></tr>
+    <tr><td><strong>Vector</strong></td><td>Meaning</td><td>Paraphrases, other languages</td><td>Exact tokens, negation, rare ids</td></tr>
+    <tr class="hl"><td><strong>Hybrid</strong></td><td>Both, fused</td><td>The best of both; the default in production</td><td>Two indexes to maintain</td></tr>
+    <tr><td><strong>+ Semantic reranker</strong></td><td>A cross-encoder rereads query and passage together</td><td>Much better ordering of the top results</td><td>Extra latency per query</td></tr>
+  </tbody></table></div>
+  <h3>Fusing rankings, and reranking</h3>
+  <p>Hybrid search runs both searches and merges the two ranked lists with <strong>Reciprocal Rank Fusion</strong>. A document's score is the sum, over the lists it appears in, of:</p>
+  <div class="formula">RRF(d) = &Sigma;<sub>r &isin; rankings</sub> 1 / (k + rank<sub>r</sub>(d)),&nbsp;&nbsp; k usually 60</div>
+  <p>RRF needs no score calibration (BM25 and cosine scores are on different scales), which is why Azure AI Search uses it. A bi-encoder (the embedding model) encodes query and passage separately; a <strong>cross-encoder</strong> reads them together and judges relevance much better, but is too slow for the whole index. So retrieve broadly (say 50 candidates) and rerank narrowly.</p>
+  <div class="grid grid-2">
+    <div class="tile tile--azure"><h4>Approximate nearest neighbor</h4><p>At scale you cannot compare a query with every vector. Indexes such as <strong>HNSW</strong> find near-best matches in logarithmic time, trading a little recall for a lot of speed. Exhaustive search is still right for small collections like ours.</p></div>
+    <div class="tile tile--amber"><h4>How many passages?</h4><p>More raise recall and lower precision. Models attend best to the beginning and end of long inputs, the "lost in the middle" effect: put the best passages first and keep <em>k</em> small.</p></div>
+  </div>
+</section>
+
+<section id="s6" data-group="Retrieval">
+  <h2>6. Generation: grounding, citations, abstention</h2>
+  <p class="lede">The generation step turns passages into an answer you can trust. Three properties define "trust".</p>
+  <div class="grid grid-3">
+    <div class="tile tile--accent"><h4>Grounded</h4><p>Every claim is supported by a passage. Instructions say "answer only from the passages"; passages carry ids.</p></div>
+    <div class="tile tile--azure"><h4>Cited</h4><p>The answer says which passages support it: structured output with a <code>citations</code> list, validated against known documents.</p></div>
+    <div class="tile tile--green"><h4>Abstains</h4><p>It says "I don't know" when the sources are silent: an <code>abstained</code> flag with a precise rule for when to set it.</p></div>
+  </div>
+  <div class="callout callout--red"><p><strong>Passages go in <code>input</code>, not in <code>instructions</code>.</strong> Retrieved text is data. If a document says "ignore your rules", it must be read, not obeyed. That is indirect prompt injection, Week 10's main topic.</p></div>
+  <div class="callout callout--amber"><p><strong>Abstention is a product decision.</strong> A false "I don't know" annoys a rider; a confident wrong answer about a fee costs money and trust. The harness checks both directions (<code>w06.ask.abstain</code>).</p></div>
+  <div class="lab"><p><strong>Part 2, steps 2 to 4</strong> embed, retrieve and generate with citations and abstention, from scratch.</p></div>
+</section>
+
+<section id="s7" data-group="Retrieval">
+  <h2>7. Evaluating RAG</h2>
+  <p class="lede">Evaluate retrieval and generation separately, or you will fix the wrong one.</p>
+  <div class="table-wrap"><table><thead><tr><th>Stage</th><th>Metric</th><th>Question it answers</th></tr></thead><tbody>
+    <tr><td>Retrieval</td><td><strong>Recall@k</strong></td><td>Is the right passage anywhere in the top <em>k</em>?</td></tr>
+    <tr><td>Retrieval</td><td><strong>MRR</strong> (mean reciprocal rank)</td><td>How high is the first right passage, on average?</td></tr>
+    <tr><td>Retrieval</td><td><strong>nDCG</strong></td><td>Are the most relevant passages ranked highest?</td></tr>
+    <tr><td>Generation</td><td><strong>Groundedness</strong></td><td>Is every claim supported by the passages?</td></tr>
+    <tr><td>Generation</td><td><strong>Relevance</strong></td><td>Does the answer address the question?</td></tr>
+    <tr><td>Generation</td><td><strong>Completeness</strong></td><td>Is anything important missing compared to a reference?</td></tr>
+    <tr><td>End to end</td><td><strong>Abstention accuracy</strong></td><td>Does it decline exactly when it should?</td></tr>
+  </tbody></table></div>
+  <p>The Week 6 checks map onto these: <code>w06.ask.citations</code> is retrieval plus citation, <code>w06.ask.facts</code> is completeness against known facts, <code>w06.ask.abstain</code> is abstention accuracy. Foundry ships managed evaluators for the same ideas: Retrieval, Document Retrieval, Groundedness, Relevance and Response Completeness (<a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators">built-in evaluators</a>). Week 10 builds an LLM judge for groundedness from scratch.</p>
+</section>
+
+<section id="s8" data-group="Retrieval">
+  <h2>8. RAG on Azure: AI Search, Foundry IQ, file search</h2>
+  <p class="lede">Our index is forty vectors in a Python list. Production RAG needs persistence, scale, freshness, filters and permissions.</p>
+  <div class="table-wrap"><table><thead><tr><th>Option</th><th>What you manage</th><th>What you get</th><th>Use when</th></tr></thead><tbody>
+    <tr><td><strong>From scratch</strong> <span class="chip chip--ghost">this course</span></td><td>Everything</td><td>Full understanding; zero infrastructure</td><td>Teaching, tiny corpora, unit tests</td></tr>
+    <tr><td><strong>Azure AI Search</strong></td><td>Index schema, ingestion, queries</td><td>Vector, keyword and hybrid search, HNSW, semantic ranker, filters, indexers, integrated vectorization</td><td>You need control over the index and the query</td></tr>
+    <tr class="hl"><td><strong>Foundry IQ</strong></td><td>Which sources go in a knowledge base</td><td>Automated chunking and embedding, multi-source agentic retrieval, extracts with citations, ACL sync and Purview labels, queries under the caller's identity</td><td>Agents over enterprise content with permissions</td></tr>
+    <tr><td><strong>File search tool</strong></td><td>Upload files</td><td>A vector store per agent, chunked and embedded for you</td><td>Quick document Q&amp;A inside a prompt agent</td></tr>
+  </tbody></table></div>
+  <h3>Agentic retrieval</h3>
+  <div class="diagram" role="img" aria-label="A multi-part question is decomposed into sub-queries, run in parallel, reranked and merged into extracts with citations.">
+    <div class="diagram__col"><div class="diagram__node">"I'm a student and my e-bike died mid-ride: what do I pay, do I get credit?"</div></div>
+    <div class="diagram__arrow">&rarr;<small>plan</small></div>
+    <div class="diagram__col"><div class="diagram__node is-accent">student fares</div><div class="diagram__node is-accent">e-bike battery policy</div><div class="diagram__node is-accent">credits</div></div>
+    <div class="diagram__arrow">&rarr;<small>in parallel</small></div>
+    <div class="diagram__col"><div class="diagram__node is-azure">Rerank semantically</div></div>
+    <div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Merged extracts with citations</div></div>
+  </div>
+  <p>Instead of one query, a model plans the retrieval, runs sub-queries in parallel against one or more sources, reranks and merges. In Foundry IQ you set a <em>retrieval reasoning effort</em> (minimal, low or medium) to trade latency for thoroughness.</p>
+  <div class="callout callout--amber"><p><strong>Permissions are the hard part.</strong> Two employees asking the same question must get different answers if they can read different documents. Foundry IQ synchronizes access control lists and runs queries under the caller's Entra identity, so the agent retrieves only what the user could open. Building that yourself is a project; buying it is usually right.</p></div>
+  <p class="muted">Sources: <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq">What is Foundry IQ?</a> · <a href="https://learn.microsoft.com/en-us/azure/search/agentic-retrieval-overview">Agentic retrieval</a> · <a href="https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview">Hybrid search</a> · <a href="https://learn.microsoft.com/en-us/azure/search/semantic-search-overview">Semantic ranking</a></p>
+</section>
+
+<section id="s9" data-group="Tool calling">
+  <h2>9. Tool calling: the protocol</h2>
+  <p class="lede">RAG gives the model text. Tools give it your code. The model never runs anything; it asks, and your code decides.</p>
+  <div class="grid grid-2">
+    <div class="tile tile--amber"><h4>Where RAG stops: arithmetic</h4><p>"I'm a member. What does a 50-minute classic ride cost?" The rules are in the handbook (45 minutes included, then $0.15 a minute), so the answer is <strong>$0.75</strong>, but the model must do arithmetic, and "sometimes right" is not good enough for a bill.</p></div>
+    <div class="tile tile--amber"><h4>Where RAG stops: live state</h4><p>"How many e-bikes are at LS-08 right now?" Live availability is in no document. One run with RAG alone answered "I don't know": honest, and useless.</p></div>
+  </div>
+  <figure class="figure">
+  <svg viewBox="0 0 1150 340" width="1150" height="340" role="img" aria-label="Sequence: your code sends instructions, the question and tool definitions; the model returns a function call; your code runs quote_fare and sends the result back with the same call id; the model writes the final answer." font-family="Segoe UI, Inter, system-ui, sans-serif">
+    <defs>
+      <marker id="arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3341b8"/></marker>
+      <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8f96"/></marker>
+    </defs>
+    <g font-size="15" font-weight="700" text-anchor="middle">
+      <rect x="60" y="4" width="200" height="44" rx="10" fill="#eef0fc" stroke="#3341b8"/><text x="160" y="32" fill="#18191b">Your code</text>
+      <rect x="500" y="4" width="200" height="44" rx="10" fill="#edf6ff" stroke="#9cc7ee"/><text x="600" y="32" fill="#18191b">Model</text>
+      <rect x="880" y="4" width="220" height="44" rx="10" fill="#ecf8f4" stroke="#9fd6c5"/><text x="990" y="32" fill="#18191b">quote_fare in domain.py</text>
+    </g>
+    <g stroke="#dcdde0" stroke-width="2" stroke-dasharray="4 5"><line x1="160" y1="48" x2="160" y2="330"/><line x1="600" y1="48" x2="600" y2="330"/><line x1="990" y1="48" x2="990" y2="330"/></g>
+    <g font-size="14" fill="#2b2e33">
+      <line x1="164" y1="84" x2="594" y2="84" stroke="#3341b8" stroke-width="2" marker-end="url(#arr-a)"/>
+      <text x="380" y="76" text-anchor="middle">1 · instructions + question + tool definitions (JSON Schema)</text>
+      <line x1="596" y1="128" x2="166" y2="128" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr-g)"/>
+      <text x="380" y="120" text-anchor="middle">2 · function_call quote_fare(member, 50, false) · call_id c1</text>
+      <line x1="164" y1="172" x2="984" y2="172" stroke="#107c62" stroke-width="2" marker-end="url(#arr-a)"/>
+      <text x="575" y="164" text-anchor="middle">3 · your code runs quote_fare("member", 50, False)</text>
+      <line x1="986" y1="212" x2="166" y2="212" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr-g)"/>
+      <text x="575" y="204" text-anchor="middle">4 · {"total": 0.75}</text>
+      <line x1="164" y1="256" x2="594" y2="256" stroke="#3341b8" stroke-width="2" marker-end="url(#arr-a)"/>
+      <text x="380" y="248" text-anchor="middle">5 · function_call_output for c1: {"total": 0.75}</text>
+      <line x1="596" y1="304" x2="166" y2="304" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr-g)"/>
+      <text x="380" y="296" text-anchor="middle">6 · "A 50-minute classic ride costs $0.75 for members."</text>
+    </g>
+  </svg>
+  <figcaption>The model asks; your code acts; the result goes back with the same <code>call_id</code>.</figcaption>
+  </figure>
+  <div class="table-wrap"><table><thead><tr><th>Piece</th><th>What it is</th></tr></thead><tbody>
+    <tr><td><strong>Tool definition</strong></td><td><code>{"type": "function", "name", "description", "parameters": &lt;JSON Schema&gt;, "strict": true}</code>, sent with the request</td></tr>
+    <tr><td><strong><code>function_call</code> item</strong></td><td>The model's request: tool <code>name</code>, <code>arguments</code> as a JSON string, and a <code>call_id</code></td></tr>
+    <tr><td><strong><code>function_call_output</code> item</strong></td><td>Your result, sent back with the same <code>call_id</code></td></tr>
+    <tr><td><strong>The loop</strong></td><td>Repeat until a response contains no <code>function_call</code> items; that response is the final answer</td></tr>
+  </tbody></table></div>
+  <h3>The loop, by hand</h3>
+  <div class="split">
+<pre class="code"><code>def ask_with_tools(question: str) -> str:
+    response = client.responses.create(
+        model=MODEL, instructions=TOOL_INSTRUCTIONS,
+        input=question, tools=TOOLS)
+    while True:
+        calls = [i for i in response.output if i.type == "function_call"]
+        if not calls:
+            return response.output_text   # no more requests: final answer
+        results = []
+        for call in calls:
+            arguments = json.loads(call.arguments)
+            result = FUNCTIONS[call.name](**arguments)
+            results.append({"type": "function_call_output",
+                            "call_id": call.call_id,
+                            "output": json.dumps(result)})
+        response = client.responses.create(
+            model=MODEL, instructions=TOOL_INSTRUCTIONS,
+            previous_response_id=response.id,
+            input=results, tools=TOOLS)</code></pre>
+    <div>
+      <div class="table-wrap"><table><thead><tr><th>Option</th><th>Use</th></tr></thead><tbody>
+        <tr><td><code>tool_choice</code></td><td><code>auto</code> (default), <code>required</code>, <code>none</code>, or one named function: force a lookup, or forbid tools for a turn</td></tr>
+        <tr><td><code>parallel_tool_calls</code></td><td>Several independent calls at once: fare and station</td></tr>
+        <tr><td><code>strict</code></td><td>Arguments always match the schema: every property required, <code>additionalProperties: false</code></td></tr>
+      </tbody></table></div>
+      <div class="callout callout--red"><p><strong>Guard the loop.</strong> A maximum number of iterations and tool calls, a time budget, and errors returned to the model as data ("unknown station LS-99"), not raised. Without limits, one confused model can call tools until your quota is gone.</p></div>
+    </div>
+  </div>
+  <div class="verdict"><p><strong>Business logic stays in code.</strong> The fare rules live in <a href="../../app/domain.py"><code>app/domain.py</code></a> as deterministic Python. The model chooses which tool and which arguments; it never computes a price. Let the model do language and judgment; let code do arithmetic, state and anything with money.</p></div>
+  <div class="lab"><p><strong>Parts 3 and 4</strong> show where RAG stops, then write this loop by hand against <code>quote_fare</code> and <code>get_station</code>.</p></div>
+</section>
+
+<section id="s10" data-group="Tool calling">
+  <h2>10. Designing tools a model uses well</h2>
+  <p class="lede">The model knows your tool only through its name, description and schema. Those are a prompt, and they deserve the same care.</p>
+  <div class="table-wrap"><table><thead><tr><th>Principle</th><th>Weak</th><th>Strong</th></tr></thead><tbody>
+    <tr><td>Names say what it does</td><td><code>lookup</code>, <code>helper2</code></td><td><code>quote_fare</code>, <code>get_station</code></td></tr>
+    <tr class="hl"><td>Descriptions say <strong>when</strong> to use it</td><td>"Gets fares."</td><td>"Exact ride fee in US dollars for one ride. Always use this instead of computing prices."</td></tr>
+    <tr><td>Constrain arguments</td><td><code>plan: string</code></td><td><code>plan: "single" | "day_pass" | "member" | "student"</code></td></tr>
+    <tr><td>Describe every argument</td><td><code>minutes</code></td><td><code>minutes: Ride length in whole minutes.</code></td></tr>
+    <tr><td>Return what the model needs, no more</td><td>The whole station database</td><td>One station's bikes, e-bikes and docks</td></tr>
+    <tr class="hl"><td>Errors are data</td><td><code>raise KeyError</code></td><td><code>{"error": "Unknown station LS-99. Ids look like LS-07."}</code></td></tr>
+    <tr><td>Separate read from write</td><td>One <code>manage_account</code> tool</td><td><code>get_balance</code> (safe) and <code>issue_credit</code> (side effect)</td></tr>
+    <tr><td>Few, distinct tools</td><td>Twenty overlapping tools</td><td>A handful, each with a clear boundary</td></tr>
+  </tbody></table></div>
+  <div class="grid grid-2">
+    <div class="tile tile--red"><h4>Side effects need extra care</h4><p>A tool that moves money or opens tickets (Week 7) should be idempotent where possible, validated in code (amount caps, rider exists), recorded, and, for high-impact actions, approved by a person: <code>approval_mode="always_require"</code>.</p></div>
+    <div class="tile tile--amber"><h4>Token budget</h4><p>Every tool definition is sent on every call. Fifty tools can cost thousands of input tokens per request and degrade tool choice. Keep tool sets small per agent, or use tool search (Foundry toolboxes).</p></div>
+  </div>
+</section>
+
+<section id="s11" data-group="Tool calling">
+  <h2>11. Tools across the stack</h2>
+  <p class="lede">Know who executes the tool: that decides where your code, secrets and logs are.</p>
+  <div class="table-wrap"><table><thead><tr><th>Kind</th><th>Example</th><th>Who executes</th><th>Where it is defined</th></tr></thead><tbody>
+    <tr class="hl"><td><strong>Function tool</strong> (client-side)</td><td><code>quote_fare</code>, <code>get_station</code></td><td>Your process</td><td>Your code; the schema is sent with each request</td></tr>
+    <tr><td><strong>Hosted tool</strong> (platform-side)</td><td>Code interpreter, file search, web search, Azure AI Search, image generation</td><td>Foundry, in its sandbox</td><td>Agent definition or request</td></tr>
+    <tr><td><strong>Remote tool over a protocol</strong></td><td>MCP servers, OpenAPI endpoints, A2A agents</td><td>Another service</td><td>A connection or a toolbox</td></tr>
+  </tbody></table></div>
+  <p>Hosted tools save you code but move execution out of your process: check data residency, cost per call and what is logged. Remote tools over MCP are Week 8's topic, when your own service becomes a tool server for other agents.</p>
+</section>
+
+<section id="s12" data-group="One agent">
+  <h2>12. Agentic RAG: retrieval as a tool</h2>
+  <p class="lede">The starting <code>/v1/ask</code> retrieves once, always, then generates. The improved version gives the model <code>search_handbook</code> as a tool. The difference is who decides.</p>
+  <div class="table-wrap"><table><thead><tr><th></th><th>Retrieve-then-generate</th><th>Retrieval as a tool (agentic)</th></tr></thead><tbody>
+    <tr><td>Searches</td><td>Exactly one, with the raw question</td><td>Zero, one or several, with queries the model writes</td></tr>
+    <tr><td>Multi-part questions</td><td>One query for two topics: weak</td><td>One search per topic</td></tr>
+    <tr><td>Questions that need code</td><td>Guesses</td><td>Calls <code>quote_fare</code> or <code>get_station</code></td></tr>
+    <tr><td>Latency and cost</td><td>Predictable: one model call</td><td>Variable: one model call per loop iteration</td></tr>
+    <tr><td>Failure mode</td><td>Bad retrieval, confident answer</td><td>Over-searching, or not searching when it should</td></tr>
+  </tbody></table></div>
+  <p>Agent Framework supports both styles: retrieval as a <strong>tool</strong> the model calls when it chooses, or as a <strong>context provider</strong> that injects passages before every run. Use a context provider when every question needs the knowledge; use a tool when the model must decide.</p>
+</section>
+
+<section id="s13" data-group="One agent">
+  <h2>13. One agent with Microsoft Agent Framework</h2>
+  <p class="lede">Writing the loop once teaches you how it works. Writing it in every service is how bugs happen. Microsoft Agent Framework is Microsoft's open-source SDK for agents and multi-agent workflows in Python, .NET and Go, the successor to Semantic Kernel and AutoGen. This week uses its single-agent half; Week 7 uses workflows.</p>
+<pre class="code"><code>from typing import Annotated, Literal
+from agent_framework import Agent, tool
+from pydantic import Field
+
+
+@tool
+def quote_fare(
+    plan: Annotated[Literal["single", "day_pass", "member", "student"], Field(description="Rider's plan.")],
+    minutes: Annotated[int, Field(description="Ride length in whole minutes.")],
+    ebike: Annotated[bool, Field(description="True for an e-bike.")] = False,
+) -> str:
+    """Exact ride fee in US dollars for one ride. Always use this instead of computing prices."""
+    ...
+
+
+agent = Agent(
+    client=state.models.agent_client(),  # FoundryChatClient: project endpoint + Entra ID
+    name="lakeshore-ask",
+    instructions=INSTRUCTIONS,
+    tools=[search_handbook, quote_fare, get_station],
+)
+result = await agent.run(question, options={"response_format": AskAnswer})
+answer: AskAnswer = result.value  # typed, validated structured output</code></pre>
+  <div class="table-wrap"><table><thead><tr><th>It does</th><th>You still decide</th></tr></thead><tbody>
+    <tr><td>Builds JSON Schema from type hints, <code>Literal</code>s, <code>Field</code> descriptions and docstrings</td><td>What the tools are, their names and descriptions</td></tr>
+    <tr><td>Runs the loop: function calls, results, parallel calls, retries of malformed calls</td><td>The instructions: when to use each tool, when to abstain</td></tr>
+    <tr><td>Enforces limits (iterations, function calls, time) through its function invocation configuration</td><td>Which limits are right for your latency and cost</td></tr>
+    <tr><td>Structured output through <code>response_format</code>, returned as <code>result.value</code></td><td>The schema of the answer</td></tr>
+    <tr><td>Streaming (<code>stream=True</code>) and sessions (<code>agent.create_session()</code>)</td><td>Whether you need them: <code>/v1/ask</code> is single-turn</td></tr>
+    <tr><td>Middleware around runs, model calls and tool calls</td><td>What to log, block or approve</td></tr>
+    <tr><td>OpenTelemetry spans for every run, model call and tool call</td><td>What to look at (Week 10)</td></tr>
+    <tr><td>Tool approval (<code>approval_mode="always_require"</code>)</td><td>Which tools are dangerous enough to need it</td></tr>
+  </tbody></table></div>
+  <p>The framework also speaks to Foundry's platform tools: <code>FoundryChatClient</code> has helpers that return hosted tool configurations (code interpreter, file search, web search, Azure AI Search, MCP) that you pass in <code>tools=[...]</code> next to your Python functions.</p>
+  <div class="callout callout--green"><p><strong>Report from execution, not from prose.</strong> <a href="../../app/tools.py"><code>app/tools.py</code></a> defines the tools with <code>@tool</code>. Each records its call inside <code>recording(state)</code>, so the API reports <code>tool_calls</code> (Week 6) and <code>actions</code> (Week 7) from what actually ran, not from what the model claims it did.</p></div>
+  <div class="lab"><p><strong>Part 5</strong> rebuilds the same agent with Agent Framework; <strong>Part 6</strong> puts it in your service.</p></div>
+  <p class="muted">Sources: <a href="https://learn.microsoft.com/en-us/agent-framework/overview/">Agent Framework overview</a> · <a href="https://developers.openai.com/api/docs/guides/function-calling">Function calling (OpenAI)</a> · <a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for agents (Anthropic)</a></p>
+</section>
+
+<section id="s14" data-group="One agent">
+  <h2>14. Summary</h2>
+  <ol class="points">
+    <li><b>Models lack private knowledge, freshness and computation.</b>RAG fixes the first two; tools fix the third.</li>
+    <li><b>RAG is chunk, embed, retrieve, generate.</b>Find the failing stage before you change anything.</li>
+    <li><b>Production retrieval is hybrid</b>(keyword plus vector, fused with RRF) with a reranker.</li>
+    <li><b>Trustworthy answers are grounded, cited, and abstain when the sources are silent.</b>Retrieved text is data, never instructions.</li>
+    <li><b>Evaluate retrieval and generation separately.</b></li>
+    <li><b>On Azure:</b>AI Search when you want control, Foundry IQ for permission-aware agentic retrieval over enterprise sources, the file search tool for quick document Q&amp;A.</li>
+    <li><b>Tool calling is a loop of <code>function_call</code> and <code>function_call_output</code> items.</b>The model asks, your code acts. Guard the loop with limits.</li>
+    <li><b>Tool design is prompt design:</b>names, "when to use" descriptions, constrained arguments, errors as data, read separate from write.</li>
+    <li><b>Agent Framework runs the loop, builds schemas, enforces limits and traces everything.</b>You still own the tools and the instructions.</li>
+  </ol>
+</section>
+
+<section id="lab" data-group="The lab">
+  <h2>The lab, part by part</h2>
+  <ol class="flow flow--4">
+    <li><b>The model does not know your handbook</b><span>A question with no sources, and the guess it produces. Section 1.</span></li>
+    <li><b>RAG from scratch</b><span>Chunk, embed, retrieve, generate with citations and abstention. Sections 2 to 6.</span></li>
+    <li><b>Where RAG stops</b><span>A fare that needs arithmetic; stations that need live data. Sections 1 and 11.</span></li>
+    <li><b>Tool calling, by hand</b><span>The loop of function calls and outputs. Sections 9 and 10.</span></li>
+    <li><b>The same, with Agent Framework</b><span>One agent, three tools, typed output. Sections 12 and 13.</span></li>
+    <li><b>Put the agent in your service</b><span>Replace retrieve-then-generate in <code>app/services/ask.py</code>. Your turn: the graded work. Sections 7 and 13.</span></li>
+    <li><b>Deploy and score</b><span>The live URL, with the Week 6 harness.</span></li>
+    <li><b>Go further (optional)</b><span>Hybrid retrieval, retrieval depth, managed retrieval, tool design.</span></li>
+  </ol>
+</section>
+
+<section id="exercise" data-group="The lab">
+  <h2>The exercise and how it is graded</h2>
+  <div class="card">
+    <h3>Replace retrieve-then-generate with an agent</h3>
+    <p><strong>Service:</strong> <code>POST /v1/ask</code> answers with <code>answer</code>, <code>citations</code> (handbook <code>doc_id</code>s), <code>tool_calls</code> and <code>abstained</code> (<a href="../../app/contract.py">contract</a>).</p>
+    <p><strong>Starting point:</strong> <a href="../../app/services/ask.py"><code>app/services/ask.py</code></a> does one search and one model call. It has no tools, so it guesses at prices and cannot see stations.</p>
+    <p><strong>Your job:</strong> an agent with <code>search_handbook</code>, <code>quote_fare</code> and <code>get_station</code> (already in <a href="../../app/tools.py"><code>app/tools.py</code></a>) that returns structured output; then tune instructions and retrieval. 100 on the public questions is reachable, and the lab (Part 6) lists the typical fixes. Write rules that generalize: grading uses questions you have not seen.</p>
+  </div>
+  <ol class="points">
+    <li><b>Import</b><span><code>Agent</code> and the tools from <code>app.tools</code>.</span></li>
+    <li><b>Rewrite <code>INSTRUCTIONS</code></b><span>When to use each tool, citations, when to abstain, a length limit.</span></li>
+    <li><b>Build the agent</b><span>Three tools, <code>state.models.agent_client()</code>.</span></li>
+    <li><b>Run it</b><span>Inside <code>recording(state)</code> with <code>response_format=AskAnswer</code>.</span></li>
+    <li><b>Return <code>AskResponse</code></b><span>Citations filtered to known <code>doc_ids()</code>; <code>tool_calls</code> from the record.</span></li>
+  </ol>
+  <div class="table-wrap"><table><thead><tr><th>Check</th><th class="num">Weight</th><th>What it measures</th></tr></thead><tbody>
+    <tr><td><code>core.health</code>, <code>core.info</code></td><td class="num">1 + 1</td><td>The service is up and identifies you</td></tr>
+    <tr><td><code>w06.ask.schema</code></td><td class="num">1</td><td>Every response matches the contract</td></tr>
+    <tr class="hl"><td><code>w06.ask.facts</code></td><td class="num">3</td><td>Answers contain the facts from the handbook</td></tr>
+    <tr><td><code>w06.ask.citations</code></td><td class="num">2</td><td>Answers cite the right page, at most three citations</td></tr>
+    <tr class="hl"><td><code>w06.ask.tools</code></td><td class="num">2</td><td>Prices and station data come from tools, with the right value</td></tr>
+    <tr><td><code>w06.ask.abstain</code></td><td class="num">1</td><td><code>abstained</code> is true exactly when the handbook has no answer</td></tr>
+    <tr><td><code>w06.latency</code></td><td class="num">1</td><td>Median latency at or under 8 s, scaled by valid responses</td></tr>
+  </tbody></table></div>
+  <h3>Typical misses, in order of impact</h3>
+  <div class="grid grid-3">
+    <div class="tile tile--red"><h4>Tools not called</h4><p>The instructions do not say when to use each tool. Be explicit: "Never compute prices yourself; call <code>quote_fare</code>."</p></div>
+    <div class="tile tile--amber"><h4>Too many citations</h4><p>The model cites everything it read. Ask it to cite only passages it used, at most three.</p></div>
+    <div class="tile tile--azure"><h4>Abstains at the wrong time</h4><p>Define it precisely: "only when no tool result or passage answers the question".</p></div>
+  </div>
+  <div class="callout"><p><strong>First goal: <code>w06.ask.tools</code> above zero.</strong> Then tune instructions. Keep the guardrail check and the offline branch at the top of <code>ask()</code>: the offline tests rely on them. The proof in <code>reports/</code> shows the exact answer for every miss.</p></div>
+  <h3>Go further in your service (optional)</h3>
+  <p>Ideas beyond the exercise, mostly in your own service. If one changes <code>app/</code>, score it in-process before you deploy it.</p>
+  <ul>
+    <li><strong>Hybrid retrieval.</strong> Add keyword matching next to the vectors: station ids and fee names are exact strings. Which questions improve?</li>
+    <li><strong>Chunking.</strong> Try smaller chunks than handbook sections. What happens to citations?</li>
+    <li><strong>Managed retrieval.</strong> Read how <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq">Foundry IQ</a> and <a href="https://learn.microsoft.com/en-us/azure/search/agentic-retrieval-overview">agentic retrieval</a> do this as a service.</li>
+    <li><strong>Tool design.</strong> Rewrite a tool description badly on purpose and watch the score drop. Then read <a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for agents</a>.</li>
+  </ul>
+</section>
+
+<section id="deploy" data-group="The lab">
+  <h2>Deploy and submit</h2>
+<pre class="code"><code>url = course.deploy()          # build the image in Azure, roll out a new revision
+proof = course.check(6, url)   # score the live URL with the Week 6 harness</code></pre>
+  <div class="callout callout--amber"><p><strong>The service is cumulative.</strong> Week 6 must keep Week 5 working: your final URL is scored with every week's harness. If time runs short, deploy as soon as the agent version beats the baseline. Submit the URL by the deadline in the <a href="../README.md">README</a>.</p></div>
+</section>
+
+<section id="deep-dive" data-group="Optional">
+  <h2>The deep dive: optional, after you submit</h2>
+  <p>The lab ships one retrieval design. The deep dive measures it the way a search engineer would and tries the alternatives: keyword, hybrid and multi-query search, other chunk and embedding sizes, the edges of the tool-calling protocol, and two ways to do RAG in Agent Framework.</p>
+  <div class="grid grid-2">
+    <div class="tile tile--green"><h4>Lab: required</h4><p><a href="../lab.ipynb">lab.ipynb</a> changes your service in <code>app/</code> and deploys it. The harness grades that deployed URL, and nothing else.</p></div>
+    <div class="tile tile--azure"><h4>Deep dive: optional</h4><p><a href="../deep-dive.ipynb">deep-dive.ipynb</a> runs the lecture's ideas as code you can change. It is not graded. It does not edit <code>app/</code> or deploy, so it cannot change your score.</p></div>
+  </div>
+  <h3>Before you open it</h3>
+  <ul>
+    <li><strong>When.</strong> After you have deployed and submitted your URL. The deep dive cannot raise your score, so do not let it take time from the lab.</li>
+    <li><strong>What it needs.</strong> The same as the lab: Setup complete, the <code>fy26/.env</code> file that the setup notebook writes, and <code>az login</code>. Open it in VS Code with the <code>fy26/.venv</code> kernel.</li>
+    <li><strong>How to run it.</strong> Run the setup cell, then the parts in order. Part 1 builds the index, the question sets and the client that later parts reuse, and Part 9 reuses Part 8's client, so a part run on its own can fail with a <code>NameError</code>. You can stop after any part.</li>
+    <li><strong>Cost.</strong> A few cents of embeddings and model calls.</li>
+  </ul>
+  <div class="table-wrap"><table><thead><tr><th>Part</th><th>What you explore</th><th>Lecture sections</th></tr></thead><tbody>
+    <tr><td>1</td><td>Measure retrieval: recall@k and MRR, and why the public questions are too easy</td><td><a href="#s5">5</a>, <a href="#s7">7</a></td></tr>
+    <tr><td>2</td><td>Keyword search from scratch (BM25)</td><td><a href="#s5">5</a></td></tr>
+    <tr><td>3</td><td>Hybrid search: Reciprocal Rank Fusion and its weights</td><td><a href="#s5">5</a></td></tr>
+    <tr><td>4</td><td>Query rewriting and multi-query fusion: the first step of agentic retrieval</td><td><a href="#s8">8</a>, <a href="#s12">12</a></td></tr>
+    <tr><td>5</td><td>Chunking: sections against fixed-size windows</td><td><a href="#s4">4</a></td></tr>
+    <tr><td>6</td><td>Embedding size: 1,536, 256 and 64 dimensions</td><td><a href="#s2">2</a></td></tr>
+    <tr><td>7</td><td>The tool-calling protocol at its edges: parallel calls, <code>tool_choice</code>, errors as data</td><td><a href="#s9">9</a>, <a href="#s10">10</a></td></tr>
+    <tr><td>8</td><td>RAG as a tool against RAG as a context provider, in Agent Framework</td><td><a href="#s12">12</a>, <a href="#s13">13</a></td></tr>
+    <tr><td>9</td><td>A platform tool next to your own: Code Interpreter from Agent Framework</td><td><a href="#s11">11</a></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="words" data-group="Reference">
+  <h2>Words used here</h2>
+  <dl class="glossary">
+    <dt>Embedding</dt><dd>A vector that represents the meaning of a text; similar meanings point in similar directions.</dd>
+    <dt>Cosine similarity</dt><dd>The cosine of the angle between two vectors; a ranking signal, not a probability.</dd>
+    <dt>Chunk</dt><dd>The unit you embed, retrieve and cite.</dd>
+    <dt>BM25</dt><dd>The standard keyword ranking function: shared terms weighted by rarity.</dd>
+    <dt>Hybrid search</dt><dd>Keyword and vector search run together and fused, usually with RRF.</dd>
+    <dt>Reranker</dt><dd>A cross-encoder that rereads query and passage together to reorder the top results.</dd>
+    <dt>Grounded</dt><dd>Every claim in the answer is supported by a retrieved passage.</dd>
+    <dt>Abstention</dt><dd>Answering "I don't know" when the sources are silent.</dd>
+    <dt>Function call</dt><dd>A model's request to run a tool, with a name, JSON arguments and a <code>call_id</code>.</dd>
+    <dt>Agentic retrieval</dt><dd>A model plans sub-queries, runs them in parallel, reranks and merges the results.</dd>
+  </dl>
+</section>
+
+<section id="reading" data-group="Reference">
+  <h2>Further reading</h2>
+  <div class="table-wrap"><table><thead><tr><th>Topic</th><th>Resource</th></tr></thead><tbody>
+    <tr><td>RAG, conceptually</td><td><a href="https://learn.microsoft.com/en-us/training/modules/rag-fundamentals/">Introduction to retrieval-augmented generation concepts</a> (module)</td></tr>
+    <tr><td>Managed knowledge for agents</td><td><a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/what-is-foundry-iq">What is Foundry IQ?</a> · <a href="https://learn.microsoft.com/en-us/training/modules/introduction-foundry-iq/">Build knowledge-enhanced AI agents with Foundry IQ</a> (module)</td></tr>
+    <tr><td>Search engine internals</td><td><a href="https://learn.microsoft.com/en-us/azure/search/vector-search-overview">Vector search</a> · <a href="https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview">Hybrid search</a> · <a href="https://learn.microsoft.com/en-us/azure/search/semantic-search-overview">Semantic ranking</a> · <a href="https://learn.microsoft.com/en-us/azure/search/agentic-retrieval-overview">Agentic retrieval</a></td></tr>
+    <tr><td>Tools in Foundry</td><td><a href="https://learn.microsoft.com/en-us/training/modules/use-generative-ai-tools/">Develop generative AI apps that use tools</a> (module) · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview">Toolbox</a></td></tr>
+    <tr><td>The protocol</td><td><a href="https://developers.openai.com/api/docs/guides/function-calling">Function calling (OpenAI)</a> · <a href="https://developers.openai.com/api/docs/guides/embeddings">Vector embeddings (OpenAI)</a></td></tr>
+    <tr><td>Tool design</td><td><a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for agents (Anthropic)</a></td></tr>
+    <tr><td>In this repository</td><td><a href="../lecture.md">Lecture notes (Markdown)</a> · <a href="slides.html">Slides</a> · <a href="../lab.ipynb">Lab</a> · <a href="../README.md">README</a> · previous: <a href="../../week05-fundamentals-of-azure-ai/docs/lecture.html">Week 5</a> · next: <a href="../../week07-multi-agent-systems/docs/lecture.html">Week 7</a></td></tr>
+  </tbody></table></div>
+</section>
+
+<p class="page-end">Week 6 lecture · Agentic AI on Microsoft Foundry · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</p>
+</main>
+</div>
+<button id="back-to-top" type="button" aria-label="Back to top">&uarr;</button>
+<script src="../../assets/lecture.js"></script>
+</body>
+</html>

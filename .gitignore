@@ -215,3 +215,22 @@ __marimo__/
 
 # Azure Developer CLI
 .azure/
+
+# Terraform (state and tfvars hold your subscription details and secrets)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+terraform.tfvars
+*.auto.tfvars
+crash.log
+
+# Harness reports (local proofs; submit the URL, not the files)
+fy26/reports/
+
+# Agent Framework harness memory, written when the notebooks run
+fy26/agent-file-memory/
+
+# macOS Finder metadata
+.DS_Store

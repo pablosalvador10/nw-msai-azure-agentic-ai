@@ -1,0 +1,28 @@
+{"id": "q01", "question": "How much is a Day Pass and how long does it last?", "doc_ids": ["plans-and-pricing"], "facts": [["$16", "16 dollars", "16 usd"], ["24 hours", "24-hour", "24 hrs"]]}
+{"id": "q02", "question": "How many minutes of a classic ride are included with the Student Pass?", "doc_ids": ["plans-and-pricing"], "facts": [["60"]]}
+{"id": "q03", "question": "What is the most a single ride can cost in ride fees?", "doc_ids": ["plans-and-pricing"], "facts": [["$50", "50 dollars", "50 usd"]]}
+{"id": "q04", "question": "How old do I need to be to ride?", "doc_ids": ["ride-rules"], "facts": [["16"]]}
+{"id": "q05", "question": "What's the speed limit on the Lakefront Trail?", "doc_ids": ["ride-rules"], "facts": [["10 mph", "10 miles per hour"]]}
+{"id": "q06", "question": "What happens if my e-bike battery runs out during a ride?", "doc_ids": ["e-bikes"], "facts": [["credit"], ["24 hours", "24-hour"]]}
+{"id": "q07", "question": "What is the fee for a lost e-bike?", "doc_ids": ["damage-and-lost-bikes"], "facts": [["2,500", "2500"]]}
+{"id": "q08", "question": "My bike was stolen. How can I reduce the lost bike fee?", "doc_ids": ["damage-and-lost-bikes"], "facts": [["police report"], ["$150", "150 dollars"]]}
+{"id": "q09", "question": "Do ride credits expire?", "doc_ids": ["refunds-and-credits"], "facts": [["never expire", "do not expire", "don't expire", "doesn't expire", "no expiration"]]}
+{"id": "q10", "question": "When are the lakefront stations closed?", "doc_ids": ["stations"], "facts": [["december 1", "dec 1"], ["march 31", "mar 31"]]}
+{"id": "q11", "question": "The station where I want to return my bike is full. What should I do?", "doc_ids": ["stations"], "facts": [["15"]]}
+{"id": "q12", "question": "Which stations have adaptive bikes?", "doc_ids": ["accessibility"], "facts": [["ls-07"], ["ls-12"], ["ls-18"]]}
+{"id": "q13", "question": "How long do you keep my ride history?", "doc_ids": ["accounts-and-privacy"], "facts": [["2 years", "two years"]]}
+{"id": "q14", "question": "What are Support's phone hours?", "doc_ids": ["safety-and-support"], "facts": [["7 am", "7am", "7:00"], ["10 pm", "10pm", "10:00"]]}
+{"id": "q15", "question": "Can I get my membership refunded?", "doc_ids": ["refunds-and-credits"], "facts": [["7 days", "seven days"]]}
+{"id": "q16", "question": "How much would a 50-minute classic ride cost on a Membership?", "tool": {"name": "quote_fare", "arguments": {"plan": "member", "minutes": 50, "ebike": false}}, "value": 0.75}
+{"id": "q17", "question": "I'm on a Day Pass. What does a 30-minute e-bike ride cost?", "tool": {"name": "quote_fare", "arguments": {"plan": "day_pass", "minutes": 30, "ebike": true}}, "value": 7.5}
+{"id": "q18", "question": "What is the price of a 20-minute e-bike ride if I pay per ride?", "tool": {"name": "quote_fare", "arguments": {"plan": "single", "minutes": 20, "ebike": true}}, "value": 9.25}
+{"id": "q19", "question": "As a student, what do I pay for a 75-minute classic ride?", "tool": {"name": "quote_fare", "arguments": {"plan": "student", "minutes": 75, "ebike": false}}, "value": 2.25}
+{"id": "q20", "question": "How many e-bikes are available at LS-08 right now?", "tool": {"name": "get_station", "arguments": {"station_id": "LS-08"}}, "value": 3}
+{"id": "q21", "question": "Are there any free docks at LS-14?", "tool": {"name": "get_station", "arguments": {"station_id": "LS-14"}}, "facts": [["no free", "0 free", "zero", "none", "full", "no docks", "no open", "no available"]]}
+{"id": "q22", "question": "Do you rent electric scooters?", "abstain": true}
+{"id": "q23", "question": "What is the Wi-Fi password at Central Station?", "abstain": true}
+{"id": "q24", "question": "Can I pay for rides with cryptocurrency?", "abstain": true}
+{"id": "q25", "question": "I'm a member and my e-bike battery died 30 minutes into the ride. How much ride credit will I get back?", "doc_ids": ["e-bikes"], "tool": {"name": "quote_fare", "arguments": {"plan": "member", "minutes": 30, "ebike": true}}, "value": 5.4}
+{"id": "q26", "question": "How much does a 70-minute classic ride cost on a Day Pass?", "tool": {"name": "quote_fare", "arguments": {"plan": "day_pass", "minutes": 70, "ebike": false}}, "value": 5.0}
+{"id": "q27", "question": "I have a Student Pass. For a 50-minute ride, how much more does an e-bike cost than a classic bike?", "tool": {"name": "quote_fare", "arguments": {"plan": "student", "minutes": 50, "ebike": true}}, "value": 7.5}
+{"id": "q28", "question": "What would a 10-hour e-bike ride cost if I pay per ride?", "doc_ids": ["plans-and-pricing"], "tool": {"name": "quote_fare", "arguments": {"plan": "single", "minutes": 600, "ebike": true}}, "value": 50}

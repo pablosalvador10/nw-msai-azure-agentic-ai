@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 5 · Fundamentals of Azure AI · Slides</title>
+<meta name="description" content="Week 5 slides: Microsoft Foundry, keyless identity, the Responses API, tokens and cost, structured output, and prompts improved by measurement.">
+<link rel="stylesheet" href="../../assets/deck.css">
+</head>
+<body>
+<main class="stage" data-week="Week 5" data-topic="Fundamentals of Azure AI">
+
+<!-- 1 -->
+<section class="slide title-slide" data-title="Fundamentals of Azure AI">
+  <div class="build">
+    <p class="kicker">Week 5</p>
+    <h1>Fundamentals of Azure AI</h1>
+    <p class="lede">Every AI feature you will build rests on one primitive: send text to a model, get text or data back. Today you learn that primitive properly, put it behind an API, and measure it.</p>
+    <div class="meta-row">
+      <span class="meta"><b>Author</b> · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</span>
+      <span class="meta"><b>Lecture</b> · <a href="lecture.html">lecture.html</a></span>
+      <span class="meta"><b>Lab</b> · <a href="../lab.ipynb">lab.ipynb</a>, required</span>
+      <span class="meta"><b>Deep dive</b> · <a href="../deep-dive.ipynb">deep-dive.ipynb</a>, optional</span>
+      <span class="meta"><b>Logistics</b> · <a href="../README.md">README</a></span>
+      <span class="meta"><b>Submit</b> · one URL, before Week 6</span>
+    </div>
+  </div>
+  <p class="hint"><kbd>&rarr;</kbd> next · <kbd>&larr;</kbd> back · <kbd>C</kbd> contents · <kbd>F</kbd> full screen</p>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-title="Four questions behind every model call">
+  <p class="kicker">Why this week matters</p>
+  <h2>Four questions sit behind every model call</h2>
+  <div class="cols cols-4 build-row" style="margin-top:22px">
+    <div class="card"><h3>Where does the model live?</h3><p>A Foundry resource, a project, a <b>deployment</b> you call by name.</p></div>
+    <div class="card azure"><h3>Who may call it?</h3><p>An Entra ID token and a role. <b>No API keys</b>, anywhere.</p></div>
+    <div class="card amber"><h3>What does it cost?</h3><p>Tokens in, tokens out, reasoning tokens. Time to first word.</p></div>
+    <div class="card green"><h3>Can code trust the answer?</h3><p>A schema the API enforces, and instructions improved by <b>measurement</b>.</p></div>
+  </div>
+  <p class="lede" style="margin-top:30px">By the end of the session each question has a concrete answer in your own service, running in Azure and scored by the harness.</p>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-title="By the end you can">
+  <p class="kicker">Objectives</p>
+  <h2>By the end of today you can</h2>
+  <div class="cols cols-60">
+    <ul class="check-list build">
+      <li>Explain the Foundry resource model: resource, project, deployment, endpoint.</li>
+      <li>Call a model with the Responses API using Entra ID, and read its token usage.</li>
+      <li>Choose reasoning effort, use prompt caching, keep conversation state, and stream.</li>
+      <li>Get <b>structured output</b> that always matches a schema, and validate it.</li>
+      <li>Improve a prompt by measurement, not by impression, using the harness.</li>
+    </ul>
+    <div class="stack build">
+      <div class="callout purple"><p><b>You ship</b> a better <code>POST /v1/classify</code>: support tickets triaged into a category, an urgency and a summary.</p></div>
+      <div class="callout"><p><b>You submit</b> one URL: your Container App. The private harness scores it on tickets you have not seen.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-title="Today: lecture, lab, deep dive">
+  <p class="kicker">Today</p>
+  <h2>Learn it, build it, ship it; then go deeper if you want</h2>
+  <div class="cols cols-60">
+    <div class="timeline build">
+      <div class="row"><span class="t">1</span><span>Models as a service: Foundry, deployments, tokens, identity</span><span class="w">Lecture</span></div>
+      <div class="row"><span class="t">2</span><span>First calls from scratch: tokens, effort, caching, state, streaming</span><span class="w">Lab Parts 1-2</span></div>
+      <div class="row"><span class="t">3</span><span>Structured output: from free text to typed data</span><span class="w">Lab Part 3</span></div>
+      <div class="row"><span class="t">4</span><span>Your turn: measure the triage service, improve it with evidence</span><span class="w">Lab Part 4, graded</span></div>
+      <div class="row"><span class="t">5</span><span>Deploy, score the live URL</span><span class="w">Lab Part 5</span></div>
+      <div class="row break"><span class="t">+</span><span>Optional: control plane, rate limits, reasoning effort measured, a Foundry agent</span><span class="w"><a href="../deep-dive.ipynb">Deep dive</a></span></div>
+    </div>
+    <div class="stack build">
+      <div class="card plain"><h3>Before class</h3><p>Setup finished and your URL scores in the harness. Learn module: <a href="https://learn.microsoft.com/en-us/training/modules/foundry-sdk/">Develop a generative AI chat app with Microsoft Foundry</a>.</p></div>
+      <div class="card plain"><h3>If FastAPI or identity are new</h3><p>Do the primers first: <a href="../../foundations/fastapi.ipynb">FastAPI</a> and <a href="../../foundations/identity.ipynb">identity and access</a>. About 30 minutes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-title="Every week runs the same loop">
+  <p class="kicker">How the course works</p>
+  <h2>Every week runs the same loop, so your attention goes to the ideas</h2>
+  <ol class="steps n5 build-row">
+    <li><b>Learn</b>The concept, built from scratch in plain Python in the notebook.</li>
+    <li><b>Build</b>The same idea goes into the service in <code>app/</code>, naive on purpose today.</li>
+    <li><b>Test locally</b>The harness calls your service and shows what failed, and why.</li>
+    <li><b>Deploy</b>One cell builds your image in Azure and rolls out a new revision.</li>
+    <li><b>Submit</b>One URL. We run a private harness with more, unseen data.</li>
+  </ol>
+  <div class="cols cols-2" style="margin-top:8px">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>What waits on Azure</th><th class="num">Typical time</th></tr>
+        <tr><td>One model call</td><td class="num">1 to 5 s</td></tr>
+        <tr><td>Harness run, in-process</td><td class="num">1 to 3 min</td></tr>
+        <tr><td>Deploy: build image, roll out revision</td><td class="num">4 to 6 min</td></tr>
+        <tr><td>Harness run against your URL</td><td class="num">2 to 5 min</td></tr>
+      </table>
+    </div>
+    <div class="callout amber build"><p><b>A rule for the whole course.</b> Every lab marks a point where you stop improving and deploy. A deployed improvement counts; an undeployed one does not.</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide section-slide" data-title="Part 1 · Where models live">
+  <p class="kicker">Part 1 · Lab Part 1</p>
+  <h1>Where models live</h1>
+  <p>Microsoft Foundry, its resource model, choosing a model, and the capacity you buy.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-title="Microsoft Foundry in one picture">
+  <p class="kicker">The Azure AI stack</p>
+  <h2>Microsoft Foundry is one Azure resource that holds models, agents, tools and governance</h2>
+  <div class="cols" style="grid-template-columns:230px 60px 1fr; gap:0; align-items:center">
+    <div class="tile hl build" style="text-align:center;padding:22px 14px"><b>Your service</b>FastAPI on Azure Container Apps<br><span class="chip ghost" style="margin-top:10px">this course</span></div>
+    <div class="flow" style="margin:0"><div class="arrow" style="width:60px">&rarr;<small>Responses API</small></div></div>
+    <div class="box-group build">
+      <p class="label">Microsoft Foundry · one resource, many projects</p>
+      <div class="tiles t3">
+        <div class="tile hl"><b>Foundry Models</b>A catalog you deploy from: OpenAI, Microsoft, Meta, Mistral, Anthropic and more · <span class="accent">Week 5</span></div>
+        <div class="tile"><b>Foundry Agent Service</b>Prompt agents, hosted agents, conversations, versions · <span class="accent">Weeks 5, 8, 10</span></div>
+        <div class="tile"><b>Tools and toolboxes</b>Web and file search, code interpreter, MCP, OpenAPI, functions · <span class="accent">Weeks 6, 8</span></div>
+        <div class="tile"><b>Foundry IQ</b>Managed knowledge bases with agentic retrieval · <span class="accent">Week 6</span></div>
+        <div class="tile"><b>Foundry Tools</b>Speech, Language, Vision, Document Intelligence, Content Safety · <span class="accent">Week 10</span></div>
+        <div class="tile"><b>Observability and governance</b>Tracing, evaluation, guardrails, RBAC, quota · <span class="accent">Week 10</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="small" style="margin-top:16px">One identity model, one network boundary, one bill. Source: <a href="https://learn.microsoft.com/en-us/azure/foundry/what-is-foundry">What is Microsoft Foundry?</a></p>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-title="Old names you will still read online">
+  <p class="kicker">Vocabulary</p>
+  <h2>Until 2025 these were separate products. You will still read the old names online</h2>
+  <div class="table-wrap build" style="max-width:1020px">
+    <table>
+      <tr><th>Previous name or design</th><th>Current</th></tr>
+      <tr><td>Azure AI Studio, Azure AI Foundry</td><td><b>Microsoft Foundry</b></td></tr>
+      <tr><td>Azure AI Services</td><td><b>Foundry Tools</b></td></tr>
+      <tr><td>Hub, plus Azure OpenAI and AI Services resources</td><td>One <b>Foundry resource with projects</b></td></tr>
+      <tr><td>Assistants API: threads, messages, runs, assistants</td><td><b>Responses API</b>: conversations, items, responses, agent versions</td></tr>
+      <tr><td>Monthly <code>api-version</code> query parameters</td><td>Stable v1 routes: <code>/openai/v1/</code></td></tr>
+      <tr><td><code>azure-ai-inference</code>, <code>AzureOpenAI()</code>, several endpoints</td><td>The standard <code>OpenAI()</code> client and <code>azure-ai-projects</code> 2.x, one project</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:14px">When a blog post and the official documentation disagree, the documentation wins. This course links the current pages every week.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-title="Resource, project, deployment, endpoint">
+  <p class="kicker">The resource model</p>
+  <h2>Your code calls a deployment by name, never a model version</h2>
+  <div class="flow build-row">
+    <div class="node"><b>Subscription</b><span>billing account</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Resource group</b><span>one per student</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node hl"><b>Foundry resource</b><span>kind AIServices · security and billing boundary</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Project</b><span>your workspace: agents, evaluations, traces</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node az"><b>Deployments</b><span>gpt-5.4-mini · text-embedding-3-small</span></div>
+  </div>
+  <div class="table-wrap build" style="margin-top:6px">
+    <table>
+      <tr><th style="width:190px">Endpoint</th><th>Shape</th><th>Used by</th></tr>
+      <tr><td><b>OpenAI-compatible v1</b></td><td><code>https://&lt;resource&gt;.openai.azure.com/openai/v1/</code></td><td>Any OpenAI SDK: responses, embeddings. Our <code>app/models.py</code></td></tr>
+      <tr><td><b>Project</b></td><td><code>https://&lt;resource&gt;.services.ai.azure.com/api/projects/&lt;project&gt;</code></td><td>Agent Framework, <code>azure-ai-projects</code>: agents, conversations, evaluations</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:12px">Upgrading a model means pointing the same deployment name at a newer version: no code changes. Terraform creates all of it in <a href="../../infra/foundry.tf"><code>infra/foundry.tf</code></a>.</p>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-title="Keys are off, on purpose">
+  <p class="kicker">One line of Terraform</p>
+  <h2>API keys are switched off, on purpose</h2>
+  <div class="cols cols-2 center">
+    <div class="build">
+      <p class="code-label">infra/foundry.tf</p>
+<pre class="code"><code>resource "azurerm_cognitive_account" "foundry" {
+  kind                       = "AIServices"
+  project_management_enabled = true
+  local_auth_enabled         = false  # no keys at all
+}</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="card red"><h3>A key is a bearer secret</h3><p>Whoever holds it is you. It does not expire on its own, and it ends up in notebooks, screenshots and git history.</p></div>
+      <div class="card green"><h3>A token is an identity</h3><p>Every caller presents a Microsoft Entra ID token. Access is per identity, auditable, and revocable.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-title="Choosing a model">
+  <p class="kicker">Choosing a model</p>
+  <h2>There is no best model, only the best model for a task, at a price</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Dimension</th><th>Question to ask</th></tr>
+        <tr><td><b>Capability</b></td><td>Structured output? Tool calling? Vision, audio?</td></tr>
+        <tr><td><b>Size tier</b></td><td>Flagship, mini or nano? Smaller is faster and cheaper</td></tr>
+        <tr><td><b>Reasoning</b></td><td>Does it think before answering? Can you set the effort?</td></tr>
+        <tr><td><b>Context window</b></td><td>How many tokens fit in one request?</td></tr>
+        <tr><td><b>Price</b></td><td>Input, cached input and output are priced separately</td></tr>
+        <tr><td><b>Availability</b></td><td>Which regions, which deployment types?</td></tr>
+        <tr><td><b>Lifecycle</b></td><td>When does this version retire? You will re-evaluate</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="callout purple"><p><b>The rule that saves money.</b> Start with the smallest model that passes your harness. Move up a tier only when a measured failure requires it, and keep the measurement.</p></div>
+      <div class="card plain"><h3>Our choice</h3><p><code>gpt-5.4-mini</code> for chat and triage, <code>text-embedding-3-small</code> for retrieval in Week 6.</p></div>
+      <p class="small">More: <a href="https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirements">model retirements</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-router">model router</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-title="Deployment types">
+  <p class="kicker">Deployment types</p>
+  <h2>The deployment type decides where inference runs, how you pay, and how steady latency is</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Type</th><th>Inference runs in</th><th>Billing</th><th>Best for</th></tr>
+      <tr class="hl"><td><b>Global Standard</b> <span class="chip">ours</span></td><td>Any Azure region</td><td>Per token</td><td>Default: newest models, lowest price, highest quota</td></tr>
+      <tr><td><b>Global Provisioned</b></td><td>Any Azure region</td><td>Reserved capacity (PTUs)</td><td>High, steady volume with low latency variance</td></tr>
+      <tr><td><b>Global Batch</b></td><td>Any Azure region</td><td>Per token, 50% off, 24-hour target</td><td>Large offline jobs</td></tr>
+      <tr><td><b>Data Zone</b> Standard, Provisioned, Batch</td><td>Inside the US, EU or APAC data zone</td><td>As above</td><td>Data-zone compliance</td></tr>
+      <tr><td><b>Standard</b>, Regional Provisioned</td><td>Inside one Azure geography</td><td>Per token or PTUs</td><td>Geography compliance</td></tr>
+    </table>
+  </div>
+  <p class="small" style="margin-top:12px">Data at rest stays in your resource's geography for every type; the table is about where prompts are processed. Source: <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types">Deployment types in Foundry Models</a>.</p>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-title="Quota and throttling">
+  <p class="kicker">Capacity</p>
+  <h2>Quota is tokens and requests per minute. Above either, Foundry answers 429</h2>
+  <div class="cols cols-3 build-row">
+    <div class="stat"><span class="n">100,000 / 100</span><span class="l">tokens and requests per minute on your <code>gpt-5.4-mini</code> deployment (<code>capacity = 100</code>)</span></div>
+    <div class="stat"><span class="n">100, not 140</span><span class="l">triage calls a minute: tokens alone would allow 100,000 / 700, but requests bind first</span></div>
+    <div class="stat"><span class="n">1,000</span><span class="l">tokens per call where the limits meet. Week 7 cases make eight calls: teams hit limits first</span></div>
+  </div>
+  <div class="flow build-row" style="margin-top:22px">
+    <div class="node am"><b>Foundry</b><span>HTTP 429 + <code>Retry-After</code></span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node hl"><b>Your service</b><span>turns it into 503 + <code>Retry-After</code>: capacity, not your request</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Any good client</b><span>waits, retries with backoff and jitter, gives up after a few tries</span></div>
+  </div>
+  <a class="lab-ref" href="../lab.ipynb">Lab Part 1 · list your deployments and their capacity</a>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="Keyless identity, step by step">
+  <p class="kicker">Identity</p>
+  <h2>No keys: every call carries a short-lived token</h2>
+  <svg viewBox="0 0 1150 330" width="1150" height="330" role="img" aria-label="Sequence: your code asks DefaultAzureCredential for a token; it uses az login or the managed identity to get one from Entra ID; your code calls Foundry with the token; Foundry checks the token and the role." font-family="Segoe UI, Inter, system-ui, sans-serif">
+    <defs>
+      <marker id="arr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3341b8"/></marker>
+      <marker id="arr5g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8f96"/></marker>
+    </defs>
+    <g font-size="15" font-weight="700" text-anchor="middle">
+      <rect x="40" y="4" width="180" height="44" rx="10" fill="#eef0fc" stroke="#3341b8"/><text x="130" y="32" fill="#18191b">Your code</text>
+      <rect x="340" y="4" width="220" height="44" rx="10" fill="#fff" stroke="#cfd2d6"/><text x="450" y="32" fill="#18191b">DefaultAzureCredential</text>
+      <rect x="660" y="4" width="200" height="44" rx="10" fill="#edf6ff" stroke="#9cc7ee"/><text x="760" y="32" fill="#18191b">Microsoft Entra ID</text>
+      <rect x="950" y="4" width="160" height="44" rx="10" fill="#edf6ff" stroke="#9cc7ee"/><text x="1030" y="32" fill="#18191b">Foundry</text>
+    </g>
+    <g stroke="#dcdde0" stroke-width="2" stroke-dasharray="4 5">
+      <line x1="130" y1="48" x2="130" y2="320"/><line x1="450" y1="48" x2="450" y2="320"/><line x1="760" y1="48" x2="760" y2="320"/><line x1="1030" y1="48" x2="1030" y2="320"/>
+    </g>
+    <g font-size="14" fill="#2b2e33">
+      <line x1="134" y1="82" x2="444" y2="82" stroke="#3341b8" stroke-width="2" marker-end="url(#arr5)"/>
+      <text x="290" y="74" text-anchor="middle">1 · token for https://ai.azure.com/.default</text>
+      <line x1="454" y1="124" x2="754" y2="124" stroke="#3341b8" stroke-width="2" marker-end="url(#arr5)"/>
+      <text x="605" y="116" text-anchor="middle">2 · az login (laptop) or managed identity (Azure)</text>
+      <line x1="756" y1="164" x2="456" y2="164" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr5g)"/>
+      <text x="605" y="156" text-anchor="middle">3 · access token, about one hour</text>
+      <line x1="446" y1="204" x2="136" y2="204" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr5g)"/>
+      <text x="290" y="196" text-anchor="middle">4 · cached, refreshed automatically</text>
+      <line x1="134" y1="248" x2="1024" y2="248" stroke="#3341b8" stroke-width="2" marker-end="url(#arr5)"/>
+      <text x="580" y="240" text-anchor="middle">5 · POST /openai/v1/responses · Authorization: Bearer &lt;token&gt;</text>
+      <line x1="1026" y1="300" x2="136" y2="300" stroke="#8a8f96" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr5g)"/>
+      <text x="580" y="292" text-anchor="middle">6 · 200 with the response, or 401 (bad token) / 403 (no role)</text>
+    </g>
+  </svg>
+  <p class="small" style="margin-top:8px">The same code runs on your laptop and in Container Apps: <code>DefaultAzureCredential</code> finds <code>az login</code> in one place and the app's managed identity in the other.</p>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-title="Control plane and data plane">
+  <p class="kicker">Authorization is RBAC</p>
+  <h2>A valid token is not enough: the identity needs a role, and only the one it needs</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Role (previous name)</th><th>Can do</th><th>Who has it here</th></tr>
+        <tr class="hl"><td><b>Foundry User</b><br><span class="small">Azure AI User</span></td><td>Call models, use agents and project data: the <b>data plane</b></td><td>You, and your app's managed identity</td></tr>
+        <tr><td><b>Foundry Project Manager</b></td><td>Manage a project, assign Foundry User in it</td><td>Nobody</td></tr>
+        <tr><td><b>Foundry Owner</b></td><td>Full access to projects and resources</td><td>Nobody</td></tr>
+        <tr><td><b>Foundry Account Owner</b></td><td>Deployments, guardrails, connections: the <b>control plane</b></td><td>You, as subscription owner</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Least privilege</h3><p>The running service needs the data plane only. If it is compromised, it cannot create deployments or change safety settings.</p></div>
+      <div class="card azure"><h3>Agents get identities too</h3><p>Foundry agents receive their own Entra agent identity: a tool call is authorized as the agent, not as a shared key.</p></div>
+      <p class="small">Read: <a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry">RBAC for Microsoft Foundry</a> · <a href="../../infra/identity.tf"><code>infra/identity.tf</code></a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide section-slide" data-title="Part 2 · The Responses API">
+  <p class="kicker">Part 2 · Lab Part 2</p>
+  <h1>The Responses API, from scratch</h1>
+  <p>One request, typed output, token usage. Then the four options you will choose deliberately: effort, caching, state and streaming.</p>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="One request in, typed items out">
+  <p class="kicker">Anatomy</p>
+  <h2>One request in, a list of typed items out</h2>
+  <div class="cols cols-2">
+    <div class="build">
+      <p class="code-label">Lab Part 2 · your first call</p>
+<pre class="code"><code>from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from openai import OpenAI
+
+token = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://ai.azure.com/.default")
+client = OpenAI(base_url=FOUNDRY_OPENAI_ENDPOINT, api_key=token)
+
+r = client.responses.create(
+    model="gpt-5.4-mini",          # the deployment name
+    instructions="You are Lakeshore Ride support. One sentence.",
+    input="Can I end my ride at any station?",
+)
+print(r.output_text)
+print(r.usage.input_tokens, r.usage.output_tokens)</code></pre>
+    </div>
+    <div class="stack build">
+      <div class="tiles t2">
+        <div class="tile"><b>Request</b><code>model</code> · <code>instructions</code> · <code>input</code> · <code>tools</code> · <code>text.format</code> · <code>reasoning</code> · <code>previous_response_id</code> · <code>stream</code></div>
+        <div class="tile"><b>Response</b><code>id</code> · <code>output</code>: items such as message, reasoning, function_call · <code>output_text</code> · <code>usage</code></div>
+      </div>
+      <div class="callout"><p><b>Why Responses, not Chat Completions?</b> It models what agents need: typed items, server-side state, built-in tools, reasoning that persists across turns. New platform features are built on it.</p></div>
+      <div class="callout purple"><p><b>The <code>api_key</code> slot takes a token provider.</b> The SDK asks it for a fresh Entra token on every request. There is no key to leak.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide" data-title="Instructions, input and conversation state">
+  <p class="kicker">Two inputs, and memory</p>
+  <h2>Instructions are yours and trusted; input is the user's and never trusted</h2>
+  <div class="cols cols-40">
+    <div class="stack build">
+      <div class="card"><h3><code>instructions</code></h3><p>Who the model is and how it behaves. Written once, in code, stable. Good for caching.</p></div>
+      <div class="card red"><h3><code>input</code></h3><p>What the user said. Changes on every request. Never trusted: Week 10 shows why.</p></div>
+    </div>
+    <div class="build">
+      <p style="font-size:17px">The model has no memory: each call stands alone. Three ways to carry a conversation:</p>
+      <div class="table-wrap">
+        <table class="compact">
+          <tr><th>Approach</th><th>How</th><th>Trade-off</th></tr>
+          <tr><td><b>Client-side history</b></td><td>Resend previous messages as <code>input</code></td><td>Full control; you manage truncation</td></tr>
+          <tr><td><b><code>previous_response_id</code></b></td><td>Point at the last response; the service chains history</td><td>Simple; needs server-side storage</td></tr>
+          <tr><td><b>Conversations API</b></td><td>A durable conversation object</td><td>Shared across clients; what Foundry agents use</td></tr>
+        </table>
+      </div>
+      <p class="small" style="margin-top:10px">Server-side state is convenient, not free: the whole history is processed as input tokens on every turn.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide" data-title="Reasoning effort is a dial">
+  <p class="kicker">Reasoning</p>
+  <h2>Reasoning effort is a dial: measure where to set it</h2>
+  <div class="cols cols-60">
+    <div class="build">
+      <p style="font-size:17px">"A member rides an e-bike for 40 minutes at $0.18 a minute. What do they pay?" One run on the course sandbox:</p>
+      <div class="bars">
+        <div class="bar"><span><code>none</code> (default)</span><span class="track"><span class="fill" style="width:1%"></span></span><span class="v">0 tokens · $7.20</span></div>
+        <div class="bar"><span><code>low</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
+        <div class="bar"><span><code>medium</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
+        <div class="bar"><span><code>high</code></span><span class="track"><span class="fill" style="width:55%"></span></span><span class="v">40 tokens · $7.20</span></div>
+        <div class="bar"><span><code>xhigh</code></span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">72 tokens · $7.20</span></div>
+      </div>
+      <p class="small" style="margin-top:10px">Bars show hidden reasoning tokens, billed as output. Every setting gave the same answer.</p>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Easy task: <code>none</code> wins</h3><p>Same answer, fastest, cheapest. Picking one of six categories is an easy task.</p></div>
+      <div class="card amber"><h3>Hard task: measure</h3><p>Several rules at once, multi-step arithmetic, plans: more effort can change the answer.</p></div>
+      <div class="callout"><p><b>Two facts about <code>gpt-5.4-mini</code>.</b> The default effort is <code>none</code>. Sampling settings such as <code>temperature</code> work only with <code>none</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-title="Where the money and the time go">
+  <p class="kicker">Tokens, cost and latency</p>
+  <h2>Output tokens drive both the bill and the wait</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="card plain"><h3>Token cost</h3><p style="font-family:var(--mono);font-size:15px">(input &minus; cached) &times; p<sub>in</sub> + cached &times; p<sub>cached</sub> + output &times; p<sub>out</sub></p><p class="small">Usage totals already include cached input and hidden reasoning. Do not add them again. Rates here are per token.</p></div>
+      <div class="card plain"><h3>Latency</h3><p style="font-family:var(--mono);font-size:15px">time to first token + visible output tokens / tokens per second</p><p class="small">Queueing, prompt processing and reasoning come first; then generation.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Lever</th><th>Cost</th><th>Latency</th></tr>
+        <tr><td>Shorter output: a label, a sentence, a JSON object</td><td>Large</td><td>Large</td></tr>
+        <tr><td>Lower reasoning effort</td><td>Fewer reasoning tokens</td><td>Shorter first token</td></tr>
+        <tr><td>Smaller model tier</td><td>Lower price per token</td><td>Usually faster</td></tr>
+        <tr><td>Stable prefix first, so it is cached</td><td>Cached input is discounted</td><td>Faster prompt processing</td></tr>
+        <tr><td>Fewer calls per request (Week 7)</td><td>Linear</td><td>Linear on the critical path</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide" data-title="Prompt caching">
+  <p class="kicker">Prompt caching</p>
+  <h2>A repeated prefix is cached: cheaper and faster, with no code change</h2>
+  <div class="cols cols-60">
+    <div class="build">
+      <p style="font-size:17px">The whole handbook in the instructions, three different questions, one run on the course sandbox:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Question</th><th class="num">Input tokens</th><th class="num">Cached</th></tr>
+          <tr><td>Can I bring my dog on a bike?</td><td class="num">1,741</td><td class="num">0</td></tr>
+          <tr class="hl"><td>How long is a day pass valid?</td><td class="num">1,740</td><td class="num">1,280</td></tr>
+          <tr class="hl"><td>Is there a student plan?</td><td class="num">1,738</td><td class="num">1,280</td></tr>
+        </table>
+      </div>
+      <p class="small" style="margin-top:10px">Read it from <code>usage.input_tokens_details.cached_tokens</code>.</p>
+    </div>
+    <div class="stack build">
+      <div class="callout purple"><p><b>How it works.</b> When the first 1,024 or more tokens of a request match a recent request, they are served from cache.</p></div>
+      <div class="card"><h3>So, put stable content first</h3><p>Instructions, tool definitions, examples, then the user's message last.</p></div>
+      <div class="card red"><h3>Never a timestamp at the top</h3><p>One changing token early in the prompt breaks the match for everything after it.</p></div>
+      <a class="lab-ref" href="../lab.ipynb">Lab Part 2 · measure it yourself</a>
+    </div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-title="State and streaming">
+  <p class="kicker">State and streaming</p>
+  <h2>Streaming changes when users see words, not when you finish</h2>
+  <div class="cols cols-2">
+    <div class="build">
+      <div class="cols cols-2">
+        <div class="stat"><span class="n">0.8 s</span><span class="l">first words on screen</span></div>
+        <div class="stat"><span class="n">1.9 s</span><span class="l">complete answer</span></div>
+      </div>
+      <p class="small" style="margin-top:10px">One streamed answer on the course sandbox. With <code>stream=True</code> the API sends events: <code>response.created</code>, many <code>response.output_text.delta</code>, then <code>response.completed</code>.</p>
+      <div class="callout amber" style="margin-top:12px"><p><b>For a chat window</b> this is the difference between "fast" and "broken". <b>For a JSON API</b> such as <code>/v1/classify</code> it buys nothing.</p></div>
+    </div>
+    <div class="build">
+      <p class="code-label">Lab Part 2 · conversation state</p>
+<pre class="code"><code>first = client.responses.create(
+    model=MODEL, input="My name is Ada and I ride a classic bike.")
+
+third = client.responses.create(
+    model=MODEL,
+    input="What is my name, and which bike do I ride?",
+    previous_response_id=first.id,   # the service keeps the history
+)</code></pre>
+      <p class="small" style="margin-top:10px">Without <code>previous_response_id</code> the model does not know Ada. With it, the service chains the history, and you still pay for it as input.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="slide section-slide" data-title="Part 3 · Structured output">
+  <p class="kicker">Part 3 · Lab Part 3</p>
+  <h1>Structured output: from prose to contracts</h1>
+  <p>A service cannot parse prose. The API can guarantee the shape; your instructions supply the judgment.</p>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-title="Three levels of answer in JSON">
+  <p class="kicker">Structured output</p>
+  <h2>Shape is guaranteed by the schema. Judgment is not</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="table-wrap">
+        <table class="compact">
+          <tr><th>Level</th><th>The API guarantees</th><th>Fails how</th></tr>
+          <tr><td>Ask in the prompt</td><td>Nothing</td><td>Prose, invalid JSON, wrong fields</td></tr>
+          <tr><td>JSON mode</td><td>Valid JSON</td><td>Any shape, invented values</td></tr>
+          <tr class="hl"><td><b>Structured outputs</b></td><td>JSON that <b>matches your schema</b></td><td>A refusal, or a wrong but valid value</td></tr>
+        </table>
+      </div>
+      <div class="callout purple"><p><b>Four rules.</b> <code>Literal</code> removes invention. Field descriptions are prompt. The schema cannot know your business rules. Validate at the boundary anyway.</p></div>
+    </div>
+    <div class="build">
+      <p class="code-label">app/contract.py, simplified · Lab Part 3</p>
+<pre class="code"><code>class TicketLabel(BaseModel):
+    category: Literal["billing", "bike_issue", "station_issue",
+                      "account", "safety", "other"]
+    urgency: Literal["low", "medium", "high"]
+    summary: str = Field(description="One sentence, at most 25 words.")
+
+parsed = client.responses.parse(
+    model=MODEL, instructions=RULES, input=ticket,
+    text_format=TicketLabel,
+)
+label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
+      <p class="small" style="margin-top:10px">The schema constrains generation itself: the model cannot produce a token that breaks it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide section-slide" data-title="Part 4 · Prompts as code">
+  <p class="kicker">Part 4 · Lab Part 4</p>
+  <h1>Prompts are code, improved by measurement</h1>
+  <p>They live in git, they have bugs, and they need tests. The harness is the test.</p>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-title="Structure your instructions">
+  <p class="kicker">Writing instructions</p>
+  <h2>A triage policy a new support agent could follow</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th style="width:170px">Part</th><th>Example for triage</th></tr>
+        <tr><td><b>Role and task</b></td><td>"You triage Lakeshore Ride support tickets."</td></tr>
+        <tr><td><b>Definitions</b></td><td>One line per category, with typical cases</td></tr>
+        <tr><td><b>Rules</b></td><td>When urgency is high, medium, low, stated so a person could apply them</td></tr>
+        <tr><td><b>Tie-breakers</b></td><td>"Safety beats everything. A refund request is billing, even if a broken bike caused it."</td></tr>
+        <tr><td><b>Output</b></td><td>Summary length; no personal data</td></tr>
+        <tr><td><b>Examples</b></td><td>Three or four short tickets, chosen for the hard cases</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Small models read literally</h3><p>Put the rules that matter most first. Say what to do when two rules conflict. One worked example beats ten adjectives.</p></div>
+      <div class="card azure"><h3>Write at the right altitude</h3><p>Specific enough to decide a case; general enough for tickets you have not seen.</p></div>
+      <p class="small">Read: <a href="https://developers.openai.com/api/docs/guides/latest-model/gpt-5.4">Prompting GPT-5.4 models (OpenAI)</a> · <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering (Anthropic)</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 27 -->
+<section class="slide" data-title="Improve by measurement">
+  <p class="kicker">The core skill of the course</p>
+  <h2>Improve by measurement, not by impression</h2>
+  <ol class="steps n4 build-row">
+    <li><b>Run the harness</b><code>course.check(5, in_process=True)</code> scores your local code in a minute.</li>
+    <li><b>Read the misses</b>Not the score. For each miss: what rule would a new agent need?</li>
+    <li><b>Change one thing</b>One rule, one example. Otherwise you will not know what helped.</li>
+    <li><b>Measure again</b>Keep the change only if the score moves for a reason you can explain.</li>
+  </ol>
+  <div class="cols cols-3 build-row" style="margin-top:6px">
+    <div class="card amber"><h3>Know your noise</h3><p>The same prompt can move a point or two between runs. One point is noise; five is signal.</p></div>
+    <div class="card red"><h3>Do not overfit</h3><p>We grade on tickets you have not seen. A rule that names a public ticket's words is an answer, not a rule.</p></div>
+    <div class="card green"><h3>Stop and deploy</h3><p>At the 45-minute mark deploy your best version (Part 5). Then keep going to 100 and redeploy.</p></div>
+  </div>
+</section>
+
+<!-- 28 -->
+<section class="slide" data-title="The exercise: POST /v1/classify">
+  <p class="kicker">The exercise</p>
+  <h2>Triage that generalizes: <code>POST /v1/classify</code></h2>
+  <div class="cols cols-40">
+    <div class="stack build">
+      <div class="card plain"><h3>Starting point</h3><p><a href="../../app/services/classify.py"><code>app/services/classify.py</code></a> tells the model the category names and nothing else. It scores in the 80s.</p></div>
+      <div class="card"><h3>Your job</h3><p>Define each category and the urgency rules, measure, iterate, deploy. 100 on the public data is reachable with rules that generalize.</p></div>
+      <div class="callout"><p><b>Contract:</b> <a href="../../app/contract.py"><code>app/contract.py</code></a>. The route and JSON shape are fixed; how you implement them is yours.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Check</th><th class="num">Weight</th><th>What it measures</th></tr>
+        <tr><td><code>core.health</code>, <code>core.info</code></td><td class="num">1 + 1</td><td>The service is up and identifies you</td></tr>
+        <tr><td><code>w05.chat</code></td><td class="num">1</td><td><code>/v1/chat</code> answers and names its model</td></tr>
+        <tr><td><code>w05.validation</code></td><td class="num">1</td><td>Bad input gets a 4xx, not a 500</td></tr>
+        <tr><td><code>w05.classify.schema</code></td><td class="num">1</td><td>Every response matches the contract</td></tr>
+        <tr class="hl"><td><code>w05.classify.category</code></td><td class="num">3</td><td>Category accuracy</td></tr>
+        <tr class="hl"><td><code>w05.classify.urgency</code></td><td class="num">2</td><td>Urgency accuracy</td></tr>
+        <tr><td><code>w05.latency</code></td><td class="num">1</td><td>Median at or under 4 s, scaled by valid responses</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 29 -->
+<section class="slide section-slide" data-title="Part 5 · Beyond one call">
+  <p class="kicker">Context for the weeks ahead</p>
+  <h1>Beyond one call: agents and safety</h1>
+  <p>Where our service sits among Foundry's ways to run agents, and the guardrail every deployment already has.</p>
+</section>
+
+<!-- 30 -->
+<section class="slide" data-title="Three ways to run an agent on Foundry">
+  <p class="kicker">Foundry Agent Service</p>
+  <h2>Three ways to run an agent on Foundry. This course builds the third, so you see every step</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th></th><th>Prompt agent</th><th>Hosted agent</th><th>Ephemeral agent <span class="chip">ours</span></th></tr>
+      <tr><td><b>Defined by</b></td><td>Configuration: model, instructions, tools</td><td>Your code in a container</td><td>Your application code</td></tr>
+      <tr><td><b>Who runs the loop</b></td><td>Foundry</td><td>Your code, on Foundry-managed compute</td><td>Your code, on your compute</td></tr>
+      <tr><td><b>Endpoint, identity</b></td><td>Managed, versioned</td><td>Managed, versioned, own Entra identity</td><td>Yours: Container Apps</td></tr>
+      <tr><td><b>Best for</b></td><td>Fast start, internal tools</td><td>Custom logic, multi-agent systems</td><td>Logic that ships with your app</td></tr>
+    </table>
+  </div>
+  <div class="cols cols-2 build-row" style="margin-top:16px">
+    <div class="callout purple"><p><b>Why ours.</b> The HTTP contract is fixed and graded, so you need full control of routes and JSON, and you see every step of the loop. The same Agent Framework code can later be packaged as a hosted agent.</p></div>
+    <div class="callout"><p><b>Vocabulary.</b> Assistant became <b>agent</b>, thread became <b>conversation</b>, message became <b>item</b>, run became <b>response</b>. Every change to an agent creates a new immutable <b>version</b>.</p></div>
+  </div>
+</section>
+
+<!-- 30b -->
+<section class="slide" data-title="What Agent Service gives you">
+  <p class="kicker">Foundry Agent Service</p>
+  <h2>A managed platform for agents: runtime, tools, identity, observability, publishing</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Component</th><th>What it does</th></tr>
+        <tr><td><b>Agent runtime</b></td><td>Hosts and scales agents; manages conversations and tool calls</td></tr>
+        <tr class="hl"><td><b>Toolboxes</b></td><td>Curate tools once; share them through one managed MCP endpoint</td></tr>
+        <tr><td><b>Models</b></td><td>Any agent-capable model; swap without changing agent code</td></tr>
+        <tr><td><b>Observability</b></td><td>Traces, metrics and evaluations in Application Insights</td></tr>
+        <tr><td><b>Optimization</b></td><td>Proposes better instructions, tool descriptions, models (preview)</td></tr>
+        <tr><td><b>Identity and security</b></td><td>An Entra identity per agent, RBAC, guardrails, network isolation</td></tr>
+        <tr><td><b>Publishing</b></td><td>Versions, stable endpoints, Teams and Microsoft 365 Copilot, A2A</td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card azure"><h3>Knowledge tools: read</h3><p>File search, Azure AI Search, Foundry IQ, web search, SharePoint, Fabric data agents.</p></div>
+      <div class="card green"><h3>Action tools: do</h3><p>Code interpreter, functions, OpenAPI, MCP, A2A, Azure Functions, browser automation, computer use.</p></div>
+      <div class="callout"><p><b>Tool search.</b> A toolbox exposes <code>tool_search</code> and <code>call_tool</code> instead of hundreds of definitions.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 30c -->
+<section class="slide" data-title="A prompt agent in code">
+  <p class="kicker">Foundry Agent Service</p>
+  <h2>A prompt agent in a dozen lines: Foundry runs the loop and the tools</h2>
+  <div class="cols cols-60">
+    <div class="build">
+<pre class="code small-code"><code>project = AIProjectClient(endpoint=FOUNDRY_PROJECT_ENDPOINT,
+                          credential=DefaultAzureCredential())
+agent = project.agents.create_version(        # a new immutable version
+    agent_name="lakeshore-fare-helper",
+    definition=PromptAgentDefinition(
+        model="gpt-5.4-mini",
+        instructions="You answer fare questions. Use Python for arithmetic.",
+        tools=[CodeInterpreterTool()],          # runs in a Foundry sandbox
+    ),
+)
+openai = project.get_openai_client()
+conversation = openai.conversations.create()
+reply = openai.responses.create(
+    conversation=conversation.id,
+    input="Three 25-minute e-bike rides at $0.40 a minute plus $1 unlock each?",
+    extra_body={"agent_reference": {"name": agent.name, "type": "agent_reference"}},
+)</code></pre>
+    </div>
+    <div class="stack build">
+      <ol class="steps vertical">
+        <li><b>Create, test</b>Portal or SDK; the playground.</li>
+        <li><b>Trace, evaluate</b>Every model and tool call; quality and safety.</li>
+        <li><b>Optimize, publish</b>Instructions, tools, model; a stable endpoint.</li>
+        <li><b>Monitor</b>Dashboards and alerts, then evaluate again.</li>
+      </ol>
+      <div class="callout purple"><p>The same loop you run with the harness every week. Weeks 6 to 10 fill in each step.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 31 -->
+<section class="slide" data-title="Safety from the first call">
+  <p class="kicker">Guardrails</p>
+  <h2>Every deployment has a guardrail from the moment it exists</h2>
+  <div class="flow build-row">
+    <div class="node"><b>User input</b><span>the ticket text</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node az"><b>Input controls</b><span>harm classifiers, Prompt Shields</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node hl"><b>Model</b><span>gpt-5.4-mini</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node az"><b>Output controls</b><span>harm classifiers</span></div>
+    <div class="arrow">&rarr;</div>
+    <div class="node"><b>Your service</b><span>completion, or HTTP 400 <code>content_filter</code></span></div>
+  </div>
+  <div class="cols cols-2 build-row" style="margin-top:6px">
+    <div class="card"><h3>The default: <code>Microsoft.DefaultV2</code></h3><p>Classifiers from Azure AI Content Safety check input and output for hate, sexual content, violence and self-harm, and detect user prompt attacks.</p></div>
+    <div class="card green"><h3>Already handled in your code</h3><p><code>is_content_filter_error</code> in <a href="../../app/guardrails.py"><code>app/guardrails.py</code></a> turns a blocked request into a polite refusal, not a 500. Week 10 builds the other layers.</p></div>
+  </div>
+  <p class="small">Read: <a href="https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview">Guardrails and controls in Microsoft Foundry</a></p>
+</section>
+
+<!-- 32 -->
+<section class="slide" data-title="Deploy and submit">
+  <p class="kicker">Lab Part 5</p>
+  <h2>Deploy, score the live URL, submit it</h2>
+  <ol class="steps n4 build-row">
+    <li><b>Build</b><code>az acr build</code> sends <code>app/</code> to your registry and builds the image in Azure. No Docker on your laptop.</li>
+    <li><b>Roll out</b>The new tag goes to <code>infra/image.auto.tfvars</code>; <code>terraform apply</code> creates a new revision.</li>
+    <li><b>Wait</b>The old revision serves until the new one answers <code>/v1/info</code> with the new version.</li>
+    <li><b>Score</b><code>course.check(5, url)</code> runs the harness against the live URL and saves a proof.</li>
+  </ol>
+  <div class="cols cols-2 build-row">
+    <div>
+      <p class="code-label">Two cells, every week</p>
+<pre class="code"><code>url = course.deploy()          # 4 to 6 minutes
+proof = course.check(5, url)   # the report and proof go to reports/</code></pre>
+    </div>
+    <div class="callout purple"><p><b>Submit the URL</b> by the deadline in the <a href="../README.md">README</a>. Keep the proof in <code>reports/</code>: if your grade surprises you, it shows exactly what your service answered.</p></div>
+  </div>
+</section>
+
+<!-- 32b -->
+<section class="slide" data-title="After you submit: the deep dive">
+  <p class="kicker">Optional · not graded</p>
+  <h2>After you submit, the deep dive takes today's ideas further</h2>
+  <div class="cols cols-40">
+    <div class="stack build">
+      <div class="card green"><h3>Lab · required</h3><p>Changes <code>app/</code> and deploys it. The harness grades the deployed URL, and nothing else.</p></div>
+      <div class="card azure"><h3>Deep dive · optional</h3><p>The lecture as code you run. It does not edit <code>app/</code> or deploy, so it cannot change your score.</p></div>
+      <div class="callout"><p>Same setup as the lab. Run the setup cell, then the parts in order. A few cents of model calls; Part 7 creates an agent and deletes it.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Part</th><th>What you explore</th><th>Sections</th></tr>
+        <tr><td>1</td><td>Your resource, from the control plane</td><td>2, 4</td></tr>
+        <tr><td>2</td><td>A token on the wire, and its audience</td><td>5</td></tr>
+        <tr><td>3</td><td>Rate-limit headers; retries with backoff and jitter</td><td>4</td></tr>
+        <tr><td>4</td><td>The Responses API inside: items, <code>store</code>, conversations</td><td>6, 7</td></tr>
+        <tr><td>5</td><td>Reasoning effort against accuracy, latency, tokens</td><td>3, 7</td></tr>
+        <tr><td>6</td><td>Structured output, under the hood</td><td>8</td></tr>
+        <tr><td>7</td><td>Foundry Agent Service: a prompt agent with a tool</td><td>10</td></tr>
+        <tr><td>8</td><td>Guardrails: what a blocked request looks like</td><td>11</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 33 -->
+<section class="slide" data-title="What to remember">
+  <p class="kicker">Summary</p>
+  <h2>What to remember</h2>
+  <div class="cols cols-2">
+    <ul class="check-list build">
+      <li>Foundry is <b>one resource with projects</b>. Code calls a <b>deployment</b> by name.</li>
+      <li>The deployment type decides where inference runs and how you pay. Start with Global Standard.</li>
+      <li>Quota is tokens <b>and</b> requests per minute. Over either you get 429: back off, honor <code>Retry-After</code>.</li>
+      <li><b>No keys.</b> Entra ID tokens, managed identity, least-privilege roles.</li>
+    </ul>
+    <ul class="check-list build">
+      <li>Output and reasoning tokens drive cost and latency. Effort is a dial; <code>none</code> by default.</li>
+      <li>A stable prefix is cached: instructions first, the user's message last.</li>
+      <li>Structured output fixes the <b>shape</b>; instructions carry the <b>judgment</b>.</li>
+      <li>Change one thing, measure, read the misses. Then deploy.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 34 -->
+<section class="slide" data-title="Learn more">
+  <p class="kicker">Learn more</p>
+  <h2>Where to go deeper</h2>
+  <div class="cols cols-2">
+    <ul class="links build">
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/modules/foundry-sdk/">Develop a generative AI chat app with Microsoft Foundry</a></span></li>
+      <li><span class="src">Microsoft Learn</span><span><a href="https://learn.microsoft.com/en-us/training/paths/develop-generative-ai-apps/">Develop generative AI apps on Microsoft Foundry</a> (learning path)</span></li>
+      <li><span class="src">Foundry docs</span><span><a href="https://learn.microsoft.com/en-us/azure/foundry/what-is-foundry">What is Microsoft Foundry?</a></span></li>
+      <li><span class="src">Foundry docs</span><span><a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types">Deployment types</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle">The v1 API</a></span></li>
+      <li><span class="src">Foundry docs</span><span><a href="https://learn.microsoft.com/en-us/azure/foundry/agents/overview">What is Foundry Agent Service?</a></span></li>
+    </ul>
+    <ul class="links build">
+      <li><span class="src">OpenAI</span><span><a href="https://developers.openai.com/api/docs/guides/structured-outputs">Structured model outputs</a></span></li>
+      <li><span class="src">OpenAI</span><span><a href="https://developers.openai.com/api/docs/guides/reasoning">Reasoning models</a> · <a href="https://developers.openai.com/api/docs/guides/prompt-caching">Prompt caching</a></span></li>
+      <li><span class="src">OpenAI</span><span><a href="https://developers.openai.com/api/docs/guides/latest-model/gpt-5.4">Prompting GPT-5.4 models</a></span></li>
+      <li><span class="src">Anthropic</span><span><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Effective context engineering for AI agents</a></span></li>
+      <li><span class="src">This course</span><span><a href="lecture.html">Lecture</a> · <a href="../lab.ipynb">Lab</a> · <a href="../deep-dive.ipynb">Deep dive (optional)</a> · <a href="../README.md">README</a></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 35 -->
+<section class="slide" data-title="Next week: RAG and tool calling">
+  <p class="kicker">Next week</p>
+  <h2>Next week: give the model sources and tools</h2>
+  <div class="cols cols-3 build-row" style="margin-top:12px">
+    <div class="card"><h3>It has not read your handbook</h3><p>Ask about the lost e-bike fee and it guesses. <b>Retrieval</b> puts the right passage in front of it, with citations.</p></div>
+    <div class="card amber"><h3>It is a poor calculator</h3><p>"Sometimes right" is not good enough for a bill. A <b>tool</b> computes the fare exactly.</p></div>
+    <div class="card azure"><h3>It cannot see live data</h3><p>No document says how many e-bikes are at LS-08 now. A <b>tool</b> reads it.</p></div>
+  </div>
+  <p class="lede" style="margin-top:26px">Before class: deploy this week's service, read <a href="https://learn.microsoft.com/en-us/training/modules/use-generative-ai-tools/">Develop generative AI apps that use tools</a>, and skim the handbook in <a href="../../app/data/handbook/"><code>app/data/handbook/</code></a>.</p>
+</section>
+
+</main>
+<script src="../../assets/deck.js"></script>
+</body>
+</html>

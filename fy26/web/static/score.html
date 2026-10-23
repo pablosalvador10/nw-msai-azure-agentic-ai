@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Score your service · Agentic AI on Microsoft Foundry</title>
+  <meta name="description" content="Run the course harness against your deployed Lakeshore Ride service and see what to fix next.">
+  <link rel="stylesheet" href="../assets/lecture.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <link rel="stylesheet" href="score.css">
+</head>
+<body class="score-page">
+<a class="skip" href="#content">Skip to the form</a>
+<header class="topbar"><div class="topbar__inner">
+  <a class="course-home-link brand-copy" href="/"><b>Agentic AI on Microsoft Foundry</b><span>Course home</span></a>
+  <div class="topbar__right">
+    <span class="who" id="who"></span>
+    <a class="signout" href="/auth/logout">Sign out</a>
+  </div>
+</div></header>
+
+<main id="content" class="score-main" tabindex="-1">
+  <header class="hero">
+    <p class="eyebrow">Online harness</p>
+    <h1>Score your deployed service<span class="hero-subtitle">The same checks as the harness on your laptop</span></h1>
+    <p class="hero-copy">Paste the URL of your service, choose the week and run. This page calls your service exactly like <code>uv run python -m harness check --week N --url …</code>, then shows every check, the evidence, and what to try next. Fix one cause, deploy, and run again until every check passes.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="form-title">
+    <h2 id="form-title">Run the harness</h2>
+    <form id="run-form" novalidate>
+      <div class="field">
+        <label for="url">Service URL</label>
+        <input id="url" name="url" type="url" required inputmode="url" spellcheck="false" autocomplete="url"
+               placeholder="https://ca-yourid-123abc.yourenv.eastus2.azurecontainerapps.io" aria-describedby="url-help">
+        <p class="field-help" id="url-help">The base URL from <code>terraform output app_url</code> or <code>course.app_url()</code>, without a path.</p>
+      </div>
+      <fieldset class="field weeks">
+        <legend>Week</legend>
+        <label><input type="radio" name="week" value="5" checked> <b>5</b> Fundamentals of Azure AI</label>
+        <label><input type="radio" name="week" value="6"> <b>6</b> RAG and tool calling</label>
+        <label><input type="radio" name="week" value="7"> <b>7</b> Multi-agent systems</label>
+        <label><input type="radio" name="week" value="8"> <b>8</b> Harnesses and agentic coding</label>
+        <label><input type="radio" name="week" value="10"> <b>10</b> Production agentic systems</label>
+      </fieldset>
+      <div class="field">
+        <label for="api-key">API key <span class="optional">needed once you turn it on in Week 10</span></label>
+        <input id="api-key" name="api_key" type="password" autocomplete="off" spellcheck="false" aria-describedby="key-help">
+        <p class="field-help" id="key-help">Sent to your service as <code>X-API-Key</code> for this run only. The site does not store it.</p>
+      </div>
+      <div class="actions">
+        <button class="button" type="submit" id="run">Run the harness</button>
+        <span class="muted">A run takes one to five minutes. You can keep reading while it runs.</span>
+      </div>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section class="panel" id="status" hidden aria-live="polite">
+    <h2>Running</h2>
+    <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+    <p id="status-text"></p>
+  </section>
+
+  <section class="panel" id="result" hidden aria-labelledby="result-title">
+    <h2 id="result-title" tabindex="-1">Result</h2>
+    <div class="summary">
+      <p class="score"><span id="score"></span><small>/ 100</small></p>
+      <div>
+        <p id="score-caption" class="caption"></p>
+        <p id="score-count"></p>
+        <div class="result-actions">
+          <button class="button button--quiet" type="button" id="download">Download proof (JSON)</button>
+          <span id="week-links" class="week-links"></span>
+        </div>
+      </div>
+    </div>
+    <div id="next" class="callout" hidden></div>
+    <ol id="checks" class="checks"></ol>
+  </section>
+
+  <section class="panel" id="history-section" hidden aria-labelledby="history-title">
+    <h2 id="history-title">Your recent runs <span class="muted">in this browser</span></h2>
+    <ol id="history" class="history"></ol>
+  </section>
+
+  <section class="panel">
+    <div class="callout callout--amber">
+      <p><strong>Reach 100 by fixing causes, not cases.</strong> Grading runs the same checks with hidden cases of the same kind, so rules written for the listed ids lose those points again.</p>
+      <p>Iterate on your laptop first (<code>uv run python -m harness check --week N --in-process</code>), deploy, then confirm the deployed URL here. The service is cumulative: score earlier weeks again before you submit.</p>
+    </div>
+  </section>
+</main>
+<script src="score.js"></script>
+</body>
+</html>

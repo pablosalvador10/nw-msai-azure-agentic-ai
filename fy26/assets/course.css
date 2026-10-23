@@ -1,0 +1,16 @@
+/* Course entry point: reuse the reading-page system, add a clear route through the materials. */
+.home-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin:26px 0 18px}
+.primary-link{display:inline-flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:#fff;font-weight:750;text-decoration:none}
+.primary-link:hover{background:var(--accent-dark);color:#fff}
+.week-list{display:grid;gap:18px;margin:24px 0}
+.week-card{display:grid;grid-template-columns:60px minmax(0,1fr);gap:22px;padding:24px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.week-number{font-size:2rem;font-weight:750;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.week-card h3{margin:0 0 10px;font-size:1.3rem}
+.week-card .eyebrow{margin:0 0 8px;font-size:.63rem}
+.week-card p{margin:0 0 12px}
+.week-deliverable{color:var(--slate);font-size:.88rem}
+.material-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.material-links a{display:inline-flex;align-items:center;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:.82rem;font-weight:650;text-decoration:none;background:var(--soft)}
+.material-links a:hover{border-color:var(--accent);background:var(--accent-soft)}
+@media(max-width:650px){.week-card{grid-template-columns:1fr;gap:10px;padding:18px}.week-number{font-size:1.4rem}.material-links a{min-height:44px}}
+@media print{.week-card{break-inside:avoid-page}.primary-link{color:var(--ink);background:none}}

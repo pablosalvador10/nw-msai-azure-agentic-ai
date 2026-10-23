@@ -1,0 +1,26 @@
+{
+  "snapshot": "2026-10-15T08:00:00-05:00",
+  "note": "Static snapshot used throughout the course so that every answer is reproducible.",
+  "stations": [
+    {"id": "LS-01", "name": "North Beach", "lat": 42.0690, "lon": -87.6720, "capacity": 15, "classic_available": 6, "ebikes_available": 3, "docks_available": 6, "status": "open", "seasonal": true, "adaptive": false},
+    {"id": "LS-02", "name": "Lighthouse Point", "lat": 42.0640, "lon": -87.6735, "capacity": 12, "classic_available": 4, "ebikes_available": 2, "docks_available": 6, "status": "open", "seasonal": true, "adaptive": false},
+    {"id": "LS-03", "name": "Harbor Pier", "lat": 42.0580, "lon": -87.6740, "capacity": 20, "classic_available": 14, "ebikes_available": 6, "docks_available": 0, "status": "open", "seasonal": true, "adaptive": false},
+    {"id": "LS-04", "name": "South Dunes", "lat": 42.0520, "lon": -87.6750, "capacity": 12, "classic_available": 3, "ebikes_available": 1, "docks_available": 8, "status": "open", "seasonal": true, "adaptive": false},
+    {"id": "LS-05", "name": "Central Station", "lat": 42.0480, "lon": -87.6830, "capacity": 25, "classic_available": 10, "ebikes_available": 0, "docks_available": 15, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-06", "name": "Library Square", "lat": 42.0505, "lon": -87.6800, "capacity": 15, "classic_available": 5, "ebikes_available": 4, "docks_available": 6, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-07", "name": "Elm and Main", "lat": 42.0470, "lon": -87.6880, "capacity": 18, "classic_available": 7, "ebikes_available": 2, "docks_available": 9, "status": "open", "seasonal": false, "adaptive": true},
+    {"id": "LS-08", "name": "Arts Campus", "lat": 42.0560, "lon": -87.6790, "capacity": 15, "classic_available": 6, "ebikes_available": 3, "docks_available": 6, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-09", "name": "Market Hall", "lat": 42.0440, "lon": -87.6800, "capacity": 20, "classic_available": 9, "ebikes_available": 5, "docks_available": 6, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-10", "name": "Clark Street", "lat": 42.0410, "lon": -87.6850, "capacity": 15, "classic_available": 2, "ebikes_available": 1, "docks_available": 12, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-11", "name": "Riverside", "lat": 42.0450, "lon": -87.6950, "capacity": 12, "classic_available": 8, "ebikes_available": 0, "docks_available": 4, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-12", "name": "Medical Center", "lat": 42.0380, "lon": -87.6900, "capacity": 20, "classic_available": 8, "ebikes_available": 4, "docks_available": 8, "status": "open", "seasonal": false, "adaptive": true},
+    {"id": "LS-13", "name": "Stadium Gate", "lat": 42.0650, "lon": -87.6900, "capacity": 30, "classic_available": 20, "ebikes_available": 5, "docks_available": 5, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-14", "name": "Engineering Quad", "lat": 42.0570, "lon": -87.6760, "capacity": 18, "classic_available": 12, "ebikes_available": 6, "docks_available": 0, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-15", "name": "Oak Park West", "lat": 42.0400, "lon": -87.7000, "capacity": 12, "classic_available": 5, "ebikes_available": 2, "docks_available": 5, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-16", "name": "Union Plaza", "lat": 42.0530, "lon": -87.6870, "capacity": 15, "classic_available": 0, "ebikes_available": 0, "docks_available": 0, "status": "maintenance", "seasonal": false, "adaptive": false},
+    {"id": "LS-17", "name": "Theater District", "lat": 42.0460, "lon": -87.6760, "capacity": 15, "classic_available": 4, "ebikes_available": 3, "docks_available": 8, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-18", "name": "Community Pool", "lat": 42.0350, "lon": -87.6800, "capacity": 12, "classic_available": 3, "ebikes_available": 1, "docks_available": 8, "status": "open", "seasonal": false, "adaptive": true},
+    {"id": "LS-19", "name": "Greenway North", "lat": 42.0700, "lon": -87.6850, "capacity": 15, "classic_available": 9, "ebikes_available": 2, "docks_available": 4, "status": "open", "seasonal": false, "adaptive": false},
+    {"id": "LS-20", "name": "Transit Hub", "lat": 42.0490, "lon": -87.6930, "capacity": 30, "classic_available": 12, "ebikes_available": 8, "docks_available": 10, "status": "open", "seasonal": false, "adaptive": false}
+  ]
+}

@@ -1,170 +1,64 @@
-# Building Agents in Azure AI Foundry
+# Agentic AI on Azure · Northwestern MS AI
 
-Build an AI agent. Give it tools. Deploy it to the cloud.
+Teaching materials for Northwestern's MS AI program. Students build a support API for a fictional bike-share service, add retrieval and tools, coordinate agents, and test the service on Azure.
 
-> Start with the **single-agent pattern** — one agent orchestrating multiple tools. Master this foundation, then level up to multi-agent systems and MCP.
+> **Students:** start with the **[FY26 course home](fy26/index.html)** in a browser. It links setup, Foundations, each week's lecture and slides, and the required lab. The **[FY26 README](fy26/README.md)** has the calendar, grading and deadlines. On GitHub, download or clone the repository to open the HTML pages locally; GitHub's file view shows their source.
 
-**Jump to:** [The Big Picture](#the-big-picture) · [Assignments](#assignments) · [Labs](#labs-divide-and-conquer) · [Getting Started](#getting-started) · [Resources](#resources)
+## Cohorts
 
+| Cohort | Status | Start here |
+|---|---|---|
+| **FY26** | Current | [Course home](fy26/index.html) · [README](fy26/README.md) |
+| FY25 | Archived, read-only | [fy25/README.md](fy25/README.md) |
 
-## The Big Picture 
+## How this repository is organized
 
-### *Single Agent vs Multi-Agent*
-
-A **single agent** is one AI entity that reasons, decides, and acts. It's the right choice when:
-- The task can be handled by one "brain" with the right tools
-- You want atomic, predictable decisions
-- Complexity is manageable without delegation
-
-When tasks require specialization, parallel work, or debate between perspectives — that's when you graduate to **multi-agent systems**. But start simple. Most problems don't need an orchestra; they need one good musician with the right instruments.
-
-### *Tool Calling*
-
-When you create an agent in **Azure AI Foundry**, you get a powerful AI runtime in the cloud. But agents become truly useful when they can take **actions** — calling APIs, processing data, sending notifications, etc.
-
-To add actions, we register **tools**. Tools can be:
-- **In-process functions** (code that runs inside the agent)
-- **External services** like **Azure Functions** or **Logic Apps** (decoupled, cloud-based)
-
-These labs focus on the decoupled approach: your agent lives in AI Foundry, and your tools live independently in Azure — clean, scalable, and production-ready. See the [Labs](#labs-divide-and-conquer) below.
-
-### *MCP: Model Context Protocol*
-
-**MCP** is an open standard for connecting AI agents to tools via a client-server architecture. Instead of hardcoding tool integrations:
-
-- **MCP Server** = exposes tools (your functions, APIs, databases)
-- **MCP Client** = the agent that discovers and calls those tools
-
-Why it matters:
-- **Reusability** — Build a tool once, use it across many agents
-- **Security** — Centralized auth, audit, and access control
-- **Discovery** — Agents can find and learn new tools dynamically
-
-In Labs 4-5, you'll build an MCP server with Azure Functions and connect it to an AI agent using Microsoft's Agent Framework.
-
-## Assignments
-
-See the full assignment details: **[Assignments](docs/asigments.md)**
-
-| Week | Topic | Lab |
-|------|-------|-----|
-| Week 3 | Single Agent + External Tools | Labs 1-5 |
-| Week 4 | Multi-Agent Orchestration | Lab 6 |
-| Week 5 | Operationalization | Labs 7-9 |
-
-## Labs (Divide and Conquer)
-
-Build step by step — don't try to do everything at once:
-
-### Part 1: HTTP Tool Pattern (Labs 1-3)
-Connect agents to tools via direct HTTP calls.
-
-| Lab | What You'll Build |
-|-----|-------------------|
-| [Lab 1: Azure Functions](notebooks/lab1_azure_functions.ipynb) | Create and deploy an Azure Function as an HTTP tool |
-| [Lab 2: Logic Apps](notebooks/lab2_logic_apps.ipynb) | Create a Logic App as an HTTP tool (no code) |
-| [Lab 3: Single Agent + HTTP Tools](notebooks/lab3_single_agent_tool_calling.ipynb) | Build an agent and connect it to your HTTP tools |
-
-### Part 2: MCP Pattern (Labs 4-5)
-Connect agents to tools via the Model Context Protocol.
-
-| Lab | What You'll Build |
-|-----|-------------------|
-| [Lab 4: MCP Server](notebooks/lab4_mcp_server_azure_functions.ipynb) | Build an MCP server using Azure Functions |
-| [Lab 5: Agent + MCP](notebooks/lab5_single_agent_mcp_integration.ipynb) | Connect an agent to MCP servers (local & remote) |
-
-### Part 3: Multi-Agent Systems (Lab 6)
-Coordinate multiple agents to solve complex problems.
-
-| Lab | What You'll Build |
-|-----|-------------------|
-| [Lab 6: Multi-Agent Orchestration](notebooks/lab6_multi_agent_orchestration.ipynb) | Implement 5 orchestration patterns (Concurrent, Sequential, Group Chat, Magentic, Handoff) |
-
-### Part 4: Operationalization (Labs 7-9)
-Add safety, evaluation, and observability for production deployment.
-
-| Lab | What You'll Build |
-|-----|-------------------|
-| [Lab 7: Guardrails](notebooks/lab7_agent_guardrails.ipynb) | Defense-in-depth safety controls and content filtering |
-| [Lab 8: Evaluations](notebooks/lab8_safety_evaluations.ipynb) | Quality metrics, custom evaluators, and red teaming |
-| [Lab 9: Observability](notebooks/lab9_tracing_observability.ipynb) | OpenTelemetry tracing and Azure Monitor integration |
-
-**Learning Path:**
 ```
-┌─────────────────────────────────────┐     ┌─────────────────────────────────┐
-│  Part 1: HTTP Tools (Week 3)        │     │  Part 2: MCP (Week 3)           │
-│                                     │     │                                 │
-│  Lab 1 (Azure Function) ──┐         │     │  Lab 4 (MCP Server)             │
-│                           ├─▶ Lab 3 │     │         │                       │
-│  Lab 2 (Logic App) ───────┘         │     │         ▼                       │
-│                                     │     │  Lab 5 (Agent + MCP)            │
-└─────────────────────────────────────┘     └─────────────────────────────────┘
-                      │                                   │
-                      └───────────────┬───────────────────┘
-                                      ▼
-                    ┌─────────────────────────────────────┐
-                    │  Part 3: Multi-Agent (Week 4)       │
-                    │                                     │
-                    │  Lab 6 (Multi-Agent Orchestration)  │
-                    │  • Concurrent, Sequential           │
-                    │  • Group Chat, Magentic, Handoff    │
-                    └──────────────────┬──────────────────┘
-                                       │
-                                       ▼
-                    ┌─────────────────────────────────────┐
-                    │  Part 4: Operationalization (Week 5)│
-                    │                                     │
-                    │  Lab 7 (Guardrails)                 │
-                    │  Lab 8 (Evaluations & Red Teaming)  │
-                    │  Lab 9 (Tracing & Observability)    │
-                    └─────────────────────────────────────┘
+.
+├── fy26/                    # Current cohort
+│   ├── README.md            # Calendar, weekly loop, grading
+│   ├── index.html           # Browser home: reading, slides and labs
+│   ├── setup/               # One-time setup: tools, Azure, Terraform, first deploy
+│   ├── foundations/         # Short primers: Terraform, FastAPI, containers, identity, harness
+│   ├── week05-…/ … week10-…/ # Overview, lecture source, main lab, optional deep dive
+│   │   └── docs/            # Browser lecture and slides, together
+│   ├── assets/              # Shared styles and navigation
+│   ├── app/                 # The service students build and deploy
+│   ├── harness/             # The local harness: checks and public data
+│   ├── infra/               # Terraform for each student's resource group
+│   └── pyproject.toml       # The cohort's own Python environment (uv)
+├── fy25/                    # Archived cohort, frozen exactly as taught
+├── .github/                 # CI, Copilot instructions and skills
+└── LICENSE
 ```
 
-> **Tip**: Part 1 teaches HTTP tools. Part 2 teaches MCP. Part 3 teaches multi-agent. Part 4 teaches production readiness.
+Each cohort has its own dependency file, lockfile, Python version and environment template. This keeps one year's package changes separate from another's. Archived files preserve what was taught; cloud services, models and external links can still change or retire.
 
-## Getting Started
+## Quick start
 
 ```bash
-# Clone and install
-git clone <repo-url>
-cd northwestern-fy26-msai-foundry-agentic-ai
-
-# Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Setup environment and install dependencies
-uv sync --all-extras --dev
+git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
+cd northwestern-msai-azure-agentic-ai/fy26
+uv sync
 ```
 
-See the full [Quick Start Guide](docs/quickstart.md) for detailed setup instructions.
+Then open the [course home](fy26/index.html) in a browser and follow [FY26 · Start here](fy26/README.md#start-here). Open the cohort folder in VS Code for notebook work.
 
-Then open the notebooks and follow along!
+## Starting a new cohort (instructors)
 
-## Resources
+1. Copy the latest cohort's course files to the new year folder. Do not copy a local environment, credentials, Terraform state or plans, reports, or agent-generated memory. Update the calendar, session folders and model versions; check availability in the region used for class.
+2. Run `uv lock --upgrade` inside `fyNN/`, run the tests, and commit the lockfile.
+3. Update the cohort matrix and infrastructure working directory in the [CI workflow](.github/workflows/ci.yml). Update internal links, instructions and agent configuration that name the previous cohort.
+4. Add the archived banner to the previous cohort's README and update the **Cohorts** table above.
 
-### Azure Portal & UI
+Archived cohorts are never edited, except to fix broken links.
 
-- [Azure Portal](https://portal.azure.com) - Main Azure portal
-- [Azure AI Foundry](https://ai.azure.com) - AI Foundry interface
-- [Azure Functions](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites/kind/functionapp) - Function Apps management
-- [Logic Apps](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Logic%2Fworkflows) - Logic Apps designer
-- [Application Insights](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/microsoft.insights%2Fcomponents) - Monitoring and diagnostics
+Before sharing a cohort with students, make sure its files and lockfile are available on the branch the setup instructions clone. Test the setup from a clean clone, not from the instructor's working directory.
 
-### Documentation
+## Contributing
 
-- [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-studio/)
-- [Azure Functions Documentation](https://learn.microsoft.com/en-us/azure/azure-functions/)
-- [Azure Logic Apps Documentation](https://learn.microsoft.com/en-us/azure/logic-apps/)
-- [Azure OpenAI Service](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-- [Azure Identity (Managed Identity)](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/)
+See the [contributor guide](CONTRIBUTING.md) for the current code layout, testing commands, content workflow and privacy checks.
 
-### Python Resources
+## License
 
-- [Pydantic Documentation](https://docs.pydantic.dev/)
-- [Python Type Hints (PEP 484)](https://peps.python.org/pep-0484/)
-- [Python Async/Await](https://docs.python.org/3/library/asyncio.html)
-- [Pytest Documentation](https://docs.pytest.org/)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT, see [LICENSE](LICENSE).

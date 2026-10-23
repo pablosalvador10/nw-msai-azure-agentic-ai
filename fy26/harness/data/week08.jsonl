@@ -1,0 +1,8 @@
+{"id": "m01", "tool": "quote_fare", "arguments": {"plan": "member", "minutes": 50, "ebike": false}, "expect": {"total": 0.75}}
+{"id": "m02", "tool": "quote_fare", "arguments": {"plan": "single", "minutes": 300, "ebike": true}, "expect": {"total": 50.0, "capped": true}}
+{"id": "m03", "tool": "get_station", "arguments": {"station_id": "LS-05"}, "expect": {"ebikes_available": 0, "docks_available": 15}}
+{"id": "m04", "tool": "search_handbook", "arguments": {"query": "fee for a lost e-bike"}, "expect": {"first_doc_id": "damage-and-lost-bikes"}}
+{"id": "m05", "tool": "search_handbook", "arguments": {"query": "Which stations have adaptive bikes?"}, "expect": {"first_doc_id": "accessibility"}}
+{"id": "n01", "tool": "nearest_station_with_docks", "arguments": {"station_id": "LS-03"}, "expect": {"station_id": "LS-08"}}
+{"id": "n02", "tool": "nearest_station_with_docks", "arguments": {"station_id": "LS-16"}, "expect": {"station_id": "LS-06"}}
+{"id": "n03", "tool": "nearest_station_with_docks", "arguments": {"station_id": "LS-12"}, "expect": {"station_id": "LS-10"}}

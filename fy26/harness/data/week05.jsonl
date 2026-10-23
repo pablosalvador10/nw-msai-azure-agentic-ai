@@ -1,0 +1,24 @@
+{"id": "t01", "text": "I was charged $14 for a 20-minute classic ride. I'm a member, so it should have been included. Please fix this.", "category": "billing", "urgency": "medium"}
+{"id": "t02", "text": "The front brake on bike 4471 barely works. I parked it at LS-09 and took another bike.", "category": "bike_issue", "urgency": "medium"}
+{"id": "t03", "text": "Someone crashed into me on the Lakefront Trail and my knee is bleeding. I'm next to LS-02.", "category": "safety", "urgency": "high"}
+{"id": "t04", "text": "Every dock at Harbor Pier (LS-03) is full and my ride clock is still running. What do I do right now?", "category": "station_issue", "urgency": "high"}
+{"id": "t05", "text": "How do I change the email address on my account?", "category": "account", "urgency": "low"}
+{"id": "t06", "text": "Do you plan to add stations near the airport?", "category": "other", "urgency": "low"}
+{"id": "t07", "text": "My Day Pass was charged twice this morning.", "category": "billing", "urgency": "medium"}
+{"id": "t08", "text": "Please delete my account and all the data you have on me.", "category": "account", "urgency": "low"}
+{"id": "t09", "text": "The dock at LS-11 won't release any bike; the screen just says error.", "category": "station_issue", "urgency": "medium"}
+{"id": "t10", "text": "A car hit me while I was riding. I think I'm okay but I'm shaken, and the bike's wheel is bent.", "category": "safety", "urgency": "high"}
+{"id": "t11", "text": "The e-bike battery died halfway through my ride and I had to push it to the station. Can I get the e-bike minutes back?", "category": "billing", "urgency": "medium"}
+{"id": "t12", "text": "Great service this summer, thanks to the team at Library Square!", "category": "other", "urgency": "low"}
+{"id": "t13", "text": "I can't log in. The app says my password is wrong but I reset it an hour ago.", "category": "account", "urgency": "low"}
+{"id": "t14", "text": "The seat on the bike I'm riding just snapped off and I'm in the middle of the river bridge.", "category": "bike_issue", "urgency": "high"}
+{"id": "t15", "text": "What's the difference between the Student Pass and a Membership?", "category": "other", "urgency": "low"}
+{"id": "t16", "text": "I got a $1,200 lost bike fee but I docked the bike at LS-06 yesterday evening.", "category": "billing", "urgency": "medium"}
+{"id": "t17", "text": "A man has been following me around the station and shouting at me. I'm scared.", "category": "safety", "urgency": "high"}
+{"id": "t18", "text": "Station LS-16 has had no bikes and no free docks all week.", "category": "station_issue", "urgency": "medium"}
+{"id": "t19", "text": "Can I bring my dog in a basket on the bike?", "category": "other", "urgency": "low"}
+{"id": "t20", "text": "I was charged the unlock fee twice for one single ride.", "category": "billing", "urgency": "medium"}
+{"id": "t21", "text": "The chain fell off the bike I just unlocked at LS-13. I'm still at the station.", "category": "bike_issue", "urgency": "medium"}
+{"id": "t22", "text": "Your app still shows my rides from two years ago. Why do you keep that?", "category": "account", "urgency": "low"}
+{"id": "t23", "text": "The dock at LS-10 won't lock my bike and I can't end my ride. It's been 20 minutes.", "category": "station_issue", "urgency": "high"}
+{"id": "t24", "text": "My little brother is 14 and wants to ride with me this weekend. Is that allowed?", "category": "other", "urgency": "low"}
