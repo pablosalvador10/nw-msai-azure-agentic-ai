@@ -234,3 +234,6 @@ fy26/agent-file-memory/
 
 # macOS Finder metadata
 .DS_Store
+
+# Course website: Mermaid bundle downloaded at image build (fy26/web/Dockerfile)
+fy26/web/static/vendor/

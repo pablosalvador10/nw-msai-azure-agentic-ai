@@ -1,6 +1,6 @@
 # Course website
 
-One URL for the whole course: the course home, every lecture and slide deck, and **Score your deployed service**, a page where students paste their service URL and the same harness they run locally scores it, with the evidence and what to fix next. Students sign in with GitHub; anyone who can read the course repository gets in. It runs on Azure Container Apps in its own resource group, `lectures`.
+One URL for the whole course: the course home, every lecture and slide deck, every README, lecture note, lab and deep-dive notebook, handbook page and source file, and **Score your deployed service**, a page where students paste their service URL and the same harness they run locally scores it, with the evidence and what to fix next. Students sign in with GitHub; anyone who can read the course repository gets in. It runs on Azure Container Apps in its own resource group, `lectures`.
 
 ```mermaid
 flowchart LR
@@ -78,7 +78,8 @@ Cost: Container Apps consumption (scales to zero), a Basic registry, and Log Ana
 | Sign-in | GitHub App OAuth with `state` and PKCE ([auth.py](auth.py)) | Container Apps' built-in authentication has no Terraform resource in `azurerm` 5.x and cannot tell who may read a repository |
 | Who gets in | The user's token can read `course_repo` | Access follows the repository: no second roster to maintain |
 | Session | Signed cookie with the login only, 8 h, `HttpOnly`, `Secure`, `SameSite=Lax` | The GitHub token is dropped after sign-in; nothing to steal from the server |
-| What is served | `index.html`, `assets/`, `week*/docs/`, `foundations/docs/` ([site.py](site.py)) | An allowlist, so no notebook, `.env` or code file is ever served; other course links open on GitHub |
+| What is served | Course pages as they are (`index.html`, `assets/`, `docs/`); every Markdown file, notebook and source file rendered in the lecture style ([site.py](site.py), [render.py](render.py)) | The whole course reads in one place. Notebooks are read-only (no outputs are committed) with a download button; diagrams are drawn by Mermaid 12.2.0, pinned and checksum-verified in the [Dockerfile](Dockerfile) |
+| What is never served | Hidden files (`.env`), Terraform variables and state, `reports/`, `web/`, caches; the image also keeps only files tracked by git | An allowlist of folders and file types, so a stray secret or scratch file cannot be published |
 | Online harness | The same engine as `python -m harness check --url` ([runs.py](runs.py)) | Students see the score and evidence they would see locally |
 | Which URLs it calls | `https`, `*.azurecontainerapps.io`, public IP addresses only | Otherwise the site could be pointed at addresses inside Azure (server-side request forgery) |
 | Fair use | Three runs at once, one per student, 20 per student per hour | One student cannot block the queue before a deadline |

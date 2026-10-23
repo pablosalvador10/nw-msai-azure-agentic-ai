@@ -22,7 +22,13 @@ FY26 = course.FY26
 WEB = FY26 / "web"
 INFRA = WEB / "infra"
 BUILD = WEB / "build"
-RUNTIME = ["__init__.py", "auth.py", "config.py", "hints.py", "main.py", "runs.py", "site.py"]
+RUNTIME = ["__init__.py", "auth.py", "config.py", "hints.py", "main.py", "render.py", "runs.py", "site.py"]
+
+
+def tracked() -> set[str]:
+    """Files git tracks in fy26/: only committed course files are published."""
+    out = course.run(["git", "ls-files", "-z", "."], quiet=True)
+    return {name for name in out.split("\0") if name}
 
 
 def stage() -> Path:
@@ -35,12 +41,16 @@ def stage() -> Path:
     shutil.copytree(FY26 / "harness", BUILD / "harness", ignore=shutil.ignore_patterns("__pycache__"))
     for name in RUNTIME:
         shutil.copy2(WEB / name, BUILD / "web" / name)
-    shutil.copytree(WEB / "static", BUILD / "web" / "static")
-    pages = published_files(FY26)
+    shutil.copytree(WEB / "static", BUILD / "web" / "static", ignore=shutil.ignore_patterns("vendor"))
+    committed = tracked()
+    pages = [rel for rel in published_files(FY26) if rel in committed]
+    skipped = sorted(set(published_files(FY26)) - set(pages))
     for rel in pages:
         (BUILD / "site" / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(FY26 / rel, BUILD / "site" / rel)
-    print(f"Staged {BUILD.relative_to(FY26)}/ with {len(pages)} published pages and assets.")
+    print(f"Staged {BUILD.relative_to(FY26)}/ with {len(pages)} course files.")
+    if skipped:
+        print(f"Not published (not committed yet): {', '.join(skipped)}")
     return BUILD
 
 

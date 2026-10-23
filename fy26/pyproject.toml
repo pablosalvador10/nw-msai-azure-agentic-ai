@@ -12,6 +12,7 @@ dependencies = [
     "azure-identity>=1.26.0",
     "azure-monitor-opentelemetry>=1.8.11",
     "fastapi>=0.159.1",
+    "markdown-it-py>=4.2",
     "mcp>=2.2,<3",
     "openai>=3.36.1",
     "pydantic-settings>=2.16.1",

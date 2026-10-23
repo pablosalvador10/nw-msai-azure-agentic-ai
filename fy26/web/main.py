@@ -31,7 +31,10 @@ from web.site import Site
 log = logging.getLogger("lectures")
 
 STATIC = Path(__file__).parent / "static"
-SCORE_FILES = {"score.js", "score.css", "site.js"}
+SCORE_FILES = {"score.js", "score.css"}
+# Shared website assets at /_site/. The Mermaid bundle is downloaded at image build (see web/Dockerfile).
+SITE_FILES = {"site.js": STATIC / "site.js", "site.css": STATIC / "site.css"}
+VENDOR_FILES = {"mermaid-12.2.0.min.js": STATIC / "vendor" / "mermaid-12.2.0.min.js"}
 SESSION_COOKIE = "lectures_session"
 STATE_COOKIE = "lectures_oauth"
 STATE_TTL_S = 600
@@ -236,13 +239,33 @@ def create_app(
             return page(404, "Not found", '<a href="/score/">Back to the score page</a>')
         return FileResponse(STATIC / name)
 
+    @app.get("/_site/{name}")
+    def site_asset(name: str) -> Response:
+        if name in SITE_FILES:
+            return FileResponse(SITE_FILES[name])
+        vendor = VENDOR_FILES.get(name)
+        if vendor is not None and vendor.is_file():
+            # Versioned file name: browsers may keep it for a week.
+            return FileResponse(vendor, headers={"Cache-Control": "private, max-age=604800, immutable"})
+        return page(404, "Not found", '<a href="/">Course home</a>')
+
     @app.get("/{path:path}")
-    def site_file(path: str) -> Response:
+    def site_file(path: str, download: bool = False) -> Response:
         file = site.file(path)
         if file is not None:
             rendered = site.render(file)
             return HTMLResponse(rendered) if rendered is not None else FileResponse(file)
-        source = None if path.startswith("api/") else site.source_url(path)
+        content = site.content(path)
+        if content is not None:
+            if download:
+                return FileResponse(content, filename=content.name, content_disposition_type="attachment")
+            return HTMLResponse(site.document(content))
+        folder = site.folder(path)
+        if folder is not None:
+            if not path.endswith("/"):
+                return RedirectResponse(f"/{path}/", status_code=308)
+            return HTMLResponse(site.listing(folder))
+        source = None if path.startswith(("api/", "_site/")) else site.source_url(path)
         if source:
             return RedirectResponse(source, status_code=302)
         return page(404, "Not found", '<a href="/">Course home</a>')

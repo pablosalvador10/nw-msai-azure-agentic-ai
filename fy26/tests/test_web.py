@@ -1,5 +1,6 @@
 """The course website (web/): GitHub sign-in, what it serves, and the online harness. Offline: GitHub is faked."""
 
+import json
 import re
 import time
 from pathlib import Path
@@ -15,7 +16,7 @@ from web.config import FY26, Settings
 from web.hints import HINTS, WEEK_DIRS
 from web.main import SESSION_COOKIE, create_app, safe_next
 from web.runs import RunQueue, TargetError, validate_target
-from web.site import INDEX_MARKER, published_files
+from web.site import INDEX_MARKER, Site, published_files
 
 REPO = "teacher/course"
 PUBLIC = ("20.1.2.3",)
@@ -84,16 +85,65 @@ class FakeRunner:
         return fake_report(week)
 
 
+README_MD = """# Week 5 overview
+
+Intro with a [lab](lab.ipynb), [setup](../setup/README.md), [agents](../../.github/READMEGC.md#help),
+[example env](../.env.example), [lecture](docs/lecture.html) and [the web](https://learn.microsoft.com).
+
+<script>alert(1)</script>
+
+## Part one
+
+| Check | Weight |
+|---|---|
+| w05.chat | 1 |
+
+```mermaid
+flowchart LR
+  A["Learn<br/>notebook"] --> B
+```
+
+```python
+print("hi")
+```
+
+## Part one
+
+A repeated heading gets its own anchor.
+"""
+
+LAB_IPYNB = {
+    "cells": [
+        {
+            "cell_type": "markdown",
+            "source": ["# Week 5 lab\n", "\n", "## Part 1 · Call a model\n", "Read [the lecture](docs/lecture.html)."],
+        },
+        {"cell_type": "code", "source": ["import course\n", "course.setup()"], "outputs": [], "execution_count": None},
+    ],
+    "metadata": {},
+    "nbformat": 4,
+    "nbformat_minor": 5,
+}
+
+
 @pytest.fixture
 def site_dir(tmp_path: Path) -> Path:
     files = {
         "index.html": f"<html><body>{INDEX_MARKER}</body></html>",
         "assets/lecture.css": "body{}",
         "week05-fundamentals-of-azure-ai/docs/lecture.html": "<h1>Week 5</h1>",
-        "week05-fundamentals-of-azure-ai/lab.ipynb": "{}",
+        "week05-fundamentals-of-azure-ai/README.md": README_MD,
+        "week05-fundamentals-of-azure-ai/lab.ipynb": json.dumps(LAB_IPYNB),
+        "setup/README.md": "# Setup\n",
+        "app/main.py": "print('code') if 1 < 2 else None\n",
+        "app/data/handbook/rides.md": "# Rides\n\nRide rules.\n",
+        "uv.lock": "lock",
         ".env": "SECRET=1",
-        "app/main.py": "print('code')",
+        ".env.example": "KEY=",
         "infra/terraform.tfvars": "subscription_id = 'x'",
+        "infra/terraform.tfstate": '{"secret": "state"}',
+        "reports/week05-x.json": '{"secret": "report"}',
+        "web/main.py": "SECRET = 'web'",
     }
     for rel, text in files.items():
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
@@ -171,12 +221,14 @@ def test_sign_in_sets_a_session_and_serves_the_course(site_dir: Path) -> None:
     assert 'href="score/"' in home.text
     assert home.headers["x-content-type-options"] == "nosniff"
     lecture = client.get("/week05-fundamentals-of-azure-ai/docs/lecture.html").text
-    assert lecture.startswith("<h1>Week 5</h1>") and '<script src="/score/site.js"></script>' in lecture
+    assert lecture.startswith("<h1>Week 5</h1>") and '<script src="/_site/site.js"></script>' in lecture
     assert client.get("/assets/lecture.css").text == "body{}"
     assert client.get("/score/").status_code == 200
     assert client.get("/score/score.js").status_code == 200
-    assert client.get("/score/site.js").status_code == 200
+    assert client.get("/_site/site.js").status_code == 200
+    assert client.get("/_site/site.css").status_code == 200
     assert client.get("/score/missing.js").status_code == 404
+    assert client.get("/_site/missing.js").status_code == 404
 
 
 def test_session_cookie_is_secure_on_https(site_dir: Path) -> None:
@@ -238,33 +290,102 @@ def test_after_sign_in_redirect_stays_on_site(raw: str, expected: str) -> None:
 # ---------------------------------------------------------------------------- what is served
 
 
-def test_only_published_pages_are_served_and_code_links_open_on_github(site_dir: Path) -> None:
+def test_secrets_and_the_website_itself_are_never_served(site_dir: Path) -> None:
     client = sign_in(make_client(site_dir))
-    for secret in ("/.env", "/%2eenv", "/week05-fundamentals-of-azure-ai/docs/../../.env", "/infra/terraform.tfvars"):
-        response = client.get(secret)
-        assert "SECRET" not in response.text and "subscription_id" not in response.text
-        assert response.status_code in (302, 404)
+    for path in (
+        "/.env",
+        "/%2eenv",
+        "/week05-fundamentals-of-azure-ai/docs/../../.env",
+        "/infra/terraform.tfvars",
+        "/infra/terraform.tfstate",
+        "/reports/week05-x.json",
+        "/web/main.py",
+        "/reports/",
+        "/web/",
+    ):
+        response = client.get(path)
+        assert response.status_code in (302, 404), path
+        assert (
+            "SECRET" not in response.text and "secret" not in response.text and "subscription_id" not in response.text
+        )
     assert client.get("/.env").status_code == 404
-
-    lab = client.get("/week05-fundamentals-of-azure-ai/lab.ipynb")
-    assert lab.status_code == 302
-    assert lab.headers["location"] == (
-        f"https://github.com/{REPO}/blob/main/fy26/week05-fundamentals-of-azure-ai/lab.ipynb"
-    )
-    folder = client.get("/app/data/handbook/")
-    assert folder.headers["location"] == f"https://github.com/{REPO}/tree/main/fy26/app/data/handbook/"
+    assert client.get("/uv.lock").headers["location"] == f"https://github.com/{REPO}/blob/main/fy26/uv.lock"
     assert client.get("/api/unknown").status_code == 404
 
 
+def test_markdown_renders_as_a_lecture_style_page(site_dir: Path) -> None:
+    client = sign_in(make_client(site_dir))
+    page = client.get("/week05-fundamentals-of-azure-ai/README.md")
+    assert page.status_code == 200 and page.headers["content-type"].startswith("text/html")
+    text = page.text
+    assert "<h1>Week 5 overview</h1>" in text and "Week 5 · Fundamentals of Azure AI" in text
+    assert '<section id="part-one"><h2>Part one</h2>' in text and '<section id="part-one-1">' in text
+    assert '<div class="table-wrap"><table>' in text and '<pre class="code"><code>print("hi")' in text
+    assert '<pre class="mermaid">flowchart LR' in text and 'data-mermaid="/_site/mermaid-12.2.0.min.js"' in text
+    assert "<script>alert(1)</script>" not in text  # raw HTML in Markdown is shown as text, never run
+    assert 'href="/week05-fundamentals-of-azure-ai/lab.ipynb"' in text
+    assert 'href="/setup/README.md"' in text and 'href="/week05-fundamentals-of-azure-ai/docs/lecture.html"' in text
+    assert f'href="https://github.com/{REPO}/blob/main/.github/READMEGC.md#help"' in text
+    assert f'href="https://github.com/{REPO}/blob/main/fy26/.env.example"' in text
+    assert 'href="https://learn.microsoft.com"' in text
+    assert f"https://github.com/{REPO}/blob/main/fy26/week05-fundamentals-of-azure-ai/README.md" in text
+
+
+def test_notebooks_render_read_only_and_download(site_dir: Path) -> None:
+    client = sign_in(make_client(site_dir))
+    text = client.get("/week05-fundamentals-of-azure-ai/lab.ipynb").text
+    assert "<h1>Week 5 lab</h1>" in text and "Main lab · notebook" in text and "Read-only copy" in text
+    assert '<section id="part-1--call-a-model"><h2>Part 1 · Call a model</h2>' in text
+    assert '<pre class="code nb-cell"><code>import course\ncourse.setup()</code></pre>' in text
+    assert 'href="/week05-fundamentals-of-azure-ai/docs/lecture.html"' in text
+    raw = client.get("/week05-fundamentals-of-azure-ai/lab.ipynb", params={"download": "1"})
+    assert raw.headers["content-disposition"].startswith("attachment") and json.loads(raw.text) == LAB_IPYNB
+
+
+def test_source_files_and_folders_render(site_dir: Path) -> None:
+    client = sign_in(make_client(site_dir))
+    code = client.get("/app/main.py").text
+    assert "<pre class=\"code\"><code>print('code') if 1 &lt; 2 else None" in code and "Source file" in code
+
+    week = client.get("/week05-fundamentals-of-azure-ai")
+    assert week.status_code == 308 and week.headers["location"] == "/week05-fundamentals-of-azure-ai/"
+    folder = client.get("/week05-fundamentals-of-azure-ai/").text
+    assert "<h1>Week 5 overview</h1>" in folder and "In this folder" in folder
+    for name in ('README.md"', 'lab.ipynb"', 'docs/"'):
+        assert f'href="/week05-fundamentals-of-azure-ai/{name}' in folder
+    handbook = client.get("/app/data/handbook/").text
+    assert 'href="/app/data/handbook/rides.md"' in handbook
+    root_app = client.get("/app/").text
+    assert 'href="/app/data/"' in root_app and 'href="/app/main.py"' in root_app
+    assert ".env" not in client.get("/infra/").text
+
+
 def test_published_files_of_the_real_course() -> None:
-    files = published_files(FY26)
-    assert "index.html" in files and "assets/lecture.css" in files and "foundations/docs/primers.html" in files
+    files = set(published_files(FY26))
+    assert {"index.html", "assets/lecture.css", "foundations/docs/primers.html", "README.md"} <= files
+    assert {"setup/README.md", "setup/setup.ipynb", "app/contract.py", "infra/foundry.tf", "Dockerfile"} <= files
     for folder in WEEK_DIRS.values():
-        assert f"{folder}/docs/lecture.html" in files
-        assert f"{folder}/docs/slides.html" in files
-    assert not [f for f in files if re.search(r"\.(ipynb|md|py|tf|tfvars|env|json|jsonl)$", f)]
+        for name in ("README.md", "lecture.md", "lab.ipynb", "docs/lecture.html", "docs/slides.html"):
+            assert f"{folder}/{name}" in files
+    leaked = [f for f in files if re.search(r"(^|/)(\.|web/|reports/|agent-file-memory/)|\.(tfvars|tfstate|lock)$", f)]
+    assert not leaked
     # The score link is injected next to this anchor; if the home page changes, update web/site.py.
     assert INDEX_MARKER in (FY26 / "index.html").read_text(encoding="utf-8")
+
+
+def test_every_real_course_document_renders_and_its_links_resolve() -> None:
+    site = Site(FY26, REPO, "main", "fy26")
+    broken = []
+    for rel in published_files(FY26):
+        if not rel.endswith((".md", ".ipynb")):
+            continue
+        page = site.document(FY26 / rel)
+        assert "<h1>" in page and "/assets/lecture.js" in page, rel
+        for href in re.findall(r'href="(/[^"#?]*)', page):
+            target = FY26 / href.strip("/")
+            if href not in ("/", "/assets/lecture.css", "/_site/site.css") and not target.exists():
+                broken.append(f"{rel} -> {href}")
+    assert not broken
 
 
 # ---------------------------------------------------------------------------- online harness
