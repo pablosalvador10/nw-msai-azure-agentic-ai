@@ -58,7 +58,7 @@ The content of the session is in **[lecture.md](lecture.md)**: threat modeling a
 
 Your final URL is also scored with the Week 5 to 8 harnesses, so a guardrail that breaks an earlier route costs points there too. Submit the URL and your API key (the value of `SERVICE_API_KEY` in `fy26/.env`) through the course site, never in a public place.
 
-**Stuck?** In Copilot Chat, pick **FY26 Lab Tutor** and name the check, for example: "Week 10, `w10.injection` is PART. Which controls fired, and which cases got through? First hint only." It explains and hints; the code stays yours. **FY26 Deploy Doctor** helps you ship and turn on the API key, **FY26 Submit Check** checks you before the deadline. New to the agents? Read [Your course agents](../foundations/docs/agents.html).
+**Stuck?** In Copilot Chat, pick **Pablo · Fundamentals** and name the check, for example: "Week 10, `w10.injection` is PART. Which controls fired, and which cases got through? First hint only." It explains and hints; the code stays yours. **Arvind · Data** puts both guardrail error rates side by side and queries your telemetry, **Will · Infra and deploy** helps you deploy and turn on the API key, and before the deadline ask **Pablo · Scoring** "Am I ready to submit?". New to the agents? Read [Your course agents](../foundations/docs/agents.html).
 
 ## The deep dive (optional)
 

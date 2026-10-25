@@ -27,6 +27,7 @@ ICONS = {
     "gauge": '<path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/>',
     "book": '<path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zm0 0A2 2 0 0 0 6 22h13"/>',
     "play": '<path d="m8 5 11 7-11 7z"/>',
+    "chat": '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/>',
 }
 
 
@@ -261,7 +262,8 @@ class Shell:
             (
                 "Your course agents",
                 "/foundations/docs/agents.html",
-                "Five Copilot agents that know this course. Start with FY26 Guide when you are stuck.",
+                "Five agents in VS Code, named after the instructors. Start with Pablo when you are stuck; "
+                "Will covers infrastructure and deployment, Arvind the data. Also: how to vibe code.",
             ),
         ]
         start_cards = "".join(
@@ -291,6 +293,7 @@ class Shell:
     <div class="home-hero__actions">
       <a class="btn btn--primary" href="/setup/README.md">Start with setup {icon("right", 16)}</a>
       <a class="btn btn--ghost" href="/score/">{icon("gauge", 16)} Score your service</a>
+      <a class="btn btn--ghost" href="/foundations/docs/agents.html">{icon("chat", 16)} Ask Pablo, Will or Arvind</a>
     </div>
     <p class="continue" hidden><span>Continue where you left off:</span> <a href="#"></a></p>
   </div>

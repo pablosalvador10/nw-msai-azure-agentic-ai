@@ -1,6 +1,6 @@
 ---
 name: fy26-troubleshooting
-description: 'Symptom to cause to fix table for the FY26 course: uv, kernel and ModuleNotFoundError; az login, tenant and token errors; Terraform AuthorizationFailed, InsufficientQuota, MissingSubscriptionRegistration, soft-deleted Foundry; 401/403 from Foundry; 429 or 503 model at capacity; /ready 503; harness core.health 0 or student_id anonymous; deploy timeout, failed revision, crash in the container, 500 with request_id; MCP 421 Invalid Host header; Week 10 401 Missing or invalid X-API-Key. Use for any error message, stack trace or "it does not work" in fy26.'
+description: 'Symptom to cause to fix table for the FY26 course: uv, kernel and ModuleNotFoundError; az login, tenant and token errors; Terraform AuthorizationFailed, InsufficientQuota, MissingSubscriptionRegistration, soft-deleted Foundry; 401/403 from Foundry; 429 or 503 model at capacity; /ready 503; harness core.health 0 or student_id anonymous; deploy timeout, failed revision, crash in the container, 500 with request_id; MCP 421 Invalid Host header; Week 10 401 Missing or invalid X-API-Key; the course website sign-in and Score your deployed service. Use for any error message, stack trace or "it does not work" in fy26.'
 argument-hint: 'Paste the exact error message (remove keys and secrets first)'
 ---
 
@@ -85,8 +85,17 @@ Find the stage first, then the row. Work from `fy26/`. Fix the cause, then rerun
 |---|---|---|
 | `421 Invalid Host header` from `/mcp` | DNS-rebinding protection: only `localhost`, `127.0.0.1` and your app's own hostname (`PUBLIC_HOSTNAME`, set by Terraform) are accepted | Locally use `http://localhost:8000/mcp`, not a LAN IP; in Azure use the exact `app_url` and redeploy with Terraform if you changed it |
 | `403 Invalid Origin header` | A browser-based client from another origin | Call from a non-browser client or `localhost` |
-| VS Code cannot connect to the deployed `/mcp` after Week 10 | No API key header | Add `"headers": {"X-API-Key": "${input:lakeshore-key}"}` to the server in `.vscode/mcp.json` with a password `input`; never hardcode the key |
+| VS Code cannot connect to the deployed `/mcp` after Week 10 | No API key header | In a **Local** chat session: add `"headers": {"X-API-Key": "${input:lakeshore-key}"}` to the server in `.vscode/mcp.json`, with a matching `inputs` entry of `"type": "promptString", "password": true`. **Copilot** sessions do not load servers that use `${input:...}`: test the deployed `/mcp` with `course.check(8)` (it sends the key), or connect VS Code to your local server, `http://127.0.0.1:8000/mcp`. Never write the key into the file |
 | A new tool works in tests but not over MCP | Only added to `domain.py` | Add it to `app/mcp_server.py` with the same name and a clear docstring |
+
+## 7 · The course website
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Signed in to GitHub, but the site says the account cannot read the course | The site admits any GitHub account that can read the course repository | Sign in with the account the instructors gave access to, or ask them to add yours |
+| **Score your deployed service** rejects the URL | It takes only the base URL of a Container App: `https://ca-...azurecontainerapps.io`, no path, no port | Copy it from `terraform -chdir=infra output -raw app_url` |
+| "You started 20 runs in the last hour" | The site limits each person to 20 runs an hour and one at a time | Iterate with the in-process harness; use the site to confirm a deploy |
+| A Week 10 run on the site: the `/v1` checks fail with 401 | The API key field was empty or wrong | Paste the value of `SERVICE_API_KEY` from `fy26/.env` into the field; the site sends it for that run only |
 
 ## Asking for help
 

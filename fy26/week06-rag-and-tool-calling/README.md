@@ -54,7 +54,7 @@ The content of the session is in **[lecture.md](lecture.md)**: embeddings and si
 | `w06.ask.abstain` | 1 | `abstained` is true exactly when the handbook has no answer |
 | `w06.latency` | 1 | Median latency at or under 8 s, scaled by valid responses |
 
-**Stuck?** In Copilot Chat, pick **FY26 Lab Tutor** and name the check, for example: "Week 6, `w06.ask.citations` is PART. What do the failing cases have in common? First hint only." It explains and hints; the code stays yours. **FY26 Deploy Doctor** helps you ship, **FY26 Submit Check** checks you before the deadline. New to the agents? Read [Your course agents](../foundations/docs/agents.html).
+**Stuck?** In Copilot Chat, pick **Pablo · Fundamentals** and name the check, for example: "Week 6, `w06.ask.citations` is PART. What do the failing cases have in common? First hint only." It explains and hints; the code stays yours. **Arvind · Data** compares the pages your answers cite with the expected ones, **Will · Infra and deploy** helps you deploy, and before the deadline ask **Pablo · Scoring** "Am I ready to submit?". New to the agents? Read [Your course agents](../foundations/docs/agents.html).
 
 ## The deep dive (optional)
 

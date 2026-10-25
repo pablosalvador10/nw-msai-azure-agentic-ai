@@ -53,7 +53,7 @@ The content of the session is in **[lecture.md](lecture.md)**: the Azure AI stac
 | `w05.classify.urgency` | 2 | Urgency accuracy |
 | `w05.latency` | 1 | Median latency at or under 4 s, scaled by valid responses |
 
-**Stuck?** In Copilot Chat, pick **FY26 Lab Tutor** and name the check, for example: "Week 5, `w05.classify.urgency` is PART. What do the failing tickets have in common? First hint only." It explains and hints; the code stays yours. **FY26 Deploy Doctor** helps you ship, **FY26 Submit Check** checks you before the deadline. New to the agents? Read [Your course agents](../foundations/docs/agents.html).
+**Stuck?** In Copilot Chat, pick **Pablo · Fundamentals** and name the check, for example: "Week 5, `w05.classify.urgency` is PART. What do the failing tickets have in common? First hint only." It explains and hints; the code stays yours. **Pablo · Scoring** explains what a check measures and how much it weighs, **Arvind · Data** counts which categories your service confuses, **Will · Infra and deploy** helps you deploy, and before the deadline ask Pablo · Scoring "Am I ready to submit?". New to the agents? Read [Your course agents](../foundations/docs/agents.html).
 
 ## The deep dive (optional)
 

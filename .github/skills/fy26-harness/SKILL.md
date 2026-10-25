@@ -1,6 +1,6 @@
 ---
 name: fy26-harness
-description: 'Run and read the FY26 Lakeshore Ride harness: list checks, score in-process, against localhost or the deployed URL, find the report and proof in fy26/reports/, understand PASS/PART/FAIL, weights and noise, debug a failing check from its exchanges, pass the Week 10 API key, and improve a score without overfitting. Use when a student asks "how do I run the harness", "what does this score mean", "why did w06.ask.citations fail", "where is my report", "how am I graded", or "write my own check".'
+description: 'Run and read the FY26 Lakeshore Ride harness: list checks, score in-process, against localhost, the deployed URL, or on the course website (Score your deployed service), find the report and proof in fy26/reports/, understand PASS/PART/FAIL, weights and noise, debug a failing check from its exchanges, pass the Week 10 API key, and improve a score without overfitting. Use when a student asks "how do I run the harness", "what does this score mean", "why did w06.ask.citations fail", "where is my report", "how am I graded", "score my URL", or "write my own check".'
 argument-hint: 'Optional: the week (5, 6, 7, 8, 10) and the check id that worries you'
 ---
 
@@ -10,17 +10,20 @@ The harness is how the course measures your service. It sends requests to the fi
 
 Primer: [foundations/harness.ipynb](../../../fy26/foundations/harness.ipynb).
 
-## Three ways to run it
+## Four ways to run it
 
-All commands run from `fy26/`.
+All commands run from `fy26/` (the workspace root when you opened that folder in VS Code).
 
 | Target | When | Command |
 |---|---|---|
 | In-process | While you iterate: no server, no deploy, uses the code in `app/` now | `uv run python -m harness check --week 6 --in-process` |
 | Local server | You want to see requests in the server log, or test `/mcp` with a real client | `uv run uvicorn app.main:app --reload` in one terminal, then `uv run python -m harness check --week 6 --url http://localhost:8000` |
 | Deployed URL | After `course.deploy()`: this is what gets graded | `uv run python -c "import course; course.setup(); course.check(6)"` |
+| Course website | Confirm a deployment from a browser, no terminal | Sign in, open **Score your deployed service**, paste the base URL (`https://ca-...azurecontainerapps.io`, no path), pick the week |
 
 From a notebook: `course.check(6, in_process=True)` or `course.check(6)` (your deployed URL). `course.check` runs in a fresh process, so it always sees your latest code, and it loads `fy26/.env` first.
+
+The website runs the same public checks with the same engine. It allows one run at a time per person and 20 runs an hour, so iterate locally and use it to confirm. Its API key field (Week 10) is sent to your service for that run only and is not stored. **Download proof (JSON)** saves the same proof file the CLI writes.
 
 `uv run python -m harness list` prints every check, its weight and its title.
 
@@ -28,7 +31,7 @@ In-process and local runs still call your real Foundry models with your `az logi
 
 ## Week 10: the API key
 
-Once `course.set_api_key()` has put `SERVICE_API_KEY` in `fy26/.env`, the service rejects `/v1/*` and `/mcp` without the `X-API-Key` header. The harness sends `$SERVICE_API_KEY` from the environment of its own process. `course.check(...)` loads `.env` for you. On the raw CLI, export it first or pass `--api-key`. Never paste the key into a chat, an issue or a commit.
+Once `course.set_api_key()` has put `SERVICE_API_KEY` in `fy26/.env`, the service rejects `/v1/*` and `/mcp` without the `X-API-Key` header. The harness sends `$SERVICE_API_KEY` from the environment of its own process. `course.check(...)` loads `.env` for you. On the raw CLI, load the key into the shell first without printing it (bash or zsh: `export "$(grep '^SERVICE_API_KEY=' .env)"`; PowerShell: `$env:SERVICE_API_KEY = ((Get-Content .env | Select-String '^SERVICE_API_KEY=').Line -split '=', 2)[1]`), or pass `--api-key`. Never paste the key into a chat, an issue or a commit.
 
 ## Reading the result
 

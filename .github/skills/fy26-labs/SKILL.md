@@ -1,6 +1,6 @@
 ---
 name: fy26-labs
-description: 'Map of the FY26 Lakeshore Ride course and service, week by week: what each week builds (Week 5 classify/chat, Week 6 ask with RAG and tools, Week 7 resolve with multi-agent triage, Week 8 MCP and a coding-agent feature, Week 10 guardrails, limits and API key), which file in app/ to edit, which harness checks score it, the iterate-measure-deploy loop, and common mistakes. Use when a student asks "what do I do this week", "which file do I change", "how does the app work", "where is the tool code", "what is the exercise", or needs a hint on a lab.'
+description: 'Map of the FY26 Lakeshore Ride course and service, week by week: what each week builds (Week 5 classify/chat, Week 6 ask with RAG and tools, Week 7 resolve with multi-agent triage, Week 8 MCP and a coding-agent feature, Week 10 guardrails, limits and API key), the materials in each week folder (README, lecture notes and HTML, slides, required lab and its parts, optional deep dive), which file in app/ to edit, which harness checks score it, the iterate-measure-deploy loop, and common mistakes. Use when a student asks "what do I do this week", "which file do I change", "how does the app work", "where is the tool code", "what is the exercise", "where are the slides", "is the deep dive graded", or needs a hint on a lab.'
 argument-hint: 'Optional: the week number (5, 6, 7, 8 or 10)'
 ---
 
@@ -20,6 +20,28 @@ Every week has the same loop: **Learn** (concept from scratch in `lab.ipynb`) �
 | 10 | Dec 1 | [week10-production-agentic-systems](../../../fy26/week10-production-agentic-systems/README.md) | all, hardened | final deadline |
 
 Weeks 1 to 4 and 9 are taught by other instructors and have no materials here. If a tool is new, the [foundations primers](../../../fy26/foundations/README.md) take 15 to 20 minutes each.
+
+## What each week folder holds
+
+| File | What it is | Graded? |
+|---|---|---|
+| `README.md` | The exercise, files to edit, checks and weights, deadline | Defines the grade |
+| `lecture.md` | The lecture notes, in numbered sections `## N · Title` | No |
+| `docs/lecture.html`, `docs/slides.html` | The same notes for the browser (`lecture.html#sN` is section N) and the slide deck | No |
+| `lab.ipynb` | The main lab: parts in order, then deploy. **Required** | Its result, your deployed URL, is graded |
+| `deep-dive.ipynb` | Optional, for after you submit. Does not edit `app/` or deploy | No |
+
+Open notebooks in VS Code with the kernel **`.venv (Python 3.12)`** from `fy26/.venv`. The **course website** (sign in with the GitHub account that can read the course repository) shows all of it in a browser, plus **Score your deployed service**, which runs the public harness against your URL.
+
+## Lab parts
+
+| Week | Parts of `lab.ipynb` |
+|---|---|
+| 5 | 1 Where models live · 2 First calls, from scratch · 3 Structured output · **4 Measure, then improve** (graded work) · 5 Deploy and score the live URL |
+| 6 | 1 The model does not know your handbook · 2 RAG from scratch · 3 Where RAG stops · 4 Tool calling, by hand · 5 The same, with Microsoft Agent Framework · **6 Put the agent in your service** (graded work) · 7 Deploy and score · 8 Go further |
+| 7 | 1 One agent with every tool · 2 Workflows, from scratch · 3 Routing with a triage agent · **4 The resolution service** (graded work) · 5 Deploy and score |
+| 8 | 1 Anatomy of a harness · 2 Run the service locally · 3 Your tools, in other agents · **4 Agentic coding: a feature from a spec** (graded work) · 5 Deploy and score · 6 Write your own check |
+| 10 | 1 Threat model · 2 Red-team your own service · **3 Layered guardrails** · **4 Limits and authentication** · 5 Observability · 6 Evaluation: an LLM judge from scratch · **7 Final deploy: every week, one URL** |
 
 ## Service map
 
@@ -85,9 +107,9 @@ Every lab marks a point where you stop improving and deploy. A deployed improvem
 ### Week 8 · MCP and a feature built by a coding agent
 
 - **Build:** `nearest_station_with_docks` in `app/domain.py`, published as an MCP tool with the same name in `app/mcp_server.py`. The spec is [tests/test_week08_nearest_station.py](../../../fy26/tests/test_week08_nearest_station.py): skipped until the function exists, then it must pass.
-- **How:** a coding agent writes the code (GitHub Copilot in **Agent** mode reads `fy26/AGENTS.md`). You write the prompt, review every diff, run `uv run pytest tests/test_week08_nearest_station.py -q -rs` and the harness, and decide what ships.
+- **How:** a coding agent writes the code (GitHub Copilot's built-in **Agent**, picked in the Agent dropdown, reads `fy26/AGENTS.md`). You write the prompt, review every diff, run `uv run pytest tests/test_week08_nearest_station.py -q -rs` and the harness, and decide what to deploy.
 - **Checks:** `w08.mcp.discover`, `w08.mcp.tools`, `w08.mcp.call` (3), `w08.mcp.new_tool` (3).
-- **Try it in VS Code:** run `uv run uvicorn app.main:app --reload`, then Command Palette, **MCP: Add Server**, HTTP, `http://localhost:8000/mcp`.
+- **Try it in VS Code:** run `uv run uvicorn app.main:app --reload`, then Command Palette, **MCP: Add Server**, HTTP, `http://127.0.0.1:8000/mcp` (lab Part 3).
 - **Common mistakes:** flat latitude/longitude distance instead of great-circle; returning the station itself or a full or closed one; a tool in `domain.py` but not in `mcp_server.py`.
 
 ### Week 10 · Production hardening

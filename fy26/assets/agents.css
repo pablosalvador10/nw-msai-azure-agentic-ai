@@ -76,7 +76,7 @@ a.agent-chip{text-decoration:none}a.agent-chip:hover{text-decoration:underline}
 kbd{display:inline-block;min-width:1.6em;padding:0 5px;border:1px solid #c8cbd0;border-bottom-width:2px;border-radius:5px;background:#fff;
   font:600 .82em/1.5 var(--mono);text-align:center;white-space:nowrap}
 
-/* Route map: one door, four specialists */
+/* Route map: one door, four experts */
 .route{display:grid;grid-template-columns:minmax(0,.8fr) 38px minmax(0,1fr) 38px minmax(0,1.5fr);align-items:center;margin:20px 0 26px}
 .route__you{padding:16px;border:2px dashed #c8cbd0;border-radius:14px;background:#fff;text-align:center}
 .route__you strong{display:block;font-size:1.02rem}.route__you span{color:var(--muted);font-size:.84rem}

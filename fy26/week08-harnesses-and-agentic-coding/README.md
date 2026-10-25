@@ -56,7 +56,7 @@ The coding agent writes the code. You write the prompt, review every change, run
 | `w08.mcp.call` | 3 | Tool calls return the right data |
 | `w08.mcp.new_tool` | 3 | `nearest_station_with_docks` exists and answers correctly |
 
-**Stuck?** This week the coding agent that writes `nearest_station_with_docks` is Copilot's built-in **Agent**, guided by [`AGENTS.md`](../AGENTS.md). **FY26 Lab Tutor** coaches your prompt and your review of the diff, and explains any failing `w08.mcp.*` check. **FY26 Deploy Doctor** helps you ship, **FY26 Submit Check** checks you before the deadline. New to the agents? Read [Your course agents](../foundations/docs/agents.html).
+**Stuck?** This week the coding agent that writes `nearest_station_with_docks` is Copilot's built-in **Agent**, guided by [`AGENTS.md`](../AGENTS.md); [Vibe coding with Copilot's Agent](../foundations/docs/agents.html#vibe) shows the loop and a prompt template. **Pablo · Fundamentals** coaches your prompt and your review of the diff, and explains any failing `w08.mcp.*` check. **Arvind · Data** explains the station data your new tool reads, and **Will · Infra and deploy** helps you deploy and fixes MCP connection errors. Before the deadline, ask **Pablo · Scoring** "Am I ready to submit?". New to the agents? Read [Your course agents](../foundations/docs/agents.html).
 
 ## The deep dive (optional)
 

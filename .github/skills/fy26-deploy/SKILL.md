@@ -42,7 +42,7 @@ If the in-process harness crashes or scores 0 on `core.health`, the container wi
 | Notebook (the lab's Deploy part) | `url = course.deploy()` |
 | Terminal, in `fy26/` | `uv run python -c "import course; course.setup(); course.deploy()"` |
 
-Then score the live URL: `course.check(<week>)` or `uv run python -c "import course; course.setup(); course.check(<week>)"`.
+Then score the live URL: `course.check(<week>)` or `uv run python -c "import course; course.setup(); course.check(<week>)"`. To confirm from a browser, the course website has **Score your deployed service** (same public checks).
 
 ## Inspect the live service
 
@@ -91,6 +91,15 @@ url = course.deploy()  # Terraform stores the key as a Container Apps secret
 ```
 
 From then on `/v1/*` and `/mcp` need the `X-API-Key` header; `/health`, `/ready`, `/v1/info` and `/docs` stay open. `course.check` sends the key for you.
+
+To call a protected route with `curl`, load the key into the shell without printing it, then reference the variable:
+
+```bash
+export "$(grep '^SERVICE_API_KEY=' .env)"     # bash or zsh; prints nothing
+curl -s -X POST $URL/v1/chat -H "content-type: application/json" -H "X-API-Key: $SERVICE_API_KEY" -d '{"message":"hi"}'
+```
+
+On Windows PowerShell: `$env:SERVICE_API_KEY = ((Get-Content .env | Select-String '^SERVICE_API_KEY=').Line -split '=', 2)[1]`, then use `curl.exe` with `-H "X-API-Key: $env:SERVICE_API_KEY"`.
 
 ## Traces and KQL
 

@@ -14,7 +14,7 @@ You submit **one URL** per week (Week 10: the URL and your API key). Instructors
 | 2 | Lint | `uv run ruff check .` | No errors |
 | 3 | Your URL | `terraform -chdir=infra output -raw app_url` | `https://ca-....azurecontainerapps.io`, no path, no trailing slash |
 | 4 | Latest code is live | `curl -s <url>/v1/info` | `version` equals the tag of your last `course.deploy()` (in `infra/image.auto.tfvars`), `student_id` is your NetID, not `anonymous`, `contract` is `fy26.v1` |
-| 5 | This week scores on the URL | `uv run python -c "import course; course.setup(); course.check(<week>)"` | The score is what you expect from your in-process runs, within 1 to 2 points |
+| 5 | This week scores on the URL | `uv run python -c "import course; course.setup(); course.check(<week>)"`, or **Score your deployed service** on the course website | The score is what you expect from your in-process runs, within 1 to 2 points |
 | 6 | Earlier weeks still work | the same, for each earlier week: 5, 6, 7, 8 | No earlier route broke. Your final URL is scored with every week's harness |
 | 7 | Week 10 only: the key | `curl -s -o /dev/null -w "%{http_code}" -X POST <url>/v1/chat -H "content-type: application/json" -d '{"message":"hi"}'` | `401` without the key; `course.check(10)` passes `w10.auth`. Submit the key only through the course site |
 | 8 | Nothing secret in git | `git status --short` and `git diff --cached --name-only` | No `.env`, `terraform.tfvars`, `*.auto.tfvars`, `terraform.tfstate*` or `reports/` staged or committed |
