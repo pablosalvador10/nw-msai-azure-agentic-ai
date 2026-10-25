@@ -75,11 +75,12 @@ def actions(ctx: Context) -> Outcome:
             )
             for want in expected
         )
-        spurious_credit = any(a.get("name") == "issue_credit" for a in done) and not any(
-            w["name"] == "issue_credit" for w in expected
-        )
-        scores.append(0.0 if spurious_credit else matched / len(expected))
-        if matched < len(expected):
+        # Money paid beyond the policy is never partly right: extra or duplicate credits score zero.
+        credits_issued = sum(a.get("name") == "issue_credit" for a in done)
+        credits_owed = sum(w["name"] == "issue_credit" for w in expected)
+        extra_credit = credits_issued > credits_owed
+        scores.append(0.0 if extra_credit else matched / len(expected))
+        if matched < len(expected) or extra_credit:
             got = [(a.get("name"), a.get("arguments"), a.get("status")) for a in done]
             notes.append(f"{row['id']} (got {got})")
     return mean(scores), f"{sum(s == 1 for s in scores)}/{len(scores)} cases took exactly the expected actions." + (

@@ -1,5 +1,8 @@
 import pytest
 
+from harness.checks import week07
+from harness.client import Exchange
+from harness.engine import Context
 from harness.scoring import arguments_match, fact_score, has_number, latency_score, normalize
 
 
@@ -32,6 +35,21 @@ def test_fact_score_partial_credit():
 )
 def test_fact_score_matches_whole_numbers(answer, facts, expected):
     assert fact_score(answer, facts) == expected
+
+
+def test_week07_actions_give_no_points_for_crediting_more_than_owed():
+    owed = {"name": "issue_credit", "arguments": {"rider_id": "R-1", "amount": 5}, "status": "issued"}
+    ticket = {"name": "open_ticket", "arguments": {"station_id": "LS-07"}, "status": "open"}
+    row = {"id": "c1", "case": "Dock did not lock.", "specialists": ["billing"], "actions": [owed, ticket]}
+
+    def score(actions: list[dict]) -> float:
+        reply = Exchange("POST", "/v1/resolve", 200, 1.0, response={"id": "c1", "actions": actions})
+        return week07.actions(Context(target=None, week=7, cache={"week07": [row], "w07": {"c1": reply}}))[0]
+
+    assert score([owed, ticket]) == 1.0
+    assert score([owed]) == 0.5
+    assert score([owed, owed, ticket]) == 0.0
+    assert score([owed, {**owed, "arguments": {"rider_id": "R-1", "amount": 50}}, ticket]) == 0.0
 
 
 def test_has_number():

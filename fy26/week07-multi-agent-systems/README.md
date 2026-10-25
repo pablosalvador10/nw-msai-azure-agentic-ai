@@ -49,7 +49,7 @@ The content of the session is in **[lecture.md](lecture.md)**, a deep tour of **
 | `core.health`, `core.info` | 1 + 1 | The service is up and identifies you |
 | `w07.resolve.schema` | 1 | Every response matches the contract |
 | `w07.resolve.route` | 2 | Cases reach the right specialists, and no others |
-| `w07.resolve.actions` | 3 | Credits (rider, amount, status) and tickets (category, station) are correct; no unowed credit |
+| `w07.resolve.actions` | 3 | Credits (rider, amount, status) and tickets (category, station) are correct; no unowed, duplicate or extra credit (any of these scores the case 0) |
 | `w07.resolve.answer` | 1 | Replies state the key facts |
 | `w07.latency` | 1 | Median latency at or under 20 s, scaled by valid responses |
 
