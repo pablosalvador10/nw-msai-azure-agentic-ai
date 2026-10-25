@@ -32,8 +32,8 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 ```bash
 # Clone the repository
-git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
-cd northwestern-msai-azure-agentic-ai/fy25
+git clone https://github.com/pablosalvador10/nw-msai-azure-agentic-ai.git
+cd nw-msai-azure-agentic-ai/fy25
 
 # Install Python versions (optional - uv will auto-install if needed)
 uv python install 3.10 3.11 3.12
