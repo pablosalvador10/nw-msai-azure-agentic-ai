@@ -33,7 +33,7 @@ from src.abstractions.azure_functions import analyze_data
 def test_analyze_data_with_valid_input():
     """Test analyze_data returns correct statistics."""
     result = analyze_data([1, 2, 3, 4, 5])
-    
+
     assert result["count"] == 5
     assert result["sum"] == 15
     assert result["mean"] == 3.0
@@ -55,16 +55,16 @@ import pytest
 def test_mcp_analyze_data_tool():
     """Test the MCP analyze_data tool."""
     from src.tool_registry.mcps.src.function_app import analyze_data
-    
+
     # Simulate MCP context (how Azure Functions passes data)
     context = json.dumps({
         "arguments": {
             "values": "[10, 20, 30]"
         }
     })
-    
+
     result = json.loads(analyze_data(context))
-    
+
     assert result["count"] == 3
     assert result["mean"] == 20.0
     assert result["status"] != "error"
@@ -76,7 +76,7 @@ def test_mcp_tool_handles_invalid_json():
             "values": "not valid json"
         }
     })
-    
+
     result = json.loads(analyze_data(context))
     assert "error" in result
 ```
@@ -130,10 +130,10 @@ def test_function_calls_external_api(mock_post):
         status_code=200,
         json=lambda: {"result": "success"}
     )
-    
+
     # Act
     result = call_external_api("test-data")
-    
+
     # Assert
     mock_post.assert_called_once()
     assert result["status"] == "success"

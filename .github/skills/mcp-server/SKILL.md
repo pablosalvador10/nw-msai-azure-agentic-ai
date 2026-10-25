@@ -55,10 +55,10 @@ def search_data(context) -> str:
     content = json.loads(context)
     query = content["arguments"].get("query", "")
     limit = content["arguments"].get("limit", 10)
-    
+
     # Your search logic here
     results = perform_search(query, limit)
-    
+
     return json.dumps({
         "results": results,
         "count": len(results),

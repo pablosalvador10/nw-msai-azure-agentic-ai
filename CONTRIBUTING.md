@@ -36,7 +36,7 @@ Students must not change the contract or scoring code. If a maintainer needs to 
 - Add a regression test for a bug. Include an error case as well as the successful path.
 - Tests run offline: no Azure calls, network access or real credentials. Use the fixtures in [fy26/tests/conftest.py](fy26/tests/conftest.py).
 
-From the cohort folder, run `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest`. Ruff is the only formatter. There are no registered `unit`, `integration` or `slow` test markers; register a marker before introducing it because pytest uses strict marker checking.
+Install the commit hooks once from the repository root with `pre-commit install`. They run Ruff (lint and format), file hygiene, a secret scan, the notebook-output check and `terraform fmt` on every commit; `pre-commit run --all-files` runs them on everything. From the cohort folder, `uv run pytest --cov` runs the offline tests with branch coverage; the build fails below the floor in `pyproject.toml`, and the floor only moves up. Ruff is the only formatter (do not add Black: the two disagree). There are no registered `unit`, `integration` or `slow` test markers; register a marker before introducing it because pytest uses strict marker checking.
 
 Some Week 8 tests are skipped until the student-built feature exists. That is intentional. Do not silence a new failure by skipping its test or lowering a grading threshold.
 
@@ -74,4 +74,4 @@ For browser changes, check a lecture and a slide deck at desktop and phone width
 4. Check the affected reading page, slides and notebook agree. The tests in [fy26/tests/test_teaching_consistency.py](fy26/tests/test_teaching_consistency.py) and [fy26/tests/test_presentation_assets.py](fy26/tests/test_presentation_assets.py) cover section and code drift, shared assets, and local HTML links.
 5. Use a conventional commit prefix: `fix:`, `docs:`, `feat:`, `test:` or `refactor:`. In the pull request, record which checks ran and any behavior that remains unverified.
 
-The [CI workflow](.github/workflows/ci.yml) checks the locked install, Ruff, offline tests, clean notebook outputs, and Terraform formatting and validation. Keep it green before merging.
+The [CI workflow](.github/workflows/ci.yml) runs the same pre-commit hooks, a secret scan of the pushed commits, the locked install, Ruff, the offline tests with coverage, clean notebook outputs, and Terraform formatting and validation. Keep it green before merging.

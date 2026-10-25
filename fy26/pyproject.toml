@@ -1,7 +1,7 @@
 [project]
 name = "northwestern-agentic-ai-fy26"
 version = "0.1.0"
-description = "Northwestern MS AI, FY26 cohort: agentic AI on Microsoft Foundry"
+description = "Agentic AI on Microsoft Foundry: the FY26 course service, harness and website"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
@@ -25,6 +25,7 @@ dev = [
     "httpx2>=2.16.0",
     "ipykernel>=7.4.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7",
     "python-dotenv>=1.2.4",
     "ruff>=0.17.2",
 ]
@@ -34,11 +35,55 @@ pythonpath = ["."]
 testpaths = ["tests"]
 addopts = ["-q", "--strict-markers"]
 
+[tool.coverage.run]
+source = ["app", "harness", "web", "course"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+# The floor only moves up: raise it when tests cover more.
+fail_under = 84
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"
 extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "I", "B", "C4", "UP"]
-ignore = ["E501"]
+select = [
+    "E", "W", "F",  # pycodestyle, pyflakes
+    "I",            # import order
+    "B",            # likely bugs
+    "C4",           # comprehensions
+    "UP",           # modern syntax for Python 3.12
+    "SIM",          # simpler code
+    "RUF",          # Ruff's own checks
+    "PTH",          # pathlib instead of os.path
+    "RET",          # return statements
+    "PIE",          # unnecessary code
+    "PERF",         # performance pitfalls
+    "PT",           # pytest style
+    "N",            # naming
+    "S",            # security (bandit)
+    "BLE",          # bare except Exception
+    "FURB",         # refurbished idioms
+    "LOG", "G",     # logging
+    "TID",          # tidy imports
+    "A",            # shadowed builtins
+]
+ignore = [
+    "E501",   # line length is handled by the formatter
+    "N818",   # exception names: RunRejected reads better than RunRejectedError
+    "PT018",  # composite assertions are clearer in these teaching tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101",  # pytest uses assert
+    "S102",  # tests execute the lecture's code samples
+    "S603",  # tests run the course's own commands
+]
+# The course helpers and the website publisher run az, terraform and git on purpose.
+"course.py" = ["S603", "S607"]
+"web/publish.py" = ["S603", "S607"]

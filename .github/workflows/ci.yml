@@ -2,95 +2,128 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, fy26 ]
+    branches: [main, develop, fy26]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  python:
-    name: Lint and test (${{ matrix.cohort }})
+  pre-commit:
+    name: Pre-commit (Ruff, hygiene, notebooks, Terraform fmt)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run every hook on every file
+        env:
+          SKIP: gitleaks  # staged-only in pre-commit; the secrets job scans the commits instead
+        run: pipx run pre-commit run --all-files --show-diff-on-failure --color always
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Scan the commits in this push or pull request
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
+          GITLEAKS_ENABLE_SUMMARY: true
+
+  python:
+    name: Tests (${{ matrix.cohort }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        cohort: [ fy26 ]
+        cohort: [fy26]
     defaults:
       run:
         working-directory: ${{ matrix.cohort }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
-      with:
-        version: "latest"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "${{ matrix.cohort }}/uv.lock"
 
-    - name: Install dependencies (from uv.lock)
-      run: uv sync --locked
+      - name: Install dependencies (from uv.lock)
+        run: uv sync --locked
 
-    - name: Run Ruff (formatting check)
-      run: uv run ruff format --check .
+      - name: Run Ruff with the locked version (lint and format)
+        run: |
+          uv run ruff check . --output-format=github
+          uv run ruff format --check .
 
-    - name: Run Ruff (linting)
-      run: uv run ruff check . --output-format=github
+      - name: Run tests with coverage (offline, no Azure)
+        run: uv run pytest --cov --cov-report=term-missing:skip-covered
 
-    - name: Run tests (offline, no Azure)
-      run: uv run pytest
-
-    - name: Check notebooks (valid JSON, no outputs)
-      run: |
-        uv run python - <<'PY'
-        import json
-        import sys
-        from pathlib import Path
-
-        bad = []
-        for path in sorted(Path(".").rglob("*.ipynb")):
-            if {".venv", ".ipynb_checkpoints"} & set(path.parts):
-                continue
-            try:
-                notebook = json.loads(path.read_text(encoding="utf-8"))
-            except ValueError as exc:
-                bad.append(f"{path}: invalid JSON ({exc})")
-                continue
-            for index, cell in enumerate(notebook.get("cells", [])):
-                if cell.get("cell_type") == "code" and (cell.get("outputs") or cell.get("execution_count")):
-                    bad.append(f"{path}: cell {index} has outputs; clear them before committing")
-                    break
-        print("\n".join(bad) or "Notebooks OK")
-        sys.exit(1 if bad else 0)
-        PY
+      - name: Check notebooks (valid JSON, no outputs)
+        run: uv run python scripts/check_notebooks.py
 
   terraform:
     name: Terraform (${{ matrix.dir }})
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         dir: [fy26/infra, fy26/web/infra]
     defaults:
       run:
         working-directory: ${{ matrix.dir }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_wrapper: false
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
-    - name: Terraform fmt
-      run: terraform fmt -check -recursive
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
 
-    - name: Terraform init (no backend)
-      run: terraform init -backend=false -input=false
+      - name: Terraform init (no backend)
+        run: terraform init -backend=false -input=false
 
-    - name: Terraform validate
-      run: terraform validate
+      - name: Terraform validate
+        run: terraform validate

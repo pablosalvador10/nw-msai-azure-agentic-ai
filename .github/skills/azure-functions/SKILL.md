@@ -26,10 +26,10 @@ def my_function(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Parse request
         data = req.get_json() if req.method == "POST" else dict(req.params)
-        
+
         # Your logic here
         result = {"status": "success", "data": data}
-        
+
         return func.HttpResponse(
             body=json.dumps(result),
             status_code=200,

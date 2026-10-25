@@ -108,7 +108,7 @@ def write_tfvars(
     account = az_account()
     path = INFRA / "terraform.tfvars"
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
-    previous = re.search(r'^location\s*=\s*"([^"]+)"', existing, re.M)
+    previous = re.search(r'^location\s*=\s*"([^"]+)"', existing, re.MULTILINE)
     if previous and previous.group(1) != location and (INFRA / "terraform.tfstate").exists():
         # Changing the region of resources that exist deletes and recreates all of them. Keep where they are.
         print(f"Keeping location {previous.group(1)!r}: your resources already live there.")

@@ -1,5 +1,6 @@
 """A model deployment at its tokens-per-minute limit must surface as 503 + Retry-After, not as a 500."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.middleware import is_model_rate_limited
@@ -12,13 +13,15 @@ class RateLimitError(Exception):
 
 
 def test_rate_limit_is_found_through_the_exception_chain():
-    try:
+    def agent_run():
         try:
             raise RateLimitError("Error code: 429 - rate_limit_exceeded")
         except RateLimitError as inner:
             raise RuntimeError("agent run failed") from inner
-    except RuntimeError as outer:
-        assert is_model_rate_limited(outer)
+
+    with pytest.raises(RuntimeError) as outer:
+        agent_run()
+    assert is_model_rate_limited(outer.value)
     assert not is_model_rate_limited(ValueError("bad input"))
 
 

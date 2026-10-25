@@ -65,8 +65,8 @@ class Catalog:
             lecture = _read(root / folder / "docs" / "lecture.html")
             when = re.search(r"\*\*Date:\*\*\s*([A-Z][a-z]{2})\w*\s+(\d{1,2})", readme)
             day = date(year, MONTHS[when.group(1)], int(when.group(2))) if when and when.group(1) in MONTHS else None
-            tagline = re.search(r'<span class="hero-subtitle">(.*?)</span>\s*</h1>', lecture, re.S)
-            builds = re.search(r"<td>You build</td>\s*<td>(.*?)</td>", lecture, re.S)
+            tagline = re.search(r'<span class="hero-subtitle">(.*?)</span>\s*</h1>', lecture, re.DOTALL)
+            builds = re.search(r"<td>You build</td>\s*<td>(.*?)</td>", lecture, re.DOTALL)
             weeks.append(
                 Week(
                     number=number,
@@ -137,9 +137,9 @@ class Catalog:
             Link("Foundations notebooks", "/foundations/README.md"),
         ]
         for week in self.weeks:
-            for link in week.links:
-                if link.label != "Slides":
-                    order.append(Link(f"Week {week.number} · {link.label}", link.href))
+            order.extend(
+                Link(f"Week {week.number} · {link.label}", link.href) for link in week.links if link.label != "Slides"
+            )
         return order
 
     def neighbours(self, path: str) -> tuple[Link | None, Link | None]:

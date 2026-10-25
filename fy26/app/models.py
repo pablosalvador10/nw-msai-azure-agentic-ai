@@ -23,7 +23,7 @@ from app.config import LLMMode, Settings
 T = TypeVar("T", bound=BaseModel)
 
 # Token audience for Foundry. The credential exchanges your identity for a short-lived token.
-TOKEN_SCOPE = "https://ai.azure.com/.default"
+TOKEN_SCOPE = "https://ai.azure.com/.default"  # noqa: S105 (an OAuth scope, not a secret)
 
 
 class FoundryModels:
@@ -119,7 +119,7 @@ def hashed_embedding(text: str, dims: int = 512) -> list[float]:
     vector = [0.0] * dims
     for token in re.findall(r"[a-z0-9]+", text.lower()):
         token = token[:-1] if len(token) > 3 and token.endswith("s") else token
-        slot = int(hashlib.md5(token.encode()).hexdigest(), 16) % dims
+        slot = int(hashlib.md5(token.encode(), usedforsecurity=False).hexdigest(), 16) % dims
         vector[slot] += 1.0
     norm = math.sqrt(sum(v * v for v in vector)) or 1.0
     return [v / norm for v in vector]

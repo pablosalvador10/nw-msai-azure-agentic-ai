@@ -91,9 +91,10 @@ async def resolve(state: AppState, request: ResolveRequest) -> ResolveResponse:
 
 
 def _notes(outputs: list) -> str:
-    lines: list[str] = []
-    for output in outputs:
-        for message in getattr(output, "messages", []) or []:
-            if message.role == "assistant" and message.text:
-                lines.append(f"[{message.author_name or 'specialist'}] {message.text}")
+    lines = [
+        f"[{message.author_name or 'specialist'}] {message.text}"
+        for output in outputs
+        for message in getattr(output, "messages", []) or []
+        if message.role == "assistant" and message.text
+    ]
     return "\n".join(lines) or "\n".join(str(o) for o in outputs)

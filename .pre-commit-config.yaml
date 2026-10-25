@@ -1,0 +1,51 @@
+# Checks that run before every commit, and in CI on every push and pull request.
+# Install once from the repository root:  pre-commit install
+# Run on everything:                      pre-commit run --all-files
+# Ruff is pinned to the version in fy26/uv.lock; bump both together.
+exclude: ^fy25/  # the archived course stays exactly as taught
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^fy26/
+      - id: ruff-format
+        files: ^fy26/
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: notebooks-clean
+        name: notebooks have no outputs
+        language: python
+        entry: python fy26/scripts/check_notebooks.py
+        files: ^fy26/.*\.ipynb$
+      - id: terraform-fmt
+        name: terraform fmt
+        language: system
+        entry: terraform fmt -check -recursive fy26
+        files: \.tf$
+        pass_filenames: false

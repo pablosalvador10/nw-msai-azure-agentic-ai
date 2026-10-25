@@ -31,8 +31,8 @@ EXCLUDED_DIRS = {"web", "reports", "agent-file-memory", "build", "node_modules",
 
 # Lecture pages keep their own design; one script adds "Score your service" to their materials bar.
 LECTURE_SCRIPT = '\n<script src="/_site/lecture-addon.js"></script>\n'
-TITLE = re.compile(r"<title>(.*?)</title>", re.S)
-SECTION_H2 = re.compile(r'<section\b[^>]*\bid="([^"]+)"[^>]*>\s*(?:<[^h][^>]*>\s*)*<h2[^>]*>(.*?)</h2>', re.S)
+TITLE = re.compile(r"<title>(.*?)</title>", re.DOTALL)
+SECTION_H2 = re.compile(r'<section\b[^>]*\bid="([^"]+)"[^>]*>\s*(?:<[^h][^>]*>\s*)*<h2[^>]*>(.*?)</h2>', re.DOTALL)
 HTML_KINDS = {
     "lecture.html": "Lecture",
     "slides.html": "Slides",

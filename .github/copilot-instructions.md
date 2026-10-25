@@ -57,12 +57,13 @@ fy25/                       # Archived cohort: frozen, do not modify
 ```bash
 uv sync                                              # install
 uv run ruff format . && uv run ruff check .          # format + lint
-uv run pytest                                        # offline tests
+uv run pytest --cov                                  # offline tests + coverage floor
 uv run uvicorn app.main:app --reload                 # run the service
 uv run python -m harness check --week 5 --in-process # score without deploying
+pre-commit install                                   # once, from the repo root
 ```
 
-CI (`.github/workflows/ci.yml`) runs `uv sync --locked`, Ruff, pytest, a notebook check (valid JSON, **no outputs**), and `terraform fmt -check` + `validate`.
+Pre-commit (`.pre-commit-config.yaml`) runs Ruff, file hygiene, gitleaks, the notebook check and `terraform fmt` on every commit. Ruff is the only formatter; never add Black. CI (`.github/workflows/ci.yml`) runs the same hooks, a gitleaks scan of the pushed commits, `uv sync --locked`, Ruff, pytest with coverage (`fail_under` in `pyproject.toml` only moves up), a notebook check (valid JSON, **no outputs**), and `terraform fmt -check` + `validate`.
 
 ## Security and Privacy
 

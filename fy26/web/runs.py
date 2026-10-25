@@ -153,7 +153,7 @@ class RunQueue:
         try:
             run.report = self._runner(url, run.week, api_key, progress)
             run.status, run.completed, run.current = "done", run.total, ""
-        except Exception as exc:  # noqa: BLE001 - report any failure to the student instead of hanging
+        except Exception as exc:
             log.exception("Run %s failed", run.id)
             run.status, run.error = "failed", f"The harness stopped: {type(exc).__name__}. Try again in a minute."
         score = (run.report or {}).get("score")

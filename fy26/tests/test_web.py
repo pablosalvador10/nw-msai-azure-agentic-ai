@@ -409,9 +409,11 @@ def test_every_real_course_document_renders_and_its_links_resolve() -> None:
         assert page.title and page.body_html, rel
         html_page = shell.render(page, User("student", 1))
         assert "<h1>" in html_page and 'class="site-nav"' in html_page, rel
-        for href in re.findall(r'href="(/[^"#?]*)', page.body_html):
-            if not (FY26 / href.strip("/")).exists():
-                broken.append(f"{rel} -> {href}")
+        broken.extend(
+            f"{rel} -> {href}"
+            for href in re.findall(r'href="(/[^"#?]*)', page.body_html)
+            if not (FY26 / href.strip("/")).exists()
+        )
     assert not broken
 
 

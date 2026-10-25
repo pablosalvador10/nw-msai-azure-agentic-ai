@@ -102,13 +102,13 @@ def process_tool_calls(run, client, thread_id):
     """Process tool calls from the agent."""
     if run.status == "requires_action":
         tool_calls = run.required_action.submit_tool_outputs.tool_calls
-        
+
         tool_outputs = []
         for call in tool_calls:
             # Get function name and arguments
             function_name = call.function.name
             arguments = json.loads(call.function.arguments)
-            
+
             # Execute the tool
             if function_name == "analyze_data":
                 result = analyze_data(arguments["values"])
@@ -116,19 +116,19 @@ def process_tool_calls(run, client, thread_id):
                 result = search_database(arguments["query"])
             else:
                 result = {"error": f"Unknown function: {function_name}"}
-            
+
             tool_outputs.append({
                 "tool_call_id": call.id,
                 "output": json.dumps(result)
             })
-        
+
         # Submit results back to the agent
         run = client.agents.submit_tool_outputs(
             thread_id=thread_id,
             run_id=run.id,
             tool_outputs=tool_outputs
         )
-    
+
     return run
 ```
 

@@ -96,15 +96,15 @@ def test_slides_follow_the_lecture(source):
     assert sorted(set(taught)) == sections, f"sections without a slide: {sorted(set(sections) - set(taught))}"
 
 
-@pytest.mark.parametrize("format", ["markdown", "lecture", "slides"])
-@pytest.mark.parametrize("amount,allowed", [(CREDIT_LIMIT, True), (CREDIT_LIMIT + 0.01, False)])
-def test_credit_middleware_examples_use_the_domain_policy(format, amount, allowed):
+@pytest.mark.parametrize("source", ["markdown", "lecture", "slides"])
+@pytest.mark.parametrize(("amount", "allowed"), [(CREDIT_LIMIT, True), (CREDIT_LIMIT + 0.01, False)])
+def test_credit_middleware_examples_use_the_domain_policy(source, amount, allowed):
     """Execute only the illustrative gate, not the model, agent or any action tool."""
     week = COHORT / "week07-multi-agent-systems"
-    if format == "markdown":
+    if source == "markdown":
         blocks = re.findall(r"^```python[^\n]*\n(.*?)^```", (week / "lecture.md").read_text(), re.MULTILINE | re.DOTALL)
     else:
-        blocks = html_parts(week / "docs" / f"{format}.html").code
+        blocks = html_parts(week / "docs" / f"{source}.html").code
     snippet = next(block for block in blocks if "async def cap_credits(" in block)
     function = next(
         node

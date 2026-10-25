@@ -20,7 +20,7 @@ from web.hints import WEEK_DIRS, WEEK_TITLES
 from web.shell import Page
 
 MERMAID = "/_site/mermaid-12.2.0.min.js"
-H1 = re.compile(r'<h1 id="[^"]*">(.*?)</h1>\s*', re.S)
+H1 = re.compile(r'<h1 id="[^"]*">(.*?)</h1>\s*', re.DOTALL)
 TAGS = re.compile(r"<[^>]+>")
 LANGUAGES = {".py": "Python", ".tf": "Terraform", ".json": "JSON", ".jsonl": "JSON Lines", ".toml": "TOML"}
 FOLDER_TITLES = {
