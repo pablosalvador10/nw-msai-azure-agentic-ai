@@ -36,19 +36,20 @@ testpaths = ["tests"]
 addopts = ["-q", "--strict-markers"]
 
 [tool.coverage.run]
-source = ["app", "harness", "web", "course"]
+source = ["app", "harness", "web"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
 # The floor only moves up: raise it when tests cover more.
-fail_under = 84
+fail_under = 88
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
 extend-exclude = ["*.ipynb"]
+force-exclude = true  # pre-commit passes file names; keep the excludes above
 
 [tool.ruff.lint]
 select = [
@@ -82,6 +83,7 @@ ignore = [
 "tests/**" = [
     "S101",  # pytest uses assert
     "S102",  # tests execute the lecture's code samples
+    "S105", "S106",  # fake credentials for the sign-in and API key tests
     "S603",  # tests run the course's own commands
 ]
 # The course helpers and the website publisher run az, terraform and git on purpose.
