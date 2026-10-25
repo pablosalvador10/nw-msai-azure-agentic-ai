@@ -262,8 +262,8 @@ class Shell:
             (
                 "Your course agents",
                 "/foundations/docs/agents.html",
-                "Five agents in VS Code, named after the instructors. Start with Pablo when you are stuck; "
-                "Will covers infrastructure and deployment, Arvind the data. Also: how to vibe code.",
+                "Five agents in VS Code that know this course. Start with Pablo · Start here when you are stuck. "
+                "Also: how to vibe code.",
             ),
         ]
         start_cards = "".join(
@@ -293,9 +293,10 @@ class Shell:
     <div class="home-hero__actions">
       <a class="btn btn--primary" href="/setup/README.md">Start with setup {icon("right", 16)}</a>
       <a class="btn btn--ghost" href="/score/">{icon("gauge", 16)} Score your service</a>
-      <a class="btn btn--ghost" href="/foundations/docs/agents.html">{icon("chat", 16)} Ask Pablo, Will or Arvind</a>
+      <a class="btn btn--ghost" href="/foundations/docs/agents.html">{icon("chat", 16)} Ask the course agents</a>
     </div>
     <p class="continue" hidden><span>Continue where you left off:</span> <a href="#"></a></p>
+    <p class="home-hero__owner">By Pablo Salvador Lopez · <a href="https://github.com/pablosalvador10">@pablosalvador10</a></p>
   </div>
   {self._focus_card(focus, today) if focus else ""}
 </section>

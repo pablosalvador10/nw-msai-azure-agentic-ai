@@ -35,7 +35,7 @@ cd nw-msai-azure-agentic-ai/fy26
 uv sync
 ```
 
-The course repository is private. Accept the GitHub invitation from the instructors first (check your email or [github.com/notifications](https://github.com/notifications)). When `git clone` asks you to sign in, sign in to GitHub in the browser window it opens. If it asks for a password in the terminal instead, run `gh auth login` once ([GitHub CLI](https://cli.github.com/)), or clone from VS Code with **Git: Clone** and **Clone from GitHub**.
+The course repository is private. Accept the GitHub invitation to it first (check your email or [github.com/notifications](https://github.com/notifications)). When `git clone` asks you to sign in, sign in to GitHub in the browser window it opens. If it asks for a password in the terminal instead, run `gh auth login` once ([GitHub CLI](https://cli.github.com/)), or clone from VS Code with **Git: Clone** and **Clone from GitHub**.
 
 `uv sync` reads `pyproject.toml` and `uv.lock`, downloads Python 3.12 if needed, and creates `fy26/.venv` with the exact package versions everyone uses. On Windows, run the same three commands in PowerShell.
 
@@ -45,9 +45,9 @@ Open the `fy26` folder in VS Code, open `setup/setup.ipynb`, and choose the kern
 
 - For the default setup, you need permission to create a resource group and its resources, register resource providers, and assign roles. **Owner**, or **Contributor** plus **Role Based Access Control Administrator**, at subscription scope covers those operations. Contributor alone cannot assign roles.
 - If the class provides an existing resource group, you do not need to type it: in the Northwestern class subscription it is named `<netid>_resourcegroup`, and the notebook's section 3 finds it from your NetID and prints `Using your resource group: ...`. If your group has another name, set `RESOURCE_GROUP` in that cell. Access only to that group does not let you create a new group at subscription scope, and Azure Policy allows US regions only.
-- The region must offer the models in [`infra/variables.tf`](../infra/variables.tf), with quota for your subscription. The notebook picks it from the last digit of your NetID: 0 to 4 use `eastus2`, 5 to 9 use `eastus`. The class is split because a subscription holds at most 50 Container Apps environments per region. Both regions are tested with every lab. Change the region only if an instructor asks you to.
+- The region must offer the models in [`infra/variables.tf`](../infra/variables.tf), with quota for your subscription. The notebook picks it from the last digit of your NetID: 0 to 4 use `eastus2`, 5 to 9 use `eastus`. The class is split because a subscription holds at most 50 Container Apps environments per region. Both regions are tested with every lab. Change the region only if you are asked to.
 
-If the class provides your subscription, confirm these prerequisites with the instructor before you begin.
+If the class provides your subscription, confirm these prerequisites with whoever administers it before you begin.
 
 ## 4. Run the notebook
 
@@ -63,7 +63,7 @@ Find your error below, or ask for help in VS Code: open Copilot Chat, pick **Wil
 | `Resource group '...' was not found` | A typo in `RESOURCE_GROUP`, or `az login` chose another subscription | Leave `RESOURCE_GROUP` empty so the notebook finds your group, or copy the name from the list in the message; check the subscription in section 2 |
 | `AuthorizationFailed` on `azurerm_resource_group` | Terraform tried to create a group, but you are Owner of your class group only | Section 3 printed `Terraform will create...`: set `RESOURCE_GROUP` to your `<netid>_resourcegroup`, run section 3 again, then plan and apply |
 | `AuthorizationFailed` on `azurerm_role_assignment` | You are Contributor only | Ask for Owner or RBAC Administrator on the subscription or resource group |
-| `InsufficientQuota` or `DeploymentModelNotSupported` | The deployment type, model, region or requested capacity is unavailable to your subscription | Ask the instructor to check quota and availability. Review a new Terraform plan before changing region or capacity; moving an existing resource can replace it |
+| `InsufficientQuota` or `DeploymentModelNotSupported` | The deployment type, model, region or requested capacity is unavailable to your subscription | Ask whoever administers the subscription to check quota and availability. Review a new Terraform plan before changing region or capacity; moving an existing resource can replace it |
 | `MissingSubscriptionRegistration` | A resource provider is not registered | `az provider register -n Microsoft.App` (or the namespace in the error), wait 2 minutes, apply again |
 | First model call returns 401 or 403 | Role assignments take a few minutes to propagate | Wait two minutes and rerun the cell; it can take up to ten |
 | The URL answers slowly the first time | The app scaled to zero while idle | Normal. The first request takes about 30 to 45 seconds |

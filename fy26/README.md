@@ -1,5 +1,7 @@
 # FY26 · Agentic AI on Microsoft Foundry
 
+By **Pablo Salvador Lopez** ([@pablosalvador10](https://github.com/pablosalvador10)).
+
 Over five sessions you build, deploy and harden one AI service: a support assistant for **Lakeshore Ride**, a fictional bike-share company. Each week adds one capability, and each week ends the same way: your service is running in Azure and a harness scores it.
 
 **Student entry point:** open the [course home](index.html) in a browser for the setup sequence and direct links to every lecture, slide deck and lab. The main lab is the core work; deep dives are optional extensions, not another required assignment.
@@ -8,18 +10,18 @@ Over five sessions you build, deploy and harden one AI service: a support assist
 
 ## Calendar
 
-| Week | Date | Topic | Instructors | Materials |
-|---|---|---|---|---|
-| 1 | Sep 29 | Azure Cloud Fundamentals + Compute + Storage | Arvind, Will | |
-| 2 | Oct 6 | Data and Analytics | Arvind | |
-| 3 | Oct 13 | Apps and DevOps | Will | |
-| 4 | Oct 20 | Security, Monitoring and Observability | Will, Arvind | |
-| **5** | **Oct 27** | **Fundamentals of Azure AI** | Pablo, Arvind | [Week 5](week05-fundamentals-of-azure-ai/README.md) |
-| **6** | **Nov 3** | **RAG Apps + Tool Calling** | Pablo, Will | [Week 6](week06-rag-and-tool-calling/README.md) |
-| **7** | **Nov 10** | **Multi-Agent Systems** | Pablo, Will | [Week 7](week07-multi-agent-systems/README.md) |
-| **8** | **Nov 17** | **Harnesses and Agentic Coding** | Will, Pablo, Arvind | [Week 8](week08-harnesses-and-agentic-coding/README.md) |
-| 9 | Nov 24 | Fabric Data Agents + Semantic Model + Ontology | Arvind, Will | |
-| **10** | **Dec 1** | **Production Agentic Systems** | Will, Arvind, Pablo | [Week 10](week10-production-agentic-systems/README.md) |
+| Week | Date | Topic | Materials |
+|---|---|---|---|
+| 1 | Sep 29 | Azure Cloud Fundamentals + Compute + Storage | |
+| 2 | Oct 6 | Data and Analytics | |
+| 3 | Oct 13 | Apps and DevOps | |
+| 4 | Oct 20 | Security, Monitoring and Observability | |
+| **5** | **Oct 27** | **Fundamentals of Azure AI** | [Week 5](week05-fundamentals-of-azure-ai/README.md) |
+| **6** | **Nov 3** | **RAG Apps + Tool Calling** | [Week 6](week06-rag-and-tool-calling/README.md) |
+| **7** | **Nov 10** | **Multi-Agent Systems** | [Week 7](week07-multi-agent-systems/README.md) |
+| **8** | **Nov 17** | **Harnesses and Agentic Coding** | [Week 8](week08-harnesses-and-agentic-coding/README.md) |
+| 9 | Nov 24 | Fabric Data Agents + Semantic Model + Ontology | |
+| **10** | **Dec 1** | **Production Agentic Systems** | [Week 10](week10-production-agentic-systems/README.md) |
 
 Weeks in **bold** have their materials here. Before Week 5, complete [Setup](setup/README.md).
 
@@ -94,7 +96,7 @@ flowchart LR
     TF -- "creates" --> rg
     NB -- "az acr build" --> ACR
     H -- "HTTPS" --> ACA
-    P["Instructors' private harness"] -- "HTTPS" --> ACA
+    P["Private grading harness"] -- "HTTPS" --> ACA
 ```
 
 ## Start here
@@ -106,7 +108,7 @@ flowchart LR
 
 Every command in this course runs from the `fy26/` folder. The notebooks switch to it for you.
 
-**Stuck?** In VS Code, open Copilot Chat and pick an agent from the Agent dropdown. The course has five, named after the instructors: **Pablo · Start here** (when you are lost; it asks the experts for you), **Pablo · Fundamentals** (the AI, the lectures, the labs, hints on the fix), **Pablo · Scoring** (your score, how grading works, the course website, the check before you submit), **Will · Infra and deploy** (setup, Azure, Terraform, Container Apps, deploying, logs) and **Arvind · Data** (the handbook and station data, harness datasets and reports, evaluation, telemetry). They explain and give hints; the graded code is yours, whether you type it or direct Copilot's Agent. [Your course agents](foundations/docs/agents.html) shows how to call them and how to vibe code well.
+**Stuck?** In VS Code, open Copilot Chat and pick an agent from the Agent dropdown. The course has five: **Pablo · Start here** (when you are lost; it asks the experts for you), **Pablo · Fundamentals** (the AI, the lectures, the labs, hints on the fix), **Pablo · Scoring** (your score, how grading works, the course website, the check before you submit), **Will · Infra and deploy** (setup, Azure, Terraform, Container Apps, deploying, logs) and **Arvind · Data** (the handbook and station data, harness datasets and reports, evaluation, telemetry). They explain and give hints; the graded code is yours, whether you type it or direct Copilot's Agent. [Your course agents](foundations/docs/agents.html) shows how to call them and how to vibe code well.
 
 ## Grading
 
@@ -130,7 +132,7 @@ fy26/
 ├── harness/          The local harness: checks and public data
 ├── infra/            Terraform for your resource group
 ├── tests/            Fast tests that run offline (uv run pytest)
-├── web/              The course website (instructors): lectures behind GitHub sign-in, plus the online harness
+├── web/              The course website: lectures behind GitHub sign-in, plus the online harness
 ├── course.py         Notebook helpers; each one prints the command it runs
 ├── Dockerfile        How your image is built
 └── AGENTS.md         Instructions for coding agents working in this folder (Week 8)
