@@ -112,3 +112,13 @@ def test_can_read_maps_the_repository_answer(code: int, allowed: bool) -> None:
 def test_can_read_raises_when_github_fails() -> None:
     with pytest.raises(GitHubError, match="503"):
         github(lambda _: httpx2.Response(503)).can_read("gho_token", "org/repo")
+
+
+def test_can_read_follows_a_renamed_repository() -> None:
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        if request.url.path == "/repos/org/old-name":
+            return httpx2.Response(301, headers={"Location": "https://api.github.com/repositories/42"})
+        assert request.headers["Authorization"] == "Bearer gho_token"
+        return httpx2.Response(200, json={"full_name": "org/new-name"})
+
+    assert github(handler).can_read("gho_token", "org/old-name") is True

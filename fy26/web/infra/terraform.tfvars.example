@@ -3,7 +3,7 @@ subscription_id = "00000000-0000-0000-0000-000000000000"
 location        = "eastus2"
 
 # resource_group_name = "lectures"
-# course_repo         = "pablosalvador10/northwestern-msai-azure-agentic-ai"
+# course_repo         = "pablosalvador10/nw-msai-azure-agentic-ai"
 # course_ref          = "main"
 # min_replicas        = 1
 

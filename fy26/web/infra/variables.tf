@@ -31,7 +31,7 @@ variable "github_client_secret" {
 variable "course_repo" {
   description = "owner/name of the course repository. Whoever can read it can use the website."
   type        = string
-  default     = "pablosalvador10/northwestern-msai-azure-agentic-ai"
+  default     = "pablosalvador10/nw-msai-azure-agentic-ai"
 
   validation {
     condition     = can(regex("^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$", var.course_repo))

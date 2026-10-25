@@ -116,7 +116,8 @@ class GitHub:
 
     def can_read(self, token: str, repo: str) -> bool:
         """True when this user can see the repository (and the GitHub App is installed on it)."""
-        response = self._http.get(f"{GITHUB_API}/repos/{repo}", headers=_api_headers(token))
+        # A renamed repository answers 301 at its old name: follow it to the new one.
+        response = self._http.get(f"{GITHUB_API}/repos/{repo}", headers=_api_headers(token), follow_redirects=True)
         if response.status_code == 200:
             return True
         if response.status_code in (403, 404):
