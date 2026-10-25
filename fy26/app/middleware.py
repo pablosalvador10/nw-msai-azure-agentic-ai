@@ -11,12 +11,15 @@ from collections import defaultdict, deque
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from starlette.datastructures import Headers
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.config import Settings
 
 log = logging.getLogger(__name__)
 
 OPEN_PATHS = {"/health", "/ready", "/v1/info", "/docs", "/openapi.json"}
+TOO_LARGE = "Request body too large."
 
 
 def is_model_rate_limited(exc: BaseException) -> bool:
@@ -30,6 +33,55 @@ def is_model_rate_limited(exc: BaseException) -> bool:
             return True
         current = current.__cause__ or current.__context__
     return False
+
+
+class BodyLimit:
+    """Answer 413 when a request body is larger than `max_bytes`.
+
+    Content-Length is checked before anything is read. A body sent without it (a chunked upload)
+    is read here, chunk by chunk, and refused as soon as it passes the limit; a body within the
+    limit is then handed to the app unchanged. The service never buffers more than the limit.
+    """
+
+    def __init__(self, app: ASGIApp, max_bytes: int) -> None:
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        length = Headers(scope=scope).get("content-length", "")
+        if length.isdigit() and int(length) > self.max_bytes:
+            await JSONResponse({"detail": TOO_LARGE}, status_code=413)(scope, receive, send)
+            return
+
+        chunks: list[bytes] = []
+        size, more = 0, True
+        while more:
+            message = await receive()
+            if message["type"] != "http.request":  # the client went away
+                await self.app(scope, _replay([message], receive), send)
+                return
+            chunks.append(message.get("body", b""))
+            size += len(chunks[-1])
+            if size > self.max_bytes:
+                await JSONResponse({"detail": TOO_LARGE}, status_code=413)(scope, receive, send)
+                return
+            more = message.get("more_body", False)
+
+        body = {"type": "http.request", "body": b"".join(chunks), "more_body": False}
+        await self.app(scope, _replay([body], receive), send)
+
+
+def _replay(messages: list[Message], receive: Receive) -> Receive:
+    """A receive channel that returns `messages` first, then whatever the client sends next."""
+    pending = list(messages)
+
+    async def replayed() -> Message:
+        return pending.pop(0) if pending else await receive()
+
+    return replayed
 
 
 def install(app: FastAPI, settings: Settings) -> None:
@@ -59,16 +111,12 @@ def install(app: FastAPI, settings: Settings) -> None:
         expected = settings.service_api_key.get_secret_value() if settings.service_api_key else ""
         if expected and request.url.path not in OPEN_PATHS:
             given = request.headers.get("x-api-key", "")
-            if not secrets.compare_digest(given, expected):
+            # Compare bytes: compare_digest rejects str with non-ASCII characters, which would be a 500.
+            if not secrets.compare_digest(given.encode(), expected.encode()):
                 return JSONResponse({"detail": "Missing or invalid X-API-Key."}, status_code=401)
         return await call_next(request)
 
-    @app.middleware("http")
-    async def body_limit(request: Request, call_next):
-        length = request.headers.get("content-length")
-        if length and length.isdigit() and int(length) > settings.max_body_bytes:
-            return JSONResponse({"detail": "Request body too large."}, status_code=413)
-        return await call_next(request)
+    app.add_middleware(BodyLimit, max_bytes=settings.max_body_bytes)
 
     @app.middleware("http")
     async def request_id(request: Request, call_next):

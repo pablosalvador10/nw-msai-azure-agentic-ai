@@ -1,5 +1,7 @@
 """The HTTP contract, exercised offline."""
 
+import pytest
+
 from app.contract import CONTRACT_VERSION
 
 
@@ -75,10 +77,29 @@ def test_large_body_is_413(client):
     assert response.status_code == 413
 
 
+@pytest.mark.parametrize("path", ["/v1/ask", "/mcp"])
+def test_large_chunked_body_without_content_length_is_413(client, path):
+    chunks = iter([b'{"id": "big", "question": "', b"a" * 70_000, b'"}'])
+    response = client.post(path, content=chunks, headers={"Content-Type": "application/json"})
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Request body too large."}
+
+
+def test_small_chunked_body_without_content_length_is_served(client):
+    chunks = iter([b'{"id": "small", ', b'"text": "My bike has a flat tire."}'])
+    response = client.post("/v1/classify", content=chunks, headers={"Content-Type": "application/json"})
+    assert response.status_code == 200
+
+
 def test_api_key_is_enforced_when_configured(client_with_key):
     assert client_with_key.post("/v1/chat", json={"message": "hi"}).status_code == 401
     assert client_with_key.post("/v1/chat", json={"message": "hi"}, headers={"X-API-Key": "s3cret"}).status_code == 200
     assert client_with_key.get("/health").status_code == 200
+
+
+def test_non_ascii_api_key_is_401_not_500(client_with_key):
+    response = client_with_key.post("/v1/chat", json={"message": "hi"}, headers={"X-API-Key": "clé".encode()})
+    assert response.status_code == 401
 
 
 def test_rate_limit_ignores_spoofed_forwarded_for():
