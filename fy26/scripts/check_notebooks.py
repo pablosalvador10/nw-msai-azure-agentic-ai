@@ -20,8 +20,8 @@ def problems(path: Path) -> list[str]:
     except ValueError as exc:
         return [f"{path}: invalid JSON ({exc})"]
     for index, cell in enumerate(notebook.get("cells", [])):
-        if cell.get("cell_type") == "code" and (cell.get("outputs") or cell.get("execution_count")):
-            return [f"{path}: cell {index} has outputs; clear all outputs before committing"]
+        if cell.get("cell_type") == "code" and (cell.get("outputs") or cell.get("execution_count") is not None):
+            return [f"{path}: cell {index} has outputs or an execution count; clear all outputs before committing"]
     return []
 
 
