@@ -5,6 +5,11 @@ resource "azurerm_container_app_environment" "this" {
   logs_destination           = "log-analytics"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
   tags                       = local.tags
+
+  # Azure adds a "Consumption" workload profile by itself. Ignoring it keeps every plan clean.
+  lifecycle {
+    ignore_changes = [workload_profile]
+  }
 }
 
 # The app is created only once an image exists (var.image_tag set).
@@ -17,6 +22,10 @@ resource "azurerm_container_app" "this" {
   container_app_environment_id = azurerm_container_app_environment.this.id
   revision_mode                = "Single"
   tags                         = local.tags
+
+  lifecycle {
+    ignore_changes = [workload_profile_name]
+  }
 
   identity {
     type         = "UserAssigned"

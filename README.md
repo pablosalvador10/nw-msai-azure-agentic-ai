@@ -31,8 +31,8 @@ Running the service costs money: model calls, image builds, the container regist
 1. **Clone the course and install its Python environment.**
 
    ```bash
-   git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
-   cd northwestern-msai-azure-agentic-ai/fy26
+   git clone https://github.com/pablosalvador10/nw-msai-azure-agentic-ai.git
+   cd nw-msai-azure-agentic-ai/fy26
    uv sync
    ```
 

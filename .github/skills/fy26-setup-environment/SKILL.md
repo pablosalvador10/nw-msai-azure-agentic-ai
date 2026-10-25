@@ -45,8 +45,8 @@ On Linux, follow the official pages. After installing, **open a new terminal** s
 ## 2. Get the course and its environment
 
 ```bash
-git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
-cd northwestern-msai-azure-agentic-ai/fy26
+git clone https://github.com/pablosalvador10/nw-msai-azure-agentic-ai.git
+cd nw-msai-azure-agentic-ai/fy26
 uv sync
 ```
 

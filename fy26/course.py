@@ -4,6 +4,7 @@ Every helper prints the exact command it runs. Copy any of them into a terminal
 (from the fy26/ folder) and you get the same result: nothing here is magic.
 """
 
+import difflib
 import json
 import os
 import platform
@@ -101,11 +102,67 @@ def az_account() -> dict[str, Any]:
     return json.loads(run(["az", "account", "show", "-o", "json"], quiet=True))
 
 
+PLACEHOLDER_STUDENT_ID = "abc1234"
+
+
+def normalize_student_id(student_id: str) -> str:
+    """Your NetID as Terraform needs it: 3-12 lowercase letters or digits, starting with a letter."""
+    value = student_id.strip().lower()
+    if value == PLACEHOLDER_STUDENT_ID:
+        raise ValueError(
+            f'Replace "{PLACEHOLDER_STUDENT_ID}" with your own NetID in STUDENT_ID, then run the cell again.'
+        )
+    if not re.fullmatch(r"[a-z][a-z0-9]{2,11}", value):
+        raise ValueError(
+            f"STUDENT_ID {student_id!r} is not valid: use your NetID, 3-12 letters or digits, starting with a letter."
+        )
+    return value
+
+
+def pick_resource_group(student_id: str, requested: str, create: bool, existing: list[str]) -> tuple[str, bool]:
+    """Choose where Terraform deploys: (group name, create it?). Empty name means Terraform's default group.
+
+    A group you named is used as it exists in Azure. With no name, your class group `<netid>_resourcegroup`
+    is used if you have one.
+    """
+    by_name = {name.lower(): name for name in existing}
+    if requested.strip():
+        match = by_name.get(requested.strip().lower())
+        if match:
+            return match, False
+        if create:
+            return requested.strip(), True
+        close = difflib.get_close_matches(requested.strip(), existing, n=3, cutoff=0.6)
+        hint = (
+            f"Did you mean {' or '.join(close)}?"
+            if close
+            else f"Groups you can see: {', '.join(sorted(existing)[:10]) or 'none'}."
+        )
+        raise ValueError(
+            f"Resource group {requested!r} was not found in this subscription. {hint} "
+            "Check the name, or the subscription shown above."
+        )
+    class_group = by_name.get(f"{student_id}_resourcegroup")
+    if class_group:
+        return class_group, False
+    return "", create
+
+
 def write_tfvars(
     student_id: str, location: str = "eastus2", resource_group: str = "", create_resource_group: bool = True
 ) -> Path:
     """Write infra/terraform.tfvars: the inputs Terraform needs. Your subscription comes from `az account show`."""
+    student_id = normalize_student_id(student_id)
     account = az_account()
+    groups = json.loads(run(["az", "group", "list", "--query", "[].name", "-o", "json"], quiet=True))
+    resource_group, create_resource_group = pick_resource_group(
+        student_id, resource_group, create_resource_group, groups
+    )
+    if resource_group and not create_resource_group:
+        print(f"Using your resource group: {resource_group}")
+    elif create_resource_group:
+        name = resource_group or f"rg-nu-{student_id}"
+        print(f"Terraform will create the resource group {name}. If the class gave you one, set RESOURCE_GROUP.")
     path = INFRA / "terraform.tfvars"
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     previous = re.search(r'^location\s*=\s*"([^"]+)"', existing, re.MULTILINE)
