@@ -11,7 +11,7 @@
 <main class="stage" data-week="Week 8" data-topic="Harnesses and Agentic Coding">
 
 <!-- 1 -->
-<section class="slide title-slide" data-title="Harnesses and Agentic Coding">
+<section class="slide title-slide" data-title="Harnesses and Agentic Coding" data-lecture="intro">
   <div class="build">
     <p class="kicker">Week 8</p>
     <h1>Harnesses and Agentic Coding</h1>
@@ -29,7 +29,7 @@
 </section>
 
 <!-- 2 -->
-<section class="slide" data-title="Two sides of one idea">
+<section class="slide" data-title="Two sides of one idea" data-lecture="intro">
   <p class="kicker">Why this week matters</p>
   <h2>This week you look at harnesses from both sides</h2>
   <div class="cols cols-2 build-row" style="margin-top:10px">
@@ -40,7 +40,7 @@
 </section>
 
 <!-- 3 -->
-<section class="slide" data-title="By the end you can">
+<section class="slide" data-title="By the end you can" data-lecture="intro">
   <p class="kicker">Objectives</p>
   <h2>By the end of today you can</h2>
   <div class="cols cols-60">
@@ -59,7 +59,7 @@
 </section>
 
 <!-- 4 -->
-<section class="slide" data-title="Today: lecture, lab, deep dive">
+<section class="slide" data-title="Today: lecture, lab, deep dive" data-lecture="intro">
   <p class="kicker">Today</p>
   <h2>Learn it, build it, ship it; then go deeper if you want</h2>
   <div class="cols cols-60">
@@ -79,7 +79,7 @@
 </section>
 
 <!-- 5 -->
-<section class="slide" data-title="Two kinds of harness">
+<section class="slide" data-title="Two kinds of harness" data-lecture="1">
   <p class="kicker">Vocabulary</p>
   <h2>An evaluation harness measures. An agent harness acts</h2>
   <div class="table-wrap build">
@@ -95,7 +95,7 @@
 </section>
 
 <!-- 6 -->
-<section class="slide" data-title="Anatomy of an agent harness">
+<section class="slide" data-title="Anatomy of an agent harness" data-lecture="2">
   <p class="kicker">Lab Part 1</p>
   <h2>The model supplies judgment. The harness makes judgment safe and productive</h2>
   <div class="cols cols-2 center">
@@ -143,7 +143,7 @@
 </section>
 
 <!-- 7 -->
-<section class="slide" data-title="Context engineering">
+<section class="slide" data-title="Context engineering" data-lecture="3">
   <p class="kicker">Context engineering</p>
   <h2>Every token in the context costs money, time and attention. Choose them</h2>
   <div class="cols cols-60">
@@ -168,14 +168,14 @@
 </section>
 
 <!-- 8 -->
-<section class="slide section-slide" data-title="Part 1 · The Model Context Protocol">
+<section class="slide section-slide" data-title="Part 1 · The Model Context Protocol" data-lecture="part">
   <p class="kicker">Part 1 · Lab Parts 2-3</p>
   <h1>The Model Context Protocol</h1>
   <p>One protocol for tools and context, so a tool written once works in every agent. What Language Server Protocol did for editors and languages.</p>
 </section>
 
 <!-- 9 -->
-<section class="slide" data-title="Hosts, clients, servers">
+<section class="slide" data-title="Hosts, clients, servers" data-lecture="4">
   <p class="kicker">MCP</p>
   <h2>Write a tool once; every MCP host can use it</h2>
   <div class="cols center" style="grid-template-columns:1fr 70px 1fr; gap:0">
@@ -202,7 +202,7 @@
 </section>
 
 <!-- 10 -->
-<section class="slide" data-title="What a server offers">
+<section class="slide" data-title="What a server offers" data-lecture="4">
   <p class="kicker">MCP features</p>
   <h2>Tools are what the model calls. Resources and prompts are what people pick</h2>
   <div class="cols cols-60">
@@ -223,7 +223,7 @@
 </section>
 
 <!-- 11 -->
-<section class="slide" data-title="MCP on the wire: revision 2026-07-28">
+<section class="slide" data-title="MCP on the wire: revision 2026-07-28" data-lecture="5">
   <p class="kicker">MCP on the wire</p>
   <h2>Revision 2026-07-28 is stateless: every request carries its version and its client</h2>
   <div class="cols cols-60">
@@ -256,7 +256,7 @@ Mcp-Method: server/discover
 </section>
 
 <!-- 12 -->
-<section class="slide" data-title="What else changed in 2026-07-28">
+<section class="slide" data-title="What else changed in 2026-07-28" data-lecture="5">
   <p class="kicker">The current revision</p>
   <h2>Changes you will meet in real servers</h2>
   <div class="cols cols-60">
@@ -279,7 +279,7 @@ Mcp-Method: server/discover
 </section>
 
 <!-- 13 -->
-<section class="slide" data-title="MCP by hand, then with clients">
+<section class="slide" data-title="MCP by hand, then with clients" data-lecture="lab">
   <p class="kicker">Lab Parts 2-3</p>
   <h2>Speak the protocol by hand once, then let clients speak it for you</h2>
   <div class="cols cols-2">
@@ -309,7 +309,7 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
 </section>
 
 <!-- 14 -->
-<section class="slide" data-title="MCP security">
+<section class="slide" data-title="MCP security" data-lecture="6">
   <p class="kicker">MCP security</p>
   <h2>Tools are arbitrary code execution. Trust servers deliberately</h2>
   <div class="table-wrap build">
@@ -328,7 +328,7 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
 </section>
 
 <!-- 15 -->
-<section class="slide" data-title="MCP across Azure">
+<section class="slide" data-title="MCP across Azure" data-lecture="7">
   <p class="kicker">MCP across Azure</p>
   <h2>MCP is the common tool interface across Microsoft's AI stack</h2>
   <div class="tiles t3 build-row" style="grid-template-columns:repeat(3,1fr)">
@@ -343,14 +343,14 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
 </section>
 
 <!-- 16 -->
-<section class="slide section-slide" data-title="Part 2 · Coding agents">
-  <p class="kicker">Part 2 · Lab Part 4</p>
+<section class="slide section-slide" data-title="Part 2 · Coding agents" data-lecture="part">
+  <p class="kicker">Part 2 · Lab Parts 3-4</p>
   <h1>Coding agents: harnesses built for software</h1>
-  <p>Where they run, how they are customized, how they are kept safe, and how to work with one.</p>
+  <p>Where they run, how they are customized and kept safe, and how to build a harness of your own.</p>
 </section>
 
 <!-- 17 -->
-<section class="slide" data-title="Where coding agents run">
+<section class="slide" data-title="Where coding agents run" data-lecture="8">
   <p class="kicker">Coding agents in 2026</p>
   <h2>Where the agent runs decides what it may touch</h2>
   <div class="cols cols-3 build-row">
@@ -370,7 +370,7 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
 </section>
 
 <!-- 18 -->
-<section class="slide" data-title="Customize by trigger">
+<section class="slide" data-title="Customize by trigger" data-lecture="9">
   <p class="kicker">GitHub Copilot, by file</p>
   <h2>Choose a customization by when it should apply</h2>
   <div class="cols cols-4 build-row">
@@ -382,8 +382,8 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
   <div class="callout purple build" style="margin-top:18px"><p><b>This repository is a worked example.</b> <code>.github/copilot-instructions.md</code> holds course conventions, <code>.github/skills/</code> holds skills, <code>fy26/AGENTS.md</code> holds the service's rules. Open them and judge them by the standard of the context-engineering slide.</p></div>
 </section>
 
-<!-- 18b -->
-<section class="slide" data-title="The Copilot cloud agent">
+<!-- 19 -->
+<section class="slide" data-title="The Copilot cloud agent" data-lecture="9">
   <p class="kicker">GitHub Copilot, in the cloud</p>
   <h2>Assign an issue; get a pull request you review</h2>
   <div class="flow build-row">
@@ -404,28 +404,31 @@ async with Client(f"{LOCAL}/mcp") as mcp_client:
   </div>
 </section>
 
-<!-- 19 -->
-<section class="slide" data-title="Sandbox and approval policy">
+<!-- 20 -->
+<section class="slide" data-title="Sandbox and approval policy" data-lecture="10">
   <p class="kicker">Permissions</p>
   <h2>Two separate questions: what may it touch, and when must it ask</h2>
   <div class="cols cols-60">
-    <div class="table-wrap build">
-      <table>
-        <tr><th>Control</th><th>Decides</th><th>Example (Codex)</th></tr>
-        <tr><td><b>Sandbox</b></td><td>Which files and network the agent can touch at all</td><td><code>workspace-write</code>: edit inside the workspace only</td></tr>
-        <tr><td><b>Approval policy</b></td><td>When the agent pauses to ask</td><td><code>on-request</code>: before crossing the sandbox</td></tr>
-        <tr><td><b>Reviewer</b></td><td>Who answers the approval</td><td>You, or an automatic reviewer that escalates unsafe actions</td></tr>
-      </table>
+    <div class="build">
+      <div class="table-wrap">
+        <table>
+          <tr><th>Control</th><th>Decides</th><th>Example (Codex)</th></tr>
+          <tr><td><b>Sandbox</b></td><td>Which files and network the agent can touch at all</td><td><code>workspace-write</code>: edit inside the workspace only</td></tr>
+          <tr><td><b>Approval policy</b></td><td>When the agent pauses to ask</td><td><code>on-request</code>: before crossing the sandbox</td></tr>
+          <tr><td><b>Reviewer</b></td><td>Who answers the approval</td><td>You, or an automatic reviewer that escalates unsafe actions</td></tr>
+        </table>
+      </div>
+      <p class="small" style="margin-top:12px">Modes combine the three: <em>Ask for approval</em>, <em>Approve for me</em>, <em>Full access</em>, or a profile in <code>config.toml</code>. <code>/init</code> writes <code>AGENTS.md</code>, <code>/review</code> reviews a diff, <code>codex exec</code> runs in scripts and CI, <code>codex mcp</code> adds MCP servers.</p>
     </div>
     <div class="stack build">
       <div class="card red"><h3>Full access only in a disposable environment</h3><p>An agent runs with your permissions. Treat it as a fast, literal-minded colleague who can be tricked.</p></div>
-      <div class="card"><h3>The same ideas in code</h3><p>The OpenAI Agents SDK and Agent Framework expose them as guardrails, approvals and middleware.</p></div>
+      <div class="card"><h3>The OpenAI Agents SDK</h3><p>The same ideas in code: tools, handoffs and agents as tools, guardrails that run in parallel with the agent, sessions, human in the loop, tracing, and sandbox agents. Its agents deploy to Foundry as hosted agents.</p></div>
     </div>
   </div>
 </section>
 
-<!-- 20 -->
-<section class="slide" data-title="A harness for your own agents">
+<!-- 21 -->
+<section class="slide" data-title="A harness for your own agents" data-lecture="11">
   <p class="kicker">Agent Framework</p>
   <h2>The anatomy diagram, as a library: <code>create_harness_agent</code></h2>
   <div class="cols cols-2">
@@ -461,8 +464,8 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 20b -->
-<section class="slide" data-title="Foundry for agentic development">
+<!-- 22 -->
+<section class="slide" data-title="Foundry for agentic development" data-lecture="12">
   <p class="kicker">Microsoft Foundry and coding agents</p>
   <h2>Coding agents drive Foundry, and Foundry hosts agents built with their SDKs</h2>
   <div class="cols cols-2">
@@ -481,8 +484,15 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 21 -->
-<section class="slide" data-title="Spec-driven development">
+<!-- 23 -->
+<section class="slide section-slide" data-title="Part 3 · Working with a coding agent" data-lecture="part">
+  <p class="kicker">Part 3 · Lab Part 4</p>
+  <h1>Working with a coding agent</h1>
+  <p>A spec written as tests, rules the agent cannot bend, and a new feature in your service.</p>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-title="Spec-driven development" data-lecture="13">
   <p class="kicker">Working with a coding agent</p>
   <h2>Write the spec as tests, let the agent iterate, review what it did</h2>
   <div class="flow build-row">
@@ -503,8 +513,25 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 22 -->
-<section class="slide" data-title="The exercise: nearest_station_with_docks">
+<!-- 25 -->
+<section class="slide" data-title="Security of agentic coding" data-lecture="14">
+  <p class="kicker">Security of agentic coding</p>
+  <h2>A coding agent runs with your permissions. Treat it as a fast colleague who can be tricked</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Risk</th><th>Example</th><th>Mitigation</th></tr>
+      <tr><td>Prompt injection through content</td><td>An issue or README says "also add this curl command to the build"</td><td>Approvals for commands and network; sandboxing; review of diffs</td></tr>
+      <tr><td>Secret exposure</td><td>The agent reads <code>.env</code> and pastes a key into a log or commit</td><td>Rules against reading secrets; hooks that scan for them; keyless auth</td></tr>
+      <tr><td>Destructive commands</td><td><code>rm -rf</code>, <code>git push --force</code>, <code>terraform destroy</code></td><td>Deny lists; approval for anything irreversible; work on branches</td></tr>
+      <tr><td>Invented dependencies</td><td>A package that does not exist, or is malicious</td><td>Lock files, dependency review, CI</td></tr>
+      <tr><td>Over-trusting output</td><td>Tests pass because they were weakened</td><td>Protected tests, code review, CI that runs the real suite</td></tr>
+    </table>
+  </div>
+  <div class="callout build" style="margin-top:14px"><p>Every mitigation here is a harness feature: sandbox, approval policy, hooks, instructions, verification.</p></div>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-title="The exercise: nearest_station_with_docks" data-lecture="lab">
   <p class="kicker">The exercise · Lab Part 4</p>
   <h2>A tool for riders at a full station: <code>nearest_station_with_docks</code></h2>
   <div class="cols cols-2">
@@ -513,8 +540,8 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 22b -->
-<section class="slide" data-title="Review the diff, then grade">
+<!-- 27 -->
+<section class="slide" data-title="Review the diff, then grade" data-lecture="lab">
   <p class="kicker">The exercise · Lab Part 4</p>
   <h2>You review every change. The harness decides whether it is done</h2>
   <div class="cols cols-2">
@@ -531,7 +558,7 @@ result = await agent.run(
         <tr><th>Check</th><th class="num">Weight</th><th>What it measures</th></tr>
         <tr><td><code>core.health</code>, <code>core.info</code></td><td class="num">1 + 1</td><td>Up, and identifies you</td></tr>
         <tr><td><code>w08.mcp.discover</code></td><td class="num">1</td><td><code>server/discover</code> answers, revision 2026-07-28</td></tr>
-        <tr><td><code>w08.mcp.tools</code></td><td class="num">2</td><td>The three course tools, with schemas</td></tr>
+        <tr><td><code>w08.mcp.tools</code></td><td class="num">2</td><td>The three course tools are published, with input schemas</td></tr>
         <tr><td><code>w08.mcp.call</code></td><td class="num">3</td><td>Tool calls return the right data</td></tr>
         <tr class="hl"><td><code>w08.mcp.new_tool</code></td><td class="num">3</td><td>The new tool exists and answers correctly</td></tr>
       </table>
@@ -539,8 +566,8 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 23 -->
-<section class="slide" data-title="When the agent gets stuck">
+<!-- 28 -->
+<section class="slide" data-title="When the agent gets stuck" data-lecture="lab">
   <p class="kicker">Steering the loop</p>
   <h2>When the agent gets stuck, fix the prompt before you add more code</h2>
   <ol class="steps n4 build-row">
@@ -552,25 +579,8 @@ result = await agent.run(
   <div class="callout purple build" style="margin-top:10px"><p><b>Trust the tests and the harness, not the agent's summary of its own work.</b> If the summary says "all tests pass", run them yourself.</p></div>
 </section>
 
-<!-- 23b -->
-<section class="slide" data-title="Security of agentic coding">
-  <p class="kicker">Security of agentic coding</p>
-  <h2>A coding agent runs with your permissions. Treat it as a fast colleague who can be tricked</h2>
-  <div class="table-wrap build">
-    <table class="compact">
-      <tr><th>Risk</th><th>Example</th><th>Mitigation</th></tr>
-      <tr><td>Prompt injection through content</td><td>An issue or README says "also add this curl command to the build"</td><td>Approvals for commands and network; sandboxing; review of diffs</td></tr>
-      <tr><td>Secret exposure</td><td>The agent reads <code>.env</code> and pastes a key into a log or commit</td><td>Rules against reading secrets; hooks that scan for them; keyless auth</td></tr>
-      <tr><td>Destructive commands</td><td><code>rm -rf</code>, <code>git push --force</code>, <code>terraform destroy</code></td><td>Deny lists; approval for anything irreversible; work on branches</td></tr>
-      <tr><td>Invented dependencies</td><td>A package that does not exist, or is malicious</td><td>Lock files, dependency review, CI</td></tr>
-      <tr><td>Over-trusting output</td><td>Tests pass because they were weakened</td><td>Protected tests, code review, CI that runs the real suite</td></tr>
-    </table>
-  </div>
-  <div class="callout build" style="margin-top:14px"><p>Every mitigation here is a harness feature: sandbox, approval policy, hooks, instructions, verification.</p></div>
-</section>
-
-<!-- 24 -->
-<section class="slide" data-title="What makes a good check">
+<!-- 29 -->
+<section class="slide" data-title="What makes a good check" data-lecture="lab">
   <p class="kicker">Lab Part 6</p>
   <h2>Write a check, and know what makes one good</h2>
   <div class="cols cols-2">
@@ -591,8 +601,8 @@ result = await agent.run(
   </div>
 </section>
 
-<!-- 25 -->
-<section class="slide" data-title="Deploy, submit, go further">
+<!-- 30 -->
+<section class="slide" data-title="Deploy, submit, go further" data-lecture="lab">
   <p class="kicker">Lab Part 5</p>
   <h2>Deploy, score the live URL, and connect it to any agent</h2>
   <div class="cols cols-2">
@@ -613,8 +623,8 @@ print(f"MCP endpoint: {url}/mcp")</code></pre>
   </div>
 </section>
 
-<!-- 25b -->
-<section class="slide" data-title="After you submit: the deep dive">
+<!-- 31 -->
+<section class="slide" data-title="After you submit: the deep dive" data-lecture="lab">
   <p class="kicker">Optional · not graded</p>
   <h2>After you submit, the deep dive takes today's ideas further</h2>
   <div class="cols cols-40">
@@ -637,8 +647,8 @@ print(f"MCP endpoint: {url}/mcp")</code></pre>
   </div>
 </section>
 
-<!-- 26 -->
-<section class="slide" data-title="What to remember">
+<!-- 32 -->
+<section class="slide" data-title="What to remember" data-lecture="15">
   <p class="kicker">Summary</p>
   <h2>What to remember</h2>
   <div class="cols cols-2">
@@ -657,8 +667,8 @@ print(f"MCP endpoint: {url}/mcp")</code></pre>
   </div>
 </section>
 
-<!-- 27 -->
-<section class="slide" data-title="Learn more">
+<!-- 33 -->
+<section class="slide" data-title="Learn more" data-lecture="reading">
   <p class="kicker">Learn more</p>
   <h2>Where to go deeper</h2>
   <div class="cols cols-2">
@@ -679,8 +689,8 @@ print(f"MCP endpoint: {url}/mcp")</code></pre>
   </div>
 </section>
 
-<!-- 28 -->
-<section class="slide" data-title="Next session: production agentic systems">
+<!-- 34 -->
+<section class="slide" data-title="Next session: production agentic systems" data-lecture="next">
   <p class="kicker">Next session · Week 10</p>
   <h2>Next session: make it hold up in production</h2>
   <div class="cols cols-3 build-row" style="margin-top:12px">

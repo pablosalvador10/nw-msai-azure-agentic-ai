@@ -66,6 +66,36 @@ def test_lecture_python_examples_match_the_reading_page(source):
         assert block.strip() in parts.code, f"Python example {number} differs between {source} and its reading page"
 
 
+SLIDE_ROLES = {"intro", "part", "lab", "reading", "next"}
+
+
+@pytest.mark.parametrize("source", LECTURES, ids=lambda source: source.parent.name)
+def test_slides_follow_the_lecture(source):
+    """Each slide names the lecture section it teaches (data-lecture), or its role in the deck.
+
+    The deck must teach the sections in the lecture's order and leave none out.
+    """
+    sections = [int(n) for n in re.findall(r"^## (\d+) · ", source.read_text(encoding="utf-8"), re.MULTILINE)]
+    deck = (source.parent / "docs/slides.html").read_text(encoding="utf-8")
+    slides = re.findall(r'<section class="slide[^"]*"[^>]*?data-title="([^"]*)"[^>]*>', deck)
+    tags = re.findall(r'<section class="slide[^"]*"[^>]*>', deck)
+    assert len(slides) == len(tags), "every slide needs a data-title"
+    taught = []
+    for name, tag in zip(slides, tags, strict=True):
+        match = re.search(r'data-lecture="([^"]*)"', tag)
+        assert match, f"slide '{name}' has no data-lecture"
+        value = match.group(1)
+        if value in SLIDE_ROLES:
+            continue
+        numbers = [int(n) for n in value.split()]
+        assert set(numbers) <= set(sections), f"slide '{name}' names a section the lecture does not have: {value}"
+        assert not taught or numbers[0] >= taught[-1], (
+            f"slide '{name}' (section {value}) comes after section {taught[-1]}"
+        )
+        taught += numbers
+    assert sorted(set(taught)) == sections, f"sections without a slide: {sorted(set(sections) - set(taught))}"
+
+
 @pytest.mark.parametrize("format", ["markdown", "lecture", "slides"])
 @pytest.mark.parametrize("amount,allowed", [(CREDIT_LIMIT, True), (CREDIT_LIMIT + 0.01, False)])
 def test_credit_middleware_examples_use_the_domain_policy(format, amount, allowed):

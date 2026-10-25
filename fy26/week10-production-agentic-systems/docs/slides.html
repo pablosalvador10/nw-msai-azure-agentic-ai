@@ -11,7 +11,7 @@
 <main class="stage" data-week="Week 10" data-topic="Production Agentic Systems">
 
 <!-- 1 -->
-<section class="slide title-slide" data-title="Production Agentic Systems">
+<section class="slide title-slide" data-title="Production Agentic Systems" data-lecture="intro">
   <div class="build">
     <p class="kicker">Week 10</p>
     <h1>Production Agentic Systems</h1>
@@ -29,7 +29,7 @@
 </section>
 
 <!-- 2 -->
-<section class="slide" data-title="What changes in production">
+<section class="slide" data-title="What changes in production" data-lecture="1">
   <p class="kicker">Why this week matters</p>
   <h2>What changes between a demo and production</h2>
   <div class="table-wrap build">
@@ -47,7 +47,7 @@
 </section>
 
 <!-- 3 -->
-<section class="slide" data-title="By the end you can">
+<section class="slide" data-title="By the end you can" data-lecture="intro">
   <p class="kicker">Objectives</p>
   <h2>By the end of today you can</h2>
   <div class="cols cols-60">
@@ -67,7 +67,7 @@
 </section>
 
 <!-- 4 -->
-<section class="slide" data-title="Today: lecture, lab, deep dive">
+<section class="slide" data-title="Today: lecture, lab, deep dive" data-lecture="intro">
   <p class="kicker">Today</p>
   <h2>Learn it, build it, ship it; then go deeper if you want</h2>
   <div class="cols cols-60">
@@ -88,7 +88,7 @@
 </section>
 
 <!-- 5 -->
-<section class="slide" data-title="Defense in depth">
+<section class="slide" data-title="Defense in depth" data-lecture="1">
   <p class="kicker">The organizing idea</p>
   <h2>Defense in depth: no layer is trusted to be perfect</h2>
   <div class="flow build-row" style="margin-top:4px">
@@ -100,9 +100,9 @@
     <div class="arrow">&rarr;</div>
     <div class="node hl"><b>Model</b><span>Foundry guardrail, instructions</span></div>
     <div class="arrow">&rarr;</div>
-    <div class="node"><b>Tools</b><span>least privilege, approvals, rules in code</span></div>
+    <div class="node"><b>Tools</b><span>least privilege, approvals, agent identity, rules in code</span></div>
     <div class="arrow">&rarr;</div>
-    <div class="node gr"><b>Output</b><span>schema, canary, groundedness</span></div>
+    <div class="node gr"><b>Output</b><span>schema, canary, groundedness, PII</span></div>
   </div>
   <div class="cols cols-2 build-row" style="margin-top:8px">
     <div class="card azure"><h3>Observability underneath every layer</h3><p>Traces, metrics and logs show what each layer caught, and what got through.</p></div>
@@ -111,14 +111,14 @@
 </section>
 
 <!-- 6 -->
-<section class="slide section-slide" data-title="Part 1 · Threats">
+<section class="slide section-slide" data-title="Part 1 · Threats" data-lecture="part">
   <p class="kicker">Part 1 · Lab Parts 1-2</p>
   <h1>Threats: what to protect, and from what</h1>
   <p>Before an attacker asks: what are the assets, where does untrusted data enter, and what could go wrong at each boundary?</p>
 </section>
 
 <!-- 7 -->
-<section class="slide" data-title="Threat model">
+<section class="slide" data-title="Threat model" data-lecture="2">
   <p class="kicker">Threat modeling</p>
   <h2>Start from the assets, not from the attacks</h2>
   <div class="table-wrap build">
@@ -135,7 +135,7 @@
 </section>
 
 <!-- 8 -->
-<section class="slide" data-title="The lethal trifecta">
+<section class="slide" data-title="The lethal trifecta" data-lecture="2">
   <p class="kicker">A sharp heuristic for agents</p>
   <h2>The lethal trifecta: remove one leg and the attack class disappears</h2>
   <div class="cols cols-2 center">
@@ -164,7 +164,7 @@
 </section>
 
 <!-- 9 -->
-<section class="slide" data-title="OWASP Top 10 for LLM applications">
+<section class="slide" data-title="OWASP Top 10 for LLM applications" data-lecture="3">
   <p class="kicker">A shared vocabulary</p>
   <h2>The OWASP Top 10 for LLM applications (2025), mapped to your service</h2>
   <div class="table-wrap build">
@@ -186,7 +186,7 @@
 </section>
 
 <!-- 10 -->
-<section class="slide" data-title="Prompt injection">
+<section class="slide" data-title="Prompt injection" data-lecture="4">
   <p class="kicker">Lab Part 2 · red-team your own service</p>
   <h2>Prompt injection is unsolved: instructions and data share one channel</h2>
   <div class="cols cols-2">
@@ -216,7 +216,7 @@
 </section>
 
 <!-- 11 -->
-<section class="slide" data-title="Defenses that hold when the model is fooled">
+<section class="slide" data-title="Defenses that hold when the model is fooled" data-lecture="4">
   <p class="kicker">Two families of defense</p>
   <h2>Prefer defenses that work even when the model is fooled</h2>
   <div class="cols cols-2">
@@ -252,16 +252,16 @@
 </section>
 
 <!-- 12 -->
-<section class="slide section-slide" data-title="Part 2 · Layered guardrails">
+<section class="slide section-slide" data-title="Part 2 · Layered guardrails" data-lecture="part">
   <p class="kicker">Part 2 · Lab Part 3</p>
   <h1>Layered guardrails, and what they cost</h1>
   <p>The platform's layer, your layers, and the error rate every one of them has.</p>
 </section>
 
 <!-- 13 -->
-<section class="slide" data-title="Guardrails in Microsoft Foundry">
+<section class="slide" data-title="Guardrails in Microsoft Foundry" data-lecture="5">
   <p class="kicker">Layer 1: the platform</p>
-  <h2>A Foundry guardrail is a set of controls: a risk, where to check it, what to do</h2>
+  <h2>A Foundry guardrail is a set of controls: a risk, where to check it, and what to do</h2>
   <div class="cols cols-2">
     <div class="table-wrap build">
       <table class="compact">
@@ -283,7 +283,7 @@
 </section>
 
 <!-- 14 -->
-<section class="slide" data-title="Your own layers">
+<section class="slide" data-title="Your own layers" data-lecture="6">
   <p class="kicker">Layers 2 and 3: yours</p>
   <h2>Platform guardrails are generic. Your service needs controls that know its domain</h2>
   <div class="table-wrap build">
@@ -301,7 +301,7 @@
 </section>
 
 <!-- 15 -->
-<section class="slide" data-title="Every guardrail has two error rates">
+<section class="slide" data-title="Every guardrail has two error rates" data-lecture="6">
   <p class="kicker">The cost of a guardrail</p>
   <h2>Every guardrail has two error rates. Measure both</h2>
   <div class="cols cols-2">
@@ -323,11 +323,11 @@
 </section>
 
 <!-- 16 -->
-<section class="slide" data-title="Your turn: harden the screen">
+<section class="slide" data-title="Your turn: harden the screen" data-lecture="lab">
   <p class="kicker">Lab Part 3 · your turn</p>
   <h2>Your turn: contain injection without refusing riders</h2>
   <ol class="steps n4 build-row">
-    <li><b>Catch the kind, not the sentence</b>Label attacks <code>prompt_injection</code> or <code>unsafe</code>. The private harness has more attacks than the public one.</li>
+    <li><b>Catch the kind of attack, not the sentence</b>Label attacks <code>prompt_injection</code> or <code>unsafe</code>. The private harness has more attacks than the public one.</li>
     <li><b>Zero false positives</b>Re-run the 32 legitimate questions after every change.</li>
     <li><b>Optional: a model screen</b>A structured-output call after the regular expressions. Measure its latency.</li>
     <li><b>Optional: a canary</b>An output check in <code>ask</code>.</li>
@@ -342,48 +342,14 @@ print(baseline["score"], "->", hardened["score"])</code></pre>
 </section>
 
 <!-- 17 -->
-<section class="slide section-slide" data-title="Part 3 · The edge, identity, reliability">
+<section class="slide section-slide" data-title="Part 3 · Identity, the edge, reliability" data-lecture="part">
   <p class="kicker">Part 3 · Lab Part 4</p>
-  <h1>The edge, identity, and reliability</h1>
+  <h1>Identity, the edge, and reliability</h1>
   <p>The cheapest defense is the one that runs before any AI.</p>
 </section>
 
 <!-- 18 -->
-<section class="slide" data-title="Limits at the edge">
-  <p class="kicker">The edge</p>
-  <h2>Four middlewares, in the order a request meets them</h2>
-  <div class="cols cols-60">
-    <div class="table-wrap build">
-      <table class="compact">
-        <tr><th>Middleware</th><th>Rule</th><th>Status</th></tr>
-        <tr><td><code>request_id</code></td><td>Echo <code>X-Request-ID</code> or generate one; log it; map an upstream 429 to 503</td><td>503</td></tr>
-        <tr><td><code>body_limit</code></td><td>Over 64 KB: reject before parsing</td><td>413</td></tr>
-        <tr class="hl"><td><code>api_key</code></td><td><code>/v1/*</code> and <code>/mcp</code> need <code>X-API-Key</code></td><td>401</td></tr>
-        <tr><td><code>rate_limit</code></td><td>Over 240 requests a minute per client</td><td>429, <code>Retry-After</code></td></tr>
-      </table>
-    </div>
-    <div class="stack build">
-      <div class="card"><h3>Status codes are a contract</h3><p>4xx: the caller must change something. 5xx: the server failed. 429 and 503 with <code>Retry-After</code>: try later. A guardrail refusal is a <b>200</b> with <code>guardrail</code> set: the service worked.</p></div>
-<pre class="code small-code"><code>course.set_api_key()      # Container App secret + .env
-url = course.deploy()</code></pre>
-    </div>
-  </div>
-</section>
-
-<!-- 19 -->
-<section class="slide" data-title="Rate limits, retries, budgets">
-  <p class="kicker">Under load</p>
-  <h2>Limit tokens, not only requests; retry with jitter; bound every loop</h2>
-  <div class="cols cols-3 build-row">
-    <div class="card"><h3>Rate limiting</h3><p>Ours is a sliding window per client, in memory: it is <b>per replica</b>, and it forgets idle clients. Production uses a shared store or a gateway, and a <b>token bucket</b> that allows short bursts.</p></div>
-    <div class="card azure"><h3>Retries</h3><p>Retry only idempotent operations, honor <code>Retry-After</code>, otherwise back off with jitter:</p><p style="font-family:var(--mono);font-size:13.5px">wait = random(0, min(cap, base &middot; 2<sup>n</sup>))</p></div>
-    <div class="card amber"><h3>Idempotency and budgets</h3><p>A credit must not be issued twice because a client retried. Bound every model call, tool call and agent loop; fail fast with a clear status.</p></div>
-  </div>
-  <div class="callout purple build" style="margin-top:18px"><p><b>For LLM services, requests are the wrong unit.</b> One request can cost a hundred times another. Token limits per consumer belong in an AI gateway.</p></div>
-</section>
-
-<!-- 20 -->
-<section class="slide" data-title="Identity, secrets, access">
+<section class="slide" data-title="Identity, secrets, access" data-lecture="7">
   <p class="kicker">Identity</p>
   <h2>Identities everywhere; keys only at the edge, and only as secrets</h2>
   <div class="cols cols-60">
@@ -405,8 +371,42 @@ url = course.deploy()</code></pre>
   </div>
 </section>
 
+<!-- 19 -->
+<section class="slide" data-title="Limits at the edge" data-lecture="8">
+  <p class="kicker">The edge</p>
+  <h2>Four middlewares, in the order a request meets them</h2>
+  <div class="cols cols-60">
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Middleware</th><th>Rule</th><th>Status</th></tr>
+        <tr><td><code>request_id</code></td><td>Echo <code>X-Request-ID</code> or generate one; log it; map an upstream 429 to 503</td><td>503</td></tr>
+        <tr><td><code>body_limit</code></td><td>Over 64 KB: reject before parsing</td><td>413</td></tr>
+        <tr class="hl"><td><code>api_key</code></td><td><code>/v1/*</code> and <code>/mcp</code> need <code>X-API-Key</code></td><td>401</td></tr>
+        <tr><td><code>rate_limit</code></td><td>Over 240 requests a minute per client</td><td>429, <code>Retry-After</code></td></tr>
+      </table>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Status codes are a contract</h3><p>4xx: the caller must change something. 5xx: the server failed. 429 and 503 with <code>Retry-After</code>: try later. A guardrail refusal is a <b>200</b> with <code>guardrail</code> set: the service worked.</p></div>
+<pre class="code small-code"><code>course.set_api_key()      # Container App secret + .env
+url = course.deploy()</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-title="Rate limits, retries, budgets" data-lecture="8">
+  <p class="kicker">Under load</p>
+  <h2>Limit tokens, not only requests; retry with jitter; bound every loop</h2>
+  <div class="cols cols-3 build-row">
+    <div class="card"><h3>Rate limiting</h3><p>Ours is a sliding window per client, in memory: it is <b>per replica</b>, and it forgets idle clients. Production uses a shared store or a gateway, and a <b>token bucket</b> that allows short bursts.</p></div>
+    <div class="card azure"><h3>Retries</h3><p>Retry only idempotent operations, honor <code>Retry-After</code>, otherwise back off with jitter:</p><p style="font-family:var(--mono);font-size:13.5px">wait = random(0, min(cap, base &middot; 2<sup>n</sup>))</p></div>
+    <div class="card amber"><h3>Idempotency and budgets</h3><p>A credit must not be issued twice because a client retried. Bound every model call, tool call and agent loop; fail fast with a clear status.</p></div>
+  </div>
+  <div class="callout purple build" style="margin-top:18px"><p><b>For LLM services, requests are the wrong unit.</b> One request can cost a hundred times another. Token limits per consumer belong in an AI gateway.</p></div>
+</section>
+
 <!-- 21 -->
-<section class="slide" data-title="The AI gateway">
+<section class="slide" data-title="The AI gateway" data-lecture="9">
   <p class="kicker">Many apps, shared models</p>
   <h2>When many applications share models, the edge becomes an AI gateway</h2>
   <div class="tiles t3 build-row" style="grid-template-columns:repeat(3,1fr)">
@@ -424,7 +424,7 @@ url = course.deploy()</code></pre>
 </section>
 
 <!-- 22 -->
-<section class="slide" data-title="Reliability and safe deployment">
+<section class="slide" data-title="Reliability and safe deployment" data-lecture="10">
   <p class="kicker">Reliability</p>
   <h2>Decide in advance what happens when something fails</h2>
   <div class="cols cols-2">
@@ -453,14 +453,14 @@ url = course.deploy()</code></pre>
 </section>
 
 <!-- 23 -->
-<section class="slide section-slide" data-title="Part 4 · Observe and evaluate">
+<section class="slide section-slide" data-title="Part 4 · Observe and evaluate" data-lecture="part">
   <p class="kicker">Part 4 · Lab Parts 5-6</p>
   <h1>Observe everything, evaluate continuously</h1>
   <p>Traces show what happened. Evaluation says whether it was good.</p>
 </section>
 
 <!-- 24 -->
-<section class="slide" data-title="Observability with OpenTelemetry">
+<section class="slide" data-title="Observability with OpenTelemetry" data-lecture="11">
   <p class="kicker">Lab Part 5 · observability</p>
   <h2>One request becomes a tree of spans, with the same names in every framework</h2>
   <div class="cols cols-2">
@@ -485,7 +485,7 @@ url = course.deploy()</code></pre>
 </section>
 
 <!-- 25 -->
-<section class="slide" data-title="Reading telemetry with KQL">
+<section class="slide" data-title="Reading telemetry with KQL" data-lecture="12">
   <p class="kicker">KQL</p>
   <h2>Ask your telemetry questions in KQL</h2>
   <div class="cols cols-2">
@@ -501,19 +501,20 @@ url = course.deploy()</code></pre>
 <pre class="code small-code"><code>AppDependencies
 | where TimeGenerated > ago(1h)
 | where Name startswith "chat" or Name startswith "execute_tool"
+    or Name has "embeddings"
 | summarize calls = count(), p50_ms = percentile(DurationMs, 50) by Name
 | order by calls desc</code></pre>
     </div>
     <div class="stack build">
       <div class="card"><h3>Read the two tables together</h3><p>If <code>/v1/ask</code> takes 3 s at the median and each model call takes 1 s, the agent makes about three calls per question. That is the lever for latency and cost.</p></div>
-      <div class="card azure"><h3>From query to alert</h3><p>Any query that returns rows can become an alert rule: "p95 of <code>/v1/ask</code> above 10 s in the last 15 minutes".</p></div>
+      <div class="card azure"><h3>From query to alert</h3><p>Any query that returns rows can become an alert rule, for example "error rate above 5% for 10 minutes". The lab asks you to write the latency alert yourself.</p></div>
       <div class="card plain"><h3>What to watch</h3><p>Latency, traffic, errors, saturation; and tokens per request, refusal rate, abstention rate, tool errors, evaluation scores.</p></div>
     </div>
   </div>
 </section>
 
 <!-- 26 -->
-<section class="slide" data-title="Kinds of evaluation">
+<section class="slide" data-title="Kinds of evaluation" data-lecture="13">
   <p class="kicker">Evaluation</p>
   <h2>The harness checks what you know in advance. Production asks about everything else</h2>
   <div class="cols cols-2">
@@ -539,7 +540,7 @@ url = course.deploy()</code></pre>
 </section>
 
 <!-- 27 -->
-<section class="slide" data-title="An LLM judge, calibrated">
+<section class="slide" data-title="An LLM judge, calibrated" data-lecture="13">
   <p class="kicker">Lab Part 6 · a judge from scratch</p>
   <h2>A judge is a model too: score one property, give it sources, calibrate it</h2>
   <div class="cols cols-60">
@@ -568,7 +569,7 @@ verdict = client.responses.parse(
 </section>
 
 <!-- 28 -->
-<section class="slide" data-title="Foundry evaluators and red teaming">
+<section class="slide" data-title="Foundry evaluators and red teaming" data-lecture="13 14">
   <p class="kicker">The managed alternatives</p>
   <h2>Foundry evaluators measure quality; the Red Teaming Agent measures attacks</h2>
   <div class="cols cols-2">
@@ -592,7 +593,14 @@ verdict = client.responses.parse(
 </section>
 
 <!-- 29 -->
-<section class="slide" data-title="GenAIOps and governance">
+<section class="slide section-slide" data-title="Part 5 · Operating at scale" data-lecture="part">
+  <p class="kicker">Part 5 · Lab Part 7</p>
+  <h1>Operating at scale</h1>
+  <p>The lifecycle, governance and cost that keep many agents healthy after launch, and the checklist before yours goes live.</p>
+</section>
+
+<!-- 30 -->
+<section class="slide" data-title="GenAIOps and governance" data-lecture="15 16">
   <p class="kicker">GenAIOps and governance</p>
   <h2>A loop for one agent, and a control plane for a fleet</h2>
   <div class="flow build-row">
@@ -618,8 +626,8 @@ verdict = client.responses.parse(
   <p class="small" style="margin-top:8px">The human side: a named owner per agent, documented intended use and limits, a way for users to report problems, an incident process that includes "turn it off".</p>
 </section>
 
-<!-- 30 -->
-<section class="slide" data-title="Cost engineering">
+<!-- 31 -->
+<section class="slide" data-title="Cost engineering" data-lecture="17">
   <p class="kicker">Cost engineering</p>
   <h2>Engineer cost the way you engineer latency</h2>
   <div class="cols cols-60">
@@ -642,8 +650,29 @@ verdict = client.responses.parse(
   </div>
 </section>
 
-<!-- 31 -->
-<section class="slide" data-title="The exercise and the final deploy">
+<!-- 32 -->
+<section class="slide" data-title="Production readiness checklist" data-lecture="18">
+  <p class="kicker">Before you put your name on it</p>
+  <h2>Production readiness checklist</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th>Area</th><th>Check</th><th>In your service</th></tr>
+      <tr><td><b>Threat model</b></td><td>Assets, entry points, boundaries; trifecta checked per agent</td><td>Part 1</td></tr>
+      <tr><td><b>Input</b></td><td>Size limits, schema, injection screens with measured false positives</td><td><code>body_limit</code>, contract, <code>screen()</code></td></tr>
+      <tr><td><b>Model</b></td><td>Guardrail assigned and tested; versions pinned</td><td><code>Microsoft.DefaultV2</code>, Terraform</td></tr>
+      <tr><td><b>Tools</b></td><td>Least privilege; rules in code; approvals; idempotency</td><td>Week 7, <code>domain.py</code></td></tr>
+      <tr><td><b>Output</b></td><td>Schema; citations validated; canary; no secrets in prompts</td><td>Contract, guardrails</td></tr>
+      <tr><td><b>Identity and limits</b></td><td>Managed identities; edge auth; rate, token, loop limits; timeouts</td><td>Foundry User, <code>X-API-Key</code>, <code>rate_limit</code></td></tr>
+      <tr><td><b>Reliability</b></td><td>Liveness and readiness; degradation; rollback</td><td><code>/health</code>, <code>/ready</code>, revisions</td></tr>
+      <tr><td><b>Observability</b></td><td>Request ids; GenAI traces; dashboards; alerts</td><td><code>request_id</code>, <code>telemetry.py</code>, KQL</td></tr>
+      <tr><td><b>Quality</b></td><td>Regression harness; evaluation sets; calibrated judge; CI gate</td><td><code>harness/</code>, Part 6</td></tr>
+      <tr><td><b>Governance</b></td><td>Owner, documentation, inventory, incident process</td><td>Your README</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 33 -->
+<section class="slide" data-title="The exercise and the final deploy" data-lecture="lab">
   <p class="kicker">The exercise · Lab Part 7</p>
   <h2>Final deploy: every week, one URL</h2>
   <div class="cols cols-2">
@@ -671,29 +700,8 @@ final = {week: course.check(week, url)["score"]
   </div>
 </section>
 
-<!-- 32 -->
-<section class="slide" data-title="Production readiness checklist">
-  <p class="kicker">Before you put your name on it</p>
-  <h2>Production readiness checklist</h2>
-  <div class="table-wrap build">
-    <table class="compact">
-      <tr><th>Area</th><th>Check</th><th>In your service</th></tr>
-      <tr><td><b>Threat model</b></td><td>Assets, entry points, boundaries; trifecta checked per agent</td><td>Part 1</td></tr>
-      <tr><td><b>Input</b></td><td>Size limits, schema, injection screens with measured false positives</td><td><code>body_limit</code>, contract, <code>screen()</code></td></tr>
-      <tr><td><b>Model</b></td><td>Guardrail assigned and tested; versions pinned</td><td><code>Microsoft.DefaultV2</code>, Terraform</td></tr>
-      <tr><td><b>Tools</b></td><td>Least privilege; rules in code; approvals; idempotency</td><td>Week 7, <code>domain.py</code></td></tr>
-      <tr><td><b>Output</b></td><td>Schema; citations validated; canary; no secrets in prompts</td><td>Contract, guardrails</td></tr>
-      <tr><td><b>Identity and limits</b></td><td>Managed identities; edge auth; rate, token, loop limits; timeouts</td><td>Foundry User, <code>X-API-Key</code>, <code>rate_limit</code></td></tr>
-      <tr><td><b>Reliability</b></td><td>Liveness and readiness; degradation; rollback</td><td><code>/health</code>, <code>/ready</code>, revisions</td></tr>
-      <tr><td><b>Observability</b></td><td>Request ids; GenAI traces; dashboards; alerts</td><td><code>request_id</code>, <code>telemetry.py</code>, KQL</td></tr>
-      <tr><td><b>Quality</b></td><td>Regression harness; evaluation sets; calibrated judge; CI gate</td><td><code>harness/</code>, Part 6</td></tr>
-      <tr><td><b>Governance</b></td><td>Owner, documentation, inventory, incident process</td><td>Your README</td></tr>
-    </table>
-  </div>
-</section>
-
-<!-- 32b -->
-<section class="slide" data-title="After you submit: the deep dive">
+<!-- 34 -->
+<section class="slide" data-title="After you submit: the deep dive" data-lecture="lab">
   <p class="kicker">Optional · not graded</p>
   <h2>After you submit, the deep dive measures the defenses you added</h2>
   <div class="cols cols-40">
@@ -717,8 +725,8 @@ final = {week: course.check(week, url)["score"]
   </div>
 </section>
 
-<!-- 33 -->
-<section class="slide" data-title="What to remember">
+<!-- 35 -->
+<section class="slide" data-title="What to remember" data-lecture="19">
   <p class="kicker">Summary</p>
   <h2>What to remember</h2>
   <div class="cols cols-2">
@@ -736,8 +744,8 @@ final = {week: course.check(week, url)["score"]
   </div>
 </section>
 
-<!-- 34 -->
-<section class="slide" data-title="Learn more">
+<!-- 36 -->
+<section class="slide" data-title="Learn more" data-lecture="reading">
   <p class="kicker">Learn more</p>
   <h2>Where to go deeper</h2>
   <div class="cols cols-2">
@@ -758,8 +766,8 @@ final = {week: course.check(week, url)["score"]
   </div>
 </section>
 
-<!-- 35 -->
-<section class="slide" data-title="What you built">
+<!-- 37 -->
+<section class="slide" data-title="What you built" data-lecture="next">
   <p class="kicker">Course wrap-up</p>
   <h2>What you built: one service, five weeks, one URL</h2>
   <ol class="steps n5 build-row">

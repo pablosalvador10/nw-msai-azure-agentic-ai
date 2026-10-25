@@ -11,7 +11,7 @@
 <main class="stage" data-week="Week 5" data-topic="Fundamentals of Azure AI">
 
 <!-- 1 -->
-<section class="slide title-slide" data-title="Fundamentals of Azure AI">
+<section class="slide title-slide" data-title="Fundamentals of Azure AI" data-lecture="intro">
   <div class="build">
     <p class="kicker">Week 5</p>
     <h1>Fundamentals of Azure AI</h1>
@@ -29,7 +29,7 @@
 </section>
 
 <!-- 2 -->
-<section class="slide" data-title="Four questions behind every model call">
+<section class="slide" data-title="Four questions behind every model call" data-lecture="intro">
   <p class="kicker">Why this week matters</p>
   <h2>Four questions sit behind every model call</h2>
   <div class="cols cols-4 build-row" style="margin-top:22px">
@@ -42,7 +42,7 @@
 </section>
 
 <!-- 3 -->
-<section class="slide" data-title="By the end you can">
+<section class="slide" data-title="By the end you can" data-lecture="intro">
   <p class="kicker">Objectives</p>
   <h2>By the end of today you can</h2>
   <div class="cols cols-60">
@@ -61,7 +61,7 @@
 </section>
 
 <!-- 4 -->
-<section class="slide" data-title="Today: lecture, lab, deep dive">
+<section class="slide" data-title="Today: lecture, lab, deep dive" data-lecture="intro">
   <p class="kicker">Today</p>
   <h2>Learn it, build it, ship it; then go deeper if you want</h2>
   <div class="cols cols-60">
@@ -81,7 +81,7 @@
 </section>
 
 <!-- 5 -->
-<section class="slide" data-title="Every week runs the same loop">
+<section class="slide" data-title="Every week runs the same loop" data-lecture="intro">
   <p class="kicker">How the course works</p>
   <h2>Every week runs the same loop, so your attention goes to the ideas</h2>
   <ol class="steps n5 build-row">
@@ -106,14 +106,14 @@
 </section>
 
 <!-- 6 -->
-<section class="slide section-slide" data-title="Part 1 · Where models live">
+<section class="slide section-slide" data-title="Part 1 · Where models live" data-lecture="part">
   <p class="kicker">Part 1 · Lab Part 1</p>
   <h1>Where models live</h1>
   <p>Microsoft Foundry, its resource model, choosing a model, and the capacity you buy.</p>
 </section>
 
 <!-- 7 -->
-<section class="slide" data-title="Microsoft Foundry in one picture">
+<section class="slide" data-title="Microsoft Foundry in one picture" data-lecture="1">
   <p class="kicker">The Azure AI stack</p>
   <h2>Microsoft Foundry is one Azure resource that holds models, agents, tools and governance</h2>
   <div class="cols" style="grid-template-columns:230px 60px 1fr; gap:0; align-items:center">
@@ -122,7 +122,7 @@
     <div class="box-group build">
       <p class="label">Microsoft Foundry · one resource, many projects</p>
       <div class="tiles t3">
-        <div class="tile hl"><b>Foundry Models</b>A catalog you deploy from: OpenAI, Microsoft, Meta, Mistral, Anthropic and more · <span class="accent">Week 5</span></div>
+        <div class="tile hl"><b>Foundry Models</b>A catalog you deploy from: OpenAI, Microsoft, Meta, Mistral, DeepSeek, Anthropic and others · <span class="accent">Week 5</span></div>
         <div class="tile"><b>Foundry Agent Service</b>Prompt agents, hosted agents, conversations, versions · <span class="accent">Weeks 5, 8, 10</span></div>
         <div class="tile"><b>Tools and toolboxes</b>Web and file search, code interpreter, MCP, OpenAPI, functions · <span class="accent">Weeks 6, 8</span></div>
         <div class="tile"><b>Foundry IQ</b>Managed knowledge bases with agentic retrieval · <span class="accent">Week 6</span></div>
@@ -135,7 +135,7 @@
 </section>
 
 <!-- 8 -->
-<section class="slide" data-title="Old names you will still read online">
+<section class="slide" data-title="Old names you will still read online" data-lecture="1">
   <p class="kicker">Vocabulary</p>
   <h2>Until 2025 these were separate products. You will still read the old names online</h2>
   <div class="table-wrap build" style="max-width:1020px">
@@ -153,7 +153,7 @@
 </section>
 
 <!-- 9 -->
-<section class="slide" data-title="Resource, project, deployment, endpoint">
+<section class="slide" data-title="Resource, project, deployment, endpoint" data-lecture="2">
   <p class="kicker">The resource model</p>
   <h2>Your code calls a deployment by name, never a model version</h2>
   <div class="flow build-row">
@@ -178,7 +178,7 @@
 </section>
 
 <!-- 10 -->
-<section class="slide" data-title="Keys are off, on purpose">
+<section class="slide" data-title="Keys are off, on purpose" data-lecture="2">
   <p class="kicker">One line of Terraform</p>
   <h2>API keys are switched off, on purpose</h2>
   <div class="cols cols-2 center">
@@ -198,7 +198,7 @@
 </section>
 
 <!-- 11 -->
-<section class="slide" data-title="Choosing a model">
+<section class="slide" data-title="Choosing a model" data-lecture="3">
   <p class="kicker">Choosing a model</p>
   <h2>There is no best model, only the best model for a task, at a price</h2>
   <div class="cols cols-60">
@@ -223,7 +223,7 @@
 </section>
 
 <!-- 12 -->
-<section class="slide" data-title="Deployment types">
+<section class="slide" data-title="Deployment types" data-lecture="4">
   <p class="kicker">Deployment types</p>
   <h2>The deployment type decides where inference runs, how you pay, and how steady latency is</h2>
   <div class="table-wrap build">
@@ -240,7 +240,7 @@
 </section>
 
 <!-- 13 -->
-<section class="slide" data-title="Quota and throttling">
+<section class="slide" data-title="Quota and throttling" data-lecture="4">
   <p class="kicker">Capacity</p>
   <h2>Quota is tokens and requests per minute. Above either, Foundry answers 429</h2>
   <div class="cols cols-3 build-row">
@@ -259,7 +259,7 @@
 </section>
 
 <!-- 14 -->
-<section class="slide" data-title="Keyless identity, step by step">
+<section class="slide" data-title="Keyless identity, step by step" data-lecture="5">
   <p class="kicker">Identity</p>
   <h2>No keys: every call carries a short-lived token</h2>
   <svg viewBox="0 0 1150 330" width="1150" height="330" role="img" aria-label="Sequence: your code asks DefaultAzureCredential for a token; it uses az login or the managed identity to get one from Entra ID; your code calls Foundry with the token; Foundry checks the token and the role." font-family="Segoe UI, Inter, system-ui, sans-serif">
@@ -295,7 +295,7 @@
 </section>
 
 <!-- 15 -->
-<section class="slide" data-title="Control plane and data plane">
+<section class="slide" data-title="Control plane and data plane" data-lecture="5">
   <p class="kicker">Authorization is RBAC</p>
   <h2>A valid token is not enough: the identity needs a role, and only the one it needs</h2>
   <div class="cols cols-60">
@@ -317,14 +317,14 @@
 </section>
 
 <!-- 16 -->
-<section class="slide section-slide" data-title="Part 2 · The Responses API">
+<section class="slide section-slide" data-title="Part 2 · The Responses API" data-lecture="part">
   <p class="kicker">Part 2 · Lab Part 2</p>
   <h1>The Responses API, from scratch</h1>
   <p>One request, typed output, token usage. Then the four options you will choose deliberately: effort, caching, state and streaming.</p>
 </section>
 
 <!-- 17 -->
-<section class="slide" data-title="One request in, typed items out">
+<section class="slide" data-title="One request in, typed items out" data-lecture="6">
   <p class="kicker">Anatomy</p>
   <h2>One request in, a list of typed items out</h2>
   <div class="cols cols-2">
@@ -357,7 +357,7 @@ print(r.usage.input_tokens, r.usage.output_tokens)</code></pre>
 </section>
 
 <!-- 18 -->
-<section class="slide" data-title="Instructions, input and conversation state">
+<section class="slide" data-title="Instructions, input and conversation state" data-lecture="6">
   <p class="kicker">Two inputs, and memory</p>
   <h2>Instructions are yours and trusted; input is the user's and never trusted</h2>
   <div class="cols cols-40">
@@ -381,79 +381,7 @@ print(r.usage.input_tokens, r.usage.output_tokens)</code></pre>
 </section>
 
 <!-- 19 -->
-<section class="slide" data-title="Reasoning effort is a dial">
-  <p class="kicker">Reasoning</p>
-  <h2>Reasoning effort is a dial: measure where to set it</h2>
-  <div class="cols cols-60">
-    <div class="build">
-      <p style="font-size:17px">"A member rides an e-bike for 40 minutes at $0.18 a minute. What do they pay?" One run on the course sandbox:</p>
-      <div class="bars">
-        <div class="bar"><span><code>none</code> (default)</span><span class="track"><span class="fill" style="width:1%"></span></span><span class="v">0 tokens · $7.20</span></div>
-        <div class="bar"><span><code>low</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
-        <div class="bar"><span><code>medium</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
-        <div class="bar"><span><code>high</code></span><span class="track"><span class="fill" style="width:55%"></span></span><span class="v">40 tokens · $7.20</span></div>
-        <div class="bar"><span><code>xhigh</code></span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">72 tokens · $7.20</span></div>
-      </div>
-      <p class="small" style="margin-top:10px">Bars show hidden reasoning tokens, billed as output. Every setting gave the same answer.</p>
-    </div>
-    <div class="stack build">
-      <div class="card"><h3>Easy task: <code>none</code> wins</h3><p>Same answer, fastest, cheapest. Picking one of six categories is an easy task.</p></div>
-      <div class="card amber"><h3>Hard task: measure</h3><p>Several rules at once, multi-step arithmetic, plans: more effort can change the answer.</p></div>
-      <div class="callout"><p><b>Two facts about <code>gpt-5.4-mini</code>.</b> The default effort is <code>none</code>. Sampling settings such as <code>temperature</code> work only with <code>none</code>.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- 20 -->
-<section class="slide" data-title="Where the money and the time go">
-  <p class="kicker">Tokens, cost and latency</p>
-  <h2>Output tokens drive both the bill and the wait</h2>
-  <div class="cols cols-2">
-    <div class="stack build">
-      <div class="card plain"><h3>Token cost</h3><p style="font-family:var(--mono);font-size:15px">(input &minus; cached) &times; p<sub>in</sub> + cached &times; p<sub>cached</sub> + output &times; p<sub>out</sub></p><p class="small">Usage totals already include cached input and hidden reasoning. Do not add them again. Rates here are per token.</p></div>
-      <div class="card plain"><h3>Latency</h3><p style="font-family:var(--mono);font-size:15px">time to first token + visible output tokens / tokens per second</p><p class="small">Queueing, prompt processing and reasoning come first; then generation.</p></div>
-    </div>
-    <div class="table-wrap build">
-      <table class="compact">
-        <tr><th>Lever</th><th>Cost</th><th>Latency</th></tr>
-        <tr><td>Shorter output: a label, a sentence, a JSON object</td><td>Large</td><td>Large</td></tr>
-        <tr><td>Lower reasoning effort</td><td>Fewer reasoning tokens</td><td>Shorter first token</td></tr>
-        <tr><td>Smaller model tier</td><td>Lower price per token</td><td>Usually faster</td></tr>
-        <tr><td>Stable prefix first, so it is cached</td><td>Cached input is discounted</td><td>Faster prompt processing</td></tr>
-        <tr><td>Fewer calls per request (Week 7)</td><td>Linear</td><td>Linear on the critical path</td></tr>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- 21 -->
-<section class="slide" data-title="Prompt caching">
-  <p class="kicker">Prompt caching</p>
-  <h2>A repeated prefix is cached: cheaper and faster, with no code change</h2>
-  <div class="cols cols-60">
-    <div class="build">
-      <p style="font-size:17px">The whole handbook in the instructions, three different questions, one run on the course sandbox:</p>
-      <div class="table-wrap">
-        <table>
-          <tr><th>Question</th><th class="num">Input tokens</th><th class="num">Cached</th></tr>
-          <tr><td>Can I bring my dog on a bike?</td><td class="num">1,741</td><td class="num">0</td></tr>
-          <tr class="hl"><td>How long is a day pass valid?</td><td class="num">1,740</td><td class="num">1,280</td></tr>
-          <tr class="hl"><td>Is there a student plan?</td><td class="num">1,738</td><td class="num">1,280</td></tr>
-        </table>
-      </div>
-      <p class="small" style="margin-top:10px">Read it from <code>usage.input_tokens_details.cached_tokens</code>.</p>
-    </div>
-    <div class="stack build">
-      <div class="callout purple"><p><b>How it works.</b> When the first 1,024 or more tokens of a request match a recent request, they are served from cache.</p></div>
-      <div class="card"><h3>So, put stable content first</h3><p>Instructions, tool definitions, examples, then the user's message last.</p></div>
-      <div class="card red"><h3>Never a timestamp at the top</h3><p>One changing token early in the prompt breaks the match for everything after it.</p></div>
-      <a class="lab-ref" href="../lab.ipynb">Lab Part 2 · measure it yourself</a>
-    </div>
-  </div>
-</section>
-
-<!-- 22 -->
-<section class="slide" data-title="State and streaming">
+<section class="slide" data-title="State and streaming" data-lecture="6">
   <p class="kicker">State and streaming</p>
   <h2>Streaming changes when users see words, not when you finish</h2>
   <div class="cols cols-2">
@@ -480,15 +408,87 @@ third = client.responses.create(
   </div>
 </section>
 
+<!-- 20 -->
+<section class="slide" data-title="Reasoning effort is a dial" data-lecture="7">
+  <p class="kicker">Reasoning</p>
+  <h2>Reasoning effort is a dial: measure where to set it</h2>
+  <div class="cols cols-60">
+    <div class="build">
+      <p style="font-size:17px">"A member rides an e-bike for 40 minutes at $0.18 a minute. What do they pay?" One run on the course sandbox:</p>
+      <div class="bars">
+        <div class="bar"><span><code>none</code> (default)</span><span class="track"><span class="fill" style="width:1%"></span></span><span class="v">0 tokens · $7.20</span></div>
+        <div class="bar"><span><code>low</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
+        <div class="bar"><span><code>medium</code></span><span class="track"><span class="fill" style="width:33%"></span></span><span class="v">25 tokens · $7.20</span></div>
+        <div class="bar"><span><code>high</code></span><span class="track"><span class="fill" style="width:55%"></span></span><span class="v">40 tokens · $7.20</span></div>
+        <div class="bar"><span><code>xhigh</code></span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v">72 tokens · $7.20</span></div>
+      </div>
+      <p class="small" style="margin-top:10px">Bars show hidden reasoning tokens, billed as output. Every setting gave the same answer.</p>
+    </div>
+    <div class="stack build">
+      <div class="card"><h3>Easy task: <code>none</code> wins</h3><p>Same answer, fastest, cheapest. Picking one of six categories is an easy task.</p></div>
+      <div class="card amber"><h3>Hard task: measure</h3><p>Several rules at once, multi-step arithmetic, plans: more effort can change the answer.</p></div>
+      <div class="callout"><p><b>Two facts about <code>gpt-5.4-mini</code>.</b> The default effort is <code>none</code>. Sampling settings such as <code>temperature</code> work only with <code>none</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide" data-title="Where the money and the time go" data-lecture="7">
+  <p class="kicker">Tokens, cost and latency</p>
+  <h2>Output tokens drive both the bill and the wait</h2>
+  <div class="cols cols-2">
+    <div class="stack build">
+      <div class="card plain"><h3>Token cost</h3><p style="font-family:var(--mono);font-size:15px">(input &minus; cached) &times; p<sub>in</sub> + cached &times; p<sub>cached</sub> + output &times; p<sub>out</sub></p><p class="small">Usage totals already include cached input and hidden reasoning. Do not add them again. Rates here are per token.</p></div>
+      <div class="card plain"><h3>Latency</h3><p style="font-family:var(--mono);font-size:15px">time to first token + visible output tokens / tokens per second</p><p class="small">Queueing, prompt processing and reasoning come first; then generation.</p></div>
+    </div>
+    <div class="table-wrap build">
+      <table class="compact">
+        <tr><th>Lever</th><th>Cost</th><th>Latency</th></tr>
+        <tr><td>Shorter output: a label, a sentence, a JSON object</td><td>Large</td><td>Large</td></tr>
+        <tr><td>Lower reasoning effort</td><td>Fewer reasoning tokens</td><td>Shorter first token</td></tr>
+        <tr><td>Smaller model tier</td><td>Lower price per token</td><td>Usually faster</td></tr>
+        <tr><td>Stable prefix first, so it is cached</td><td>Cached input is discounted</td><td>Faster prompt processing</td></tr>
+        <tr><td>Fewer calls per request (Week 7)</td><td>Linear</td><td>Linear on the critical path</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-title="Prompt caching" data-lecture="7">
+  <p class="kicker">Prompt caching</p>
+  <h2>A repeated prefix is cached: cheaper and faster, with no code change</h2>
+  <div class="cols cols-60">
+    <div class="build">
+      <p style="font-size:17px">The whole handbook in the instructions, three different questions, one run on the course sandbox:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Question</th><th class="num">Input tokens</th><th class="num">Cached</th></tr>
+          <tr><td>Can I bring my dog on a bike?</td><td class="num">1,741</td><td class="num">0</td></tr>
+          <tr class="hl"><td>How long is a day pass valid?</td><td class="num">1,740</td><td class="num">1,280</td></tr>
+          <tr class="hl"><td>Is there a student plan?</td><td class="num">1,738</td><td class="num">1,280</td></tr>
+        </table>
+      </div>
+      <p class="small" style="margin-top:10px">Read it from <code>usage.input_tokens_details.cached_tokens</code>.</p>
+    </div>
+    <div class="stack build">
+      <div class="callout purple"><p><b>How it works.</b> When the first 1,024 or more tokens of a request match a recent request, they are served from cache.</p></div>
+      <div class="card"><h3>So, put stable content first</h3><p>Instructions, tool definitions, examples, then the user's message last.</p></div>
+      <div class="card red"><h3>Never a timestamp at the top</h3><p>One changing token early in the prompt breaks the match for everything after it.</p></div>
+      <a class="lab-ref" href="../lab.ipynb">Lab Part 2 · measure it yourself</a>
+    </div>
+  </div>
+</section>
+
 <!-- 23 -->
-<section class="slide section-slide" data-title="Part 3 · Structured output">
+<section class="slide section-slide" data-title="Part 3 · Structured output" data-lecture="part">
   <p class="kicker">Part 3 · Lab Part 3</p>
   <h1>Structured output: from prose to contracts</h1>
   <p>A service cannot parse prose. The API can guarantee the shape; your instructions supply the judgment.</p>
 </section>
 
 <!-- 24 -->
-<section class="slide" data-title="Three levels of answer in JSON">
+<section class="slide" data-title="Three levels of answer in JSON" data-lecture="8">
   <p class="kicker">Structured output</p>
   <h2>Shape is guaranteed by the schema. Judgment is not</h2>
   <div class="cols cols-2">
@@ -522,14 +522,14 @@ label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
 </section>
 
 <!-- 25 -->
-<section class="slide section-slide" data-title="Part 4 · Prompts as code">
+<section class="slide section-slide" data-title="Part 4 · Prompts as code" data-lecture="part">
   <p class="kicker">Part 4 · Lab Part 4</p>
   <h1>Prompts are code, improved by measurement</h1>
   <p>They live in git, they have bugs, and they need tests. The harness is the test.</p>
 </section>
 
 <!-- 26 -->
-<section class="slide" data-title="Structure your instructions">
+<section class="slide" data-title="Structure your instructions" data-lecture="9">
   <p class="kicker">Writing instructions</p>
   <h2>A triage policy a new support agent could follow</h2>
   <div class="cols cols-60">
@@ -553,7 +553,7 @@ label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
 </section>
 
 <!-- 27 -->
-<section class="slide" data-title="Improve by measurement">
+<section class="slide" data-title="Improve by measurement" data-lecture="9">
   <p class="kicker">The core skill of the course</p>
   <h2>Improve by measurement, not by impression</h2>
   <ol class="steps n4 build-row">
@@ -570,7 +570,7 @@ label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
 </section>
 
 <!-- 28 -->
-<section class="slide" data-title="The exercise: POST /v1/classify">
+<section class="slide" data-title="The exercise: POST /v1/classify" data-lecture="lab">
   <p class="kicker">The exercise</p>
   <h2>Triage that generalizes: <code>POST /v1/classify</code></h2>
   <div class="cols cols-40">
@@ -595,33 +595,14 @@ label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
 </section>
 
 <!-- 29 -->
-<section class="slide section-slide" data-title="Part 5 · Beyond one call">
+<section class="slide section-slide" data-title="Part 5 · Beyond one call" data-lecture="part">
   <p class="kicker">Context for the weeks ahead</p>
   <h1>Beyond one call: agents and safety</h1>
   <p>Where our service sits among Foundry's ways to run agents, and the guardrail every deployment already has.</p>
 </section>
 
 <!-- 30 -->
-<section class="slide" data-title="Three ways to run an agent on Foundry">
-  <p class="kicker">Foundry Agent Service</p>
-  <h2>Three ways to run an agent on Foundry. This course builds the third, so you see every step</h2>
-  <div class="table-wrap build">
-    <table class="compact">
-      <tr><th></th><th>Prompt agent</th><th>Hosted agent</th><th>Ephemeral agent <span class="chip">ours</span></th></tr>
-      <tr><td><b>Defined by</b></td><td>Configuration: model, instructions, tools</td><td>Your code in a container</td><td>Your application code</td></tr>
-      <tr><td><b>Who runs the loop</b></td><td>Foundry</td><td>Your code, on Foundry-managed compute</td><td>Your code, on your compute</td></tr>
-      <tr><td><b>Endpoint, identity</b></td><td>Managed, versioned</td><td>Managed, versioned, own Entra identity</td><td>Yours: Container Apps</td></tr>
-      <tr><td><b>Best for</b></td><td>Fast start, internal tools</td><td>Custom logic, multi-agent systems</td><td>Logic that ships with your app</td></tr>
-    </table>
-  </div>
-  <div class="cols cols-2 build-row" style="margin-top:16px">
-    <div class="callout purple"><p><b>Why ours.</b> The HTTP contract is fixed and graded, so you need full control of routes and JSON, and you see every step of the loop. The same Agent Framework code can later be packaged as a hosted agent.</p></div>
-    <div class="callout"><p><b>Vocabulary.</b> Assistant became <b>agent</b>, thread became <b>conversation</b>, message became <b>item</b>, run became <b>response</b>. Every change to an agent creates a new immutable <b>version</b>.</p></div>
-  </div>
-</section>
-
-<!-- 30b -->
-<section class="slide" data-title="What Agent Service gives you">
+<section class="slide" data-title="What Agent Service gives you" data-lecture="10">
   <p class="kicker">Foundry Agent Service</p>
   <h2>A managed platform for agents: runtime, tools, identity, observability, publishing</h2>
   <div class="cols cols-60">
@@ -645,8 +626,39 @@ label = parsed.output_parsed   # a TicketLabel, not a string</code></pre>
   </div>
 </section>
 
-<!-- 30c -->
-<section class="slide" data-title="A prompt agent in code">
+<!-- 31 -->
+<section class="slide" data-title="Three ways to run an agent on Foundry" data-lecture="10">
+  <p class="kicker">Foundry Agent Service</p>
+  <h2>Three ways to run an agent on Foundry. This course builds the third, so you see every step</h2>
+  <div class="table-wrap build">
+    <table class="compact">
+      <tr><th></th><th>Prompt agent</th><th>Hosted agent</th><th>Ephemeral agent <span class="chip">ours</span></th></tr>
+      <tr><td><b>Defined by</b></td><td>Configuration: model, instructions, tools</td><td>Your code in a container</td><td>Your application code</td></tr>
+      <tr><td><b>Who runs the loop</b></td><td>Foundry</td><td>Your code, on Foundry-managed compute</td><td>Your code, on your compute</td></tr>
+      <tr><td><b>Endpoint, identity</b></td><td>Managed, versioned</td><td>Managed, versioned, own Entra identity</td><td>Yours: Container Apps</td></tr>
+      <tr><td><b>Best for</b></td><td>Fast start, internal tools</td><td>Custom logic, multi-agent systems</td><td>Logic that ships with your app</td></tr>
+    </table>
+  </div>
+  <div class="cols cols-2 build-row" style="margin-top:16px">
+    <div class="callout purple"><p><b>Why ours.</b> The HTTP contract is fixed and graded, so you need full control of routes and JSON, and you see every step of the loop. The same Agent Framework code can later be packaged as a hosted agent.</p></div>
+    <div class="callout"><p><b>Vocabulary.</b> Assistant became <b>agent</b>, thread became <b>conversation</b>, message became <b>item</b>, run became <b>response</b>. Every change to an agent creates a new immutable <b>version</b>.</p></div>
+  </div>
+</section>
+
+<!-- 32 -->
+<section class="slide" data-title="Beyond one request" data-lecture="10">
+  <p class="kicker">Foundry Agent Service</p>
+  <h2>Beyond one request: when an agent runs, for how long, and as whom</h2>
+  <div class="cols cols-3 build-row">
+    <div class="card azure"><h3>Routines: when</h3><p>A schedule (at most once every five minutes), a set time, a new GitHub issue or a Teams message starts a prompt or hosted agent. Success means "delivered", not "finished".</p></div>
+    <div class="card green"><h3>Long-running: how long</h3><p>Work outlives the client connection. A dead process is detected and the handler re-entered with the same input; streams resume from a cursor. Preview.</p></div>
+    <div class="card"><h3>Autopilots: as whom</h3><p>A hosted agent published as a blueprint. Each instance gets an agent identity <em>and</em> an agent user account: its own mailbox and Teams presence.</p></div>
+  </div>
+  <div class="callout amber" style="margin-top:16px"><p><b>Recovery is re-entry, not replay.</b> The handler starts again from the top, so every side effect must be safe to repeat or recorded as done: Week 7's checkpoints, Week 10's idempotency keys.</p></div>
+</section>
+
+<!-- 33 -->
+<section class="slide" data-title="A prompt agent in code" data-lecture="10">
   <p class="kicker">Foundry Agent Service</p>
   <h2>A prompt agent in a dozen lines: Foundry runs the loop and the tools</h2>
   <div class="cols cols-60">
@@ -681,8 +693,8 @@ reply = openai.responses.create(
   </div>
 </section>
 
-<!-- 31 -->
-<section class="slide" data-title="Safety from the first call">
+<!-- 34 -->
+<section class="slide" data-title="Safety from the first call" data-lecture="11">
   <p class="kicker">Guardrails</p>
   <h2>Every deployment has a guardrail from the moment it exists</h2>
   <div class="flow build-row">
@@ -703,8 +715,8 @@ reply = openai.responses.create(
   <p class="small">Read: <a href="https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview">Guardrails and controls in Microsoft Foundry</a></p>
 </section>
 
-<!-- 32 -->
-<section class="slide" data-title="Deploy and submit">
+<!-- 35 -->
+<section class="slide" data-title="Deploy and submit" data-lecture="lab">
   <p class="kicker">Lab Part 5</p>
   <h2>Deploy, score the live URL, submit it</h2>
   <ol class="steps n4 build-row">
@@ -723,8 +735,8 @@ proof = course.check(5, url)   # the report and proof go to reports/</code></pre
   </div>
 </section>
 
-<!-- 32b -->
-<section class="slide" data-title="After you submit: the deep dive">
+<!-- 36 -->
+<section class="slide" data-title="After you submit: the deep dive" data-lecture="lab">
   <p class="kicker">Optional · not graded</p>
   <h2>After you submit, the deep dive takes today's ideas further</h2>
   <div class="cols cols-40">
@@ -749,8 +761,8 @@ proof = course.check(5, url)   # the report and proof go to reports/</code></pre
   </div>
 </section>
 
-<!-- 33 -->
-<section class="slide" data-title="What to remember">
+<!-- 37 -->
+<section class="slide" data-title="What to remember" data-lecture="12">
   <p class="kicker">Summary</p>
   <h2>What to remember</h2>
   <div class="cols cols-2">
@@ -769,8 +781,8 @@ proof = course.check(5, url)   # the report and proof go to reports/</code></pre
   </div>
 </section>
 
-<!-- 34 -->
-<section class="slide" data-title="Learn more">
+<!-- 38 -->
+<section class="slide" data-title="Learn more" data-lecture="reading">
   <p class="kicker">Learn more</p>
   <h2>Where to go deeper</h2>
   <div class="cols cols-2">
@@ -791,8 +803,8 @@ proof = course.check(5, url)   # the report and proof go to reports/</code></pre
   </div>
 </section>
 
-<!-- 35 -->
-<section class="slide" data-title="Next week: RAG and tool calling">
+<!-- 39 -->
+<section class="slide" data-title="Next week: RAG and tool calling" data-lecture="next">
   <p class="kicker">Next week</p>
   <h2>Next week: give the model sources and tools</h2>
   <div class="cols cols-3 build-row" style="margin-top:12px">

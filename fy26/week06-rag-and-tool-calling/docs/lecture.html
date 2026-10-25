@@ -425,8 +425,10 @@ answer: AskAnswer = result.value  # typed, validated structured output</code></p
   <h3>Typical misses, in order of impact</h3>
   <div class="grid grid-3">
     <div class="tile tile--red"><h4>Tools not called</h4><p>The instructions do not say when to use each tool. Be explicit: "Never compute prices yourself; call <code>quote_fare</code>."</p></div>
+    <div class="tile tile--red"><h4>A rule and a number</h4><p>"What credit do I get?" needs the rule from the handbook <em>and</em> the amount from <code>quote_fare</code>. Say so, with one worked example.</p></div>
+    <div class="tile tile--amber"><h4>A price without its page</h4><p>When a policy shapes a price (the fare cap), search the handbook too and cite that page.</p></div>
     <div class="tile tile--amber"><h4>Too many citations</h4><p>The model cites everything it read. Ask it to cite only passages it used, at most three.</p></div>
-    <div class="tile tile--azure"><h4>Abstains at the wrong time</h4><p>Define it precisely: "only when no tool result or passage answers the question".</p></div>
+    <div class="tile tile--azure"><h4>Abstains at the wrong time</h4><p>Define it precisely: "only when no tool result or passage answers the question". Silence is not an answer: never infer a "no".</p></div>
   </div>
   <div class="callout"><p><strong>First goal: <code>w06.ask.tools</code> above zero.</strong> Then tune instructions. Keep the guardrail check and the offline branch at the top of <code>ask()</code>: the offline tests rely on them. The proof in <code>reports/</code> shows the exact answer for every miss.</p></div>
   <h3>Go further in your service (optional)</h3>

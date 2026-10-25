@@ -55,13 +55,25 @@
   homeButton.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h4.5v-6h4v6h4.5V9"/></svg>';
   homeButton.append("Course home");
   stage.querySelector(".chrome-top").append(homeButton);
+  let lectureLink = null;
   if (weekFolder) {
-    const lecture = document.createElement("a");
-    lecture.href = new URL(`${weekFolder}/docs/lecture.html`, courseRoot).href;
-    lecture.className = "nav-btn deck-material-link";
-    lecture.textContent = "Lecture";
-    lecture.setAttribute("aria-label", "Read this week's lecture");
-    tocBtn.after(lecture);
+    lectureLink = document.createElement("a");
+    lectureLink.href = new URL(`${weekFolder}/docs/lecture.html`, courseRoot).href;
+    lectureLink.className = "nav-btn deck-material-link";
+    lectureLink.textContent = "Lecture";
+    lectureLink.setAttribute("aria-label", "Read this week's lecture");
+    tocBtn.after(lectureLink);
+  }
+  // Each slide names the lecture section it teaches (data-lecture="6"); the button follows it.
+  function pointLectureAt(slide) {
+    if (!lectureLink) return;
+    const section = (slide.dataset.lecture || "").split(" ")[0];
+    const numbered = /^\d+$/.test(section);
+    const url = new URL(lectureLink.href);
+    url.hash = numbered ? `s${section}` : "";
+    lectureLink.href = url.href;
+    lectureLink.textContent = numbered ? `Lecture §${section}` : "Lecture";
+    lectureLink.setAttribute("aria-label", numbered ? `Read section ${section} of the lecture` : "Read this week's lecture");
   }
 
   const list = toc.querySelector("ol");
@@ -104,6 +116,7 @@
       else b.removeAttribute("aria-current");
     });
     live.textContent = `Slide ${n + 1} of ${slides.length}: ${title}`;
+    pointLectureAt(slides[n]);
     if (location.hash !== `#${n + 1}`) history.replaceState(null, "", `#${n + 1}`);
     if (moveFocus) slides[n].focus({ preventScroll: true });
   }

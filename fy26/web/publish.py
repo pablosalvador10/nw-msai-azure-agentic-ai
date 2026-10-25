@@ -49,23 +49,29 @@ def committed() -> dict[str, bytes]:
 
 
 def stage() -> Path:
-    """Copy exactly what the image needs into web/build/: nothing else reaches the registry."""
+    """Write exactly what the image needs into web/build/, all of it from the last commit."""
     shutil.rmtree(BUILD, ignore_errors=True)
-    (BUILD / "web").mkdir(parents=True)
-    shutil.copy2(WEB / "Dockerfile", BUILD / "Dockerfile")
-    for name in ("pyproject.toml", "uv.lock"):
-        shutil.copy2(FY26 / name, BUILD / name)
-    shutil.copytree(FY26 / "harness", BUILD / "harness", ignore=shutil.ignore_patterns("__pycache__"))
-    for name in RUNTIME:
-        shutil.copy2(WEB / name, BUILD / "web" / name)
-    shutil.copytree(WEB / "static", BUILD / "web" / "static", ignore=shutil.ignore_patterns("vendor"))
     files = committed()
+
+    def put(rel: str, dest: str) -> None:
+        if rel not in files:
+            raise SystemExit(f"fy26/{rel} is not committed. Commit it, then publish.")
+        (BUILD / dest).parent.mkdir(parents=True, exist_ok=True)
+        (BUILD / dest).write_bytes(files[rel])
+
+    put("web/Dockerfile", "Dockerfile")
+    for name in ("pyproject.toml", "uv.lock"):
+        put(name, name)
+    for name in RUNTIME:
+        put(f"web/{name}", f"web/{name}")
+    for rel in files:
+        if rel.startswith(("harness/", "web/static/")):
+            put(rel, rel)
     pages = [rel for rel in published_files(FY26) if rel in files]
     skipped = sorted(set(published_files(FY26)) - set(pages))
     for rel in pages:
-        (BUILD / "site" / rel).parent.mkdir(parents=True, exist_ok=True)
-        (BUILD / "site" / rel).write_bytes(files[rel])
-    print(f"Staged {BUILD.relative_to(FY26)}/ with {len(pages)} course files.")
+        put(rel, f"site/{rel}")
+    print(f"Staged {BUILD.relative_to(FY26)}/ from the last commit, with {len(pages)} course files.")
     if skipped:
         print(f"Not published (not committed yet): {', '.join(skipped)}")
     return BUILD

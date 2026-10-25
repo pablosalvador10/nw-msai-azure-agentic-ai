@@ -11,7 +11,7 @@
 <main class="stage" data-week="Week 6" data-topic="RAG Apps + Tool Calling">
 
 <!-- 1 -->
-<section class="slide title-slide" data-title="RAG Apps + Tool Calling">
+<section class="slide title-slide" data-title="RAG Apps + Tool Calling" data-lecture="intro">
   <div class="build">
     <p class="kicker">Week 6</p>
     <h1>RAG Apps + Tool Calling</h1>
@@ -29,7 +29,7 @@
 </section>
 
 <!-- 2 -->
-<section class="slide" data-title="Three blind spots no prompt can fix">
+<section class="slide" data-title="Three blind spots no prompt can fix" data-lecture="intro">
   <p class="kicker">Why this week matters</p>
   <h2>A model has three blind spots that no prompt can fix</h2>
   <div class="cols cols-3 build-row">
@@ -41,7 +41,7 @@
 </section>
 
 <!-- 3 -->
-<section class="slide" data-title="By the end you can">
+<section class="slide" data-title="By the end you can" data-lecture="intro">
   <p class="kicker">Objectives</p>
   <h2>By the end of today you can</h2>
   <div class="cols cols-60">
@@ -61,7 +61,7 @@
 </section>
 
 <!-- 4 -->
-<section class="slide" data-title="Today: lecture, lab, deep dive">
+<section class="slide" data-title="Today: lecture, lab, deep dive" data-lecture="intro">
   <p class="kicker">Today</p>
   <h2>Learn it, build it, ship it; then go deeper if you want</h2>
   <div class="cols cols-60">
@@ -82,7 +82,7 @@
 </section>
 
 <!-- 5 -->
-<section class="slide" data-title="Three ways to put knowledge into an answer">
+<section class="slide" data-title="Three ways to put knowledge into an answer" data-lecture="1">
   <p class="kicker">Choosing the approach</p>
   <h2>Three ways to put knowledge into an answer. Know when each is right</h2>
   <div class="cols cols-3 build-row">
@@ -94,14 +94,14 @@
 </section>
 
 <!-- 6 -->
-<section class="slide section-slide" data-title="Part 1 · RAG from scratch">
+<section class="slide section-slide" data-title="Part 1 · RAG from scratch" data-lecture="part">
   <p class="kicker">Part 1 · Lab Parts 1-2</p>
   <h1>Retrieval-augmented generation, from scratch</h1>
   <p>Chunk, embed, retrieve, generate. Twenty lines of Python, no framework, so you see what every product on the market improves on.</p>
 </section>
 
 <!-- 7 -->
-<section class="slide" data-title="The model does not know your handbook">
+<section class="slide" data-title="The model does not know your handbook" data-lecture="1">
   <p class="kicker">Lab Part 1 · the problem</p>
   <h2>Asked about your handbook, the model guesses or hedges</h2>
   <div class="cols cols-2 center">
@@ -121,7 +121,7 @@ print(r.output_text)</code></pre>
 </section>
 
 <!-- 8 -->
-<section class="slide" data-title="Embeddings and cosine similarity">
+<section class="slide" data-title="Embeddings and cosine similarity" data-lecture="2">
   <p class="kicker">Embeddings</p>
   <h2>Embeddings place texts with similar meaning close together, even with no shared words</h2>
   <div class="cols cols-60">
@@ -145,7 +145,7 @@ print(r.output_text)</code></pre>
 </section>
 
 <!-- 9 -->
-<section class="slide" data-title="The RAG pipeline">
+<section class="slide" data-title="The RAG pipeline" data-lecture="3">
   <p class="kicker">The pipeline</p>
   <h2>Two pipelines: one when documents change, one on every question</h2>
   <div class="stack">
@@ -175,7 +175,7 @@ print(r.output_text)</code></pre>
 </section>
 
 <!-- 10 -->
-<section class="slide" data-title="Chunking">
+<section class="slide" data-title="Chunking" data-lecture="4">
   <p class="kicker">Chunking</p>
   <h2>A chunk is the unit you embed, retrieve and cite. Its size is a trade-off</h2>
   <div class="cols cols-2">
@@ -202,7 +202,7 @@ print(r.output_text)</code></pre>
 </section>
 
 <!-- 11 -->
-<section class="slide" data-title="Vector, keyword, hybrid, reranking">
+<section class="slide" data-title="Vector, keyword, hybrid, reranking" data-lecture="5">
   <p class="kicker">Retrieval</p>
   <h2>Production retrieval is hybrid: keywords plus vectors, then a reranker</h2>
   <div class="cols cols-60">
@@ -223,7 +223,7 @@ print(r.output_text)</code></pre>
 </section>
 
 <!-- 12 -->
-<section class="slide" data-title="Grounded, cited, and able to abstain">
+<section class="slide" data-title="Grounded, cited, and able to abstain" data-lecture="6">
   <p class="kicker">Generation</p>
   <h2>A trustworthy answer is grounded, cited, and says "I don't know" when it should</h2>
   <div class="cols cols-2">
@@ -251,7 +251,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 13 -->
-<section class="slide" data-title="Evaluating RAG">
+<section class="slide" data-title="Evaluating RAG" data-lecture="7">
   <p class="kicker">Evaluation</p>
   <h2>Evaluate retrieval and generation separately, or you will fix the wrong one</h2>
   <div class="cols cols-60">
@@ -273,7 +273,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 14 -->
-<section class="slide" data-title="RAG on Azure">
+<section class="slide" data-title="RAG on Azure" data-lecture="8">
   <p class="kicker">Managed options</p>
   <h2>Our index is forty vectors in a list. Production needs persistence, scale and permissions</h2>
   <div class="table-wrap build">
@@ -289,14 +289,14 @@ response = client.responses.parse(
 </section>
 
 <!-- 15 -->
-<section class="slide section-slide" data-title="Part 2 · Tool calling">
+<section class="slide section-slide" data-title="Part 2 · Tool calling" data-lecture="part">
   <p class="kicker">Part 2 · Lab Parts 3-4</p>
   <h1>Tool calling: the model asks, your code acts</h1>
   <p>Where retrieval stops, and the loop at the heart of every agent.</p>
 </section>
 
 <!-- 16 -->
-<section class="slide" data-title="Where RAG stops">
+<section class="slide" data-title="Where RAG stops" data-lecture="9">
   <p class="kicker">Lab Part 3</p>
   <h2>Where RAG stops: arithmetic and live data need code, not text</h2>
   <div class="cols cols-2 build-row">
@@ -307,7 +307,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 17 -->
-<section class="slide" data-title="The tool-calling protocol">
+<section class="slide" data-title="The tool-calling protocol" data-lecture="9">
   <p class="kicker">The protocol</p>
   <h2>The model never runs your code. It asks, and your code decides</h2>
   <svg viewBox="0 0 1150 340" width="1150" height="340" role="img" aria-label="Sequence: your code sends instructions, the question and tool definitions; the model returns a function call; your code runs quote_fare and sends the result back with the same call id; the model writes the final answer." font-family="Segoe UI, Inter, system-ui, sans-serif">
@@ -340,7 +340,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 18 -->
-<section class="slide" data-title="The loop, by hand">
+<section class="slide" data-title="The loop, by hand" data-lecture="9">
   <p class="kicker">Lab Part 4</p>
   <h2>The loop by hand: twenty lines you will never need to write again</h2>
   <div class="cols cols-60">
@@ -380,7 +380,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 19 -->
-<section class="slide" data-title="Business logic stays in code">
+<section class="slide" data-title="Business logic stays in code" data-lecture="10">
   <p class="kicker">The most important design rule</p>
   <h2>Let the model do language and judgment. Let code do arithmetic, state and money</h2>
   <div class="flow build-row" style="margin-top:18px">
@@ -397,7 +397,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 20 -->
-<section class="slide" data-title="Designing tools a model uses well">
+<section class="slide" data-title="Designing tools a model uses well" data-lecture="10">
   <p class="kicker">Tool design is prompt design</p>
   <h2>The model knows a tool only by its name, description and schema</h2>
   <div class="table-wrap build">
@@ -416,7 +416,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 21 -->
-<section class="slide" data-title="Who executes the tool?">
+<section class="slide" data-title="Who executes the tool?" data-lecture="11">
   <p class="kicker">Tools across the stack</p>
   <h2>Know who executes a tool: it decides where your code, secrets and logs live</h2>
   <div class="cols cols-3 build-row">
@@ -427,14 +427,14 @@ response = client.responses.parse(
 </section>
 
 <!-- 22 -->
-<section class="slide section-slide" data-title="Part 3 · Agent Framework">
+<section class="slide section-slide" data-title="Part 3 · Agent Framework" data-lecture="part">
   <p class="kicker">Part 3 · Lab Parts 5-6</p>
   <h1>The same, with Microsoft Agent Framework</h1>
   <p>Writing the loop once is how you understand it. Writing it in every service is how bugs happen.</p>
 </section>
 
 <!-- 23 -->
-<section class="slide" data-title="Retrieval as a tool">
+<section class="slide" data-title="Retrieval as a tool" data-lecture="12">
   <p class="kicker">Agentic RAG</p>
   <h2>Retrieve once and always, or let the model decide when to search</h2>
   <div class="table-wrap build">
@@ -451,7 +451,7 @@ response = client.responses.parse(
 </section>
 
 <!-- 24 -->
-<section class="slide" data-title="One agent, three tools">
+<section class="slide" data-title="One agent, three tools" data-lecture="13">
   <p class="kicker">Lab Part 5</p>
   <h2>A tool is a Python function with type hints and a docstring</h2>
   <div class="cols cols-2">
@@ -490,7 +490,7 @@ answer = result.value                     # a typed AskAnswer</code></pre>
 </section>
 
 <!-- 25 -->
-<section class="slide" data-title="The exercise: POST /v1/ask">
+<section class="slide" data-title="The exercise: POST /v1/ask" data-lecture="lab">
   <p class="kicker">The exercise · Lab Part 6</p>
   <h2>Replace retrieve-then-generate with an agent: <code>POST /v1/ask</code></h2>
   <div class="cols cols-40">
@@ -518,7 +518,7 @@ answer = result.value                     # a typed AskAnswer</code></pre>
 </section>
 
 <!-- 26 -->
-<section class="slide" data-title="Reading the misses">
+<section class="slide" data-title="Reading the misses" data-lecture="lab">
   <p class="kicker">Measure, then fix</p>
   <h2>Typical misses, in order of impact</h2>
   <div class="cols cols-3 build-row">
@@ -532,7 +532,7 @@ answer = result.value                     # a typed AskAnswer</code></pre>
 </section>
 
 <!-- 27 -->
-<section class="slide" data-title="Deploy and submit">
+<section class="slide" data-title="Deploy and submit" data-lecture="lab">
   <p class="kicker">Lab Part 7</p>
   <h2>Deploy, score the live URL, submit it</h2>
   <div class="cols cols-2 center">
@@ -548,8 +548,8 @@ proof = course.check(6, url)   # score the live service</code></pre>
   </div>
 </section>
 
-<!-- 27b -->
-<section class="slide" data-title="After you submit: the deep dive">
+<!-- 28 -->
+<section class="slide" data-title="After you submit: the deep dive" data-lecture="lab">
   <p class="kicker">Optional · not graded</p>
   <h2>After you submit, the deep dive takes today's ideas further</h2>
   <div class="cols cols-40">
@@ -575,8 +575,8 @@ proof = course.check(6, url)   # score the live service</code></pre>
   </div>
 </section>
 
-<!-- 28 -->
-<section class="slide" data-title="What to remember">
+<!-- 29 -->
+<section class="slide" data-title="What to remember" data-lecture="14">
   <p class="kicker">Summary</p>
   <h2>What to remember</h2>
   <div class="cols cols-2">
@@ -595,8 +595,8 @@ proof = course.check(6, url)   # score the live service</code></pre>
   </div>
 </section>
 
-<!-- 29 -->
-<section class="slide" data-title="Learn more">
+<!-- 30 -->
+<section class="slide" data-title="Learn more" data-lecture="reading">
   <p class="kicker">Learn more</p>
   <h2>Where to go deeper</h2>
   <div class="cols cols-2">
@@ -616,8 +616,8 @@ proof = course.check(6, url)   # score the live service</code></pre>
   </div>
 </section>
 
-<!-- 30 -->
-<section class="slide" data-title="Next week: multi-agent systems">
+<!-- 31 -->
+<section class="slide" data-title="Next week: multi-agent systems" data-lecture="next">
   <p class="kicker">Next week</p>
   <h2>Next week: when one agent becomes a team</h2>
   <div class="cols cols-3 build-row" style="margin-top:12px">
