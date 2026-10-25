@@ -172,7 +172,10 @@ class Shell:
         if path.endswith("/lecture.md") and path.replace("/lecture.md", "/docs/lecture.html") in links:
             return path.replace("/lecture.md", "/docs/lecture.html")
         folders = [href for href in links if href.endswith("/") and href != "/" and path.startswith(href)]
-        return max(folders, key=len) if folders else None
+        if folders:
+            return max(folders, key=len)
+        folder = path.rsplit("/", 1)[0]
+        return f"{folder}/README.md" if folder and f"{folder}/README.md" in links else None
 
     def _sidebar(self, path: str) -> str:
         active = self.active_href(path)

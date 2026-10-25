@@ -237,8 +237,7 @@
     if (week) week.checked = true;
     renderHistory();
     try {
-      const me = await api("/api/me");
-      $("who").textContent = `@${me.login}`;
+      await api("/api/me"); // an expired session goes to sign-in now, not after the form is filled
     } catch { /* the page still works; api() redirects to sign-in on 401 */ }
     const active = sessionStorage.getItem("activeRun");
     if (active) poll(active);

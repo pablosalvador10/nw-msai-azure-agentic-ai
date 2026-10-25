@@ -417,6 +417,18 @@ def test_the_real_course_map() -> None:
         assert link.href == "/score/" or target.exists(), link.href
 
 
+def test_the_sidebar_marks_where_you_are() -> None:
+    shell = Shell(Catalog.load(FY26), "/_site/mermaid.js")
+    week5 = "/week05-fundamentals-of-azure-ai"
+    assert shell.active_href("/") is None
+    assert shell.active_href(f"{week5}/lab.ipynb") == f"{week5}/lab.ipynb"
+    assert shell.active_href(f"{week5}/lecture.md") == f"{week5}/docs/lecture.html"
+    assert shell.active_href(f"{week5}/") == f"{week5}/README.md"
+    assert shell.active_href("/setup/setup.ipynb") == "/setup/README.md"
+    assert shell.active_href("/app/data/handbook/rides.md") == "/app/data/handbook/"
+    assert shell.active_href("/AGENTS.md") is None
+
+
 def test_week_status_follows_the_calendar(site_dir: Path) -> None:
     catalog = Catalog.load(site_dir, year=2026)
     week5 = catalog.weeks[0]
