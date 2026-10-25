@@ -57,9 +57,9 @@ variable "image_tag" {
 }
 
 variable "min_replicas" {
-  description = "0 scales to zero when idle (first visit waits ~15 s). 1 keeps the site warm during the term."
+  description = "1 keeps a replica running, so a harness run (held in its memory) finishes after the student leaves the page. 0 scales to zero when idle: cheaper between terms, but the first visit waits ~15 s and an unfinished run can be lost."
   type        = number
-  default     = 0
+  default     = 1
 
   validation {
     condition     = contains([0, 1], var.min_replicas)

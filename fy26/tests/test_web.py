@@ -248,6 +248,12 @@ def test_sign_out_needs_a_post(site_dir: Path) -> None:
     # A GET (a crawler, a prefetch, a link on another site) only shows the button.
     assert 'method="post"' in client.get("/auth/logout").text
     assert client.get("/api/me").status_code == 200
+
+
+def test_score_form_never_puts_the_api_key_in_a_url(site_dir: Path) -> None:
+    # Without score.js the browser submits the form natively; a GET would append api_key to the URL.
+    client = sign_in(make_client(site_dir))
+    assert '<form id="run-form" class="panel score-form" method="post"' in client.get("/score/").text
     out = client.post("/auth/logout")
     assert out.status_code == 200 and "lectures_session=" in out.headers["set-cookie"]
     assert client.get("/api/me").status_code == 401

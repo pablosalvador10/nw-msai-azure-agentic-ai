@@ -65,10 +65,10 @@ uv run python -m web.publish
 | Remove a student | Remove their repository access. Sessions end within 8 hours (`session_hours`) |
 | Rotate the client secret | Generate a new one in the GitHub App, update `terraform.tfvars`, `terraform -chdir=web/infra apply`. Everyone signs in again |
 | See runs and sign-ins | `az containerapp logs show -n <container_app_name> -g lectures --follow`. Each run logs user, week, target, status, score and duration |
-| Keep the site warm during the term | `min_replicas = 1` in `terraform.tfvars`, then apply. With 0 the first visit after idle waits about 15 s |
+| Scale to zero between terms | `min_replicas = 0` in `terraform.tfvars`, then apply. Cheaper, but the first visit after idle waits about 15 s, and a run still going when its student leaves the page can be lost: runs live in the replica's memory. Keep the default of 1 during the term |
 | Remove everything | `terraform -chdir=web/infra destroy` |
 
-Cost: Container Apps consumption (scales to zero), a Basic registry, and Log Analytics capped at 1 GB a day.
+Cost: Container Apps consumption (one replica kept running during the term), a Basic registry, and Log Analytics capped at 1 GB a day.
 
 ## How it works
 
