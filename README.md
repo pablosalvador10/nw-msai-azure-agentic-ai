@@ -1,64 +1,58 @@
-# Agentic AI on Azure · Northwestern MS AI
+# Agentic AI on Microsoft Foundry
 
-Teaching materials for Northwestern's MS AI program. Students build a support API for a fictional bike-share service, add retrieval and tools, coordinate agents, and test the service on Azure.
+A hands-on course in building AI agents that hold up in production. You build one service, a support API for **Lakeshore Ride** (a fictional bike-share company), and give it a new capability each week: structured output, retrieval with citations, tools, several agents working together, MCP, and the guardrails a public service needs. Every week ends the same way: the service runs on Azure and a test harness scores it, so you always know what works and what to fix next.
 
-> **Students:** start with the **[FY26 course home](fy26/index.html)** in a browser. It links setup, Foundations, each week's lecture and slides, and the required lab. The **[FY26 README](fy26/README.md)** has the calendar, grading and deadlines. On GitHub, download or clone the repository to open the HTML pages locally; GitHub's file view shows their source.
+Each topic starts from first principles in plain Python, so you see what a framework does before you use one.
 
-## Cohorts
+## What you will build
 
-| Cohort | Status | Start here |
+| Week | Topic | Your service gains |
 |---|---|---|
-| **FY26** | Current | [Course home](fy26/index.html) · [README](fy26/README.md) |
-| FY25 | Archived, read-only | [fy25/README.md](fy25/README.md) |
+| 5 | [Fundamentals of Azure AI](fy26/week05-fundamentals-of-azure-ai/README.md) | `POST /v1/classify` and `/v1/chat`: ticket triage with structured output |
+| 6 | [RAG and tool calling](fy26/week06-rag-and-tool-calling/README.md) | `POST /v1/ask`: answers from the handbook, with citations and tools |
+| 7 | [Multi-agent systems](fy26/week07-multi-agent-systems/README.md) | `POST /v1/resolve`: specialist agents, actions and approvals |
+| 8 | [Harnesses and agentic coding](fy26/week08-harnesses-and-agentic-coding/README.md) | `/mcp`: your tools for any agent, plus a feature built with a coding agent |
+| 10 | [Production agentic systems](fy26/week10-production-agentic-systems/README.md) | Guardrails, limits, an API key and tracing on every route |
 
-## How this repository is organized
+Every week has a lecture to read, slides, a main lab (the exercise) and an optional deep dive.
+
+**Built with:** models on Microsoft Foundry through the Responses API, Microsoft Agent Framework, MCP, FastAPI on Azure Container Apps, Terraform and OpenTelemetry. The [course README](fy26/README.md#the-stack-as-of-october-2026) lists the versions.
+
+## What you need
+
+- An **Azure subscription** where you can create a resource group, register resource providers and assign roles (Owner, or Contributor plus Role Based Access Control Administrator).
+- **VS Code**, **uv**, the **Azure CLI**, **Terraform** and **Git**. No Docker: images are built in Azure.
+- Optional: **GitHub Copilot** in VS Code, for the course agents that help when you are stuck.
+
+Running the service costs money: model calls, image builds, the container registry and logs. The app scales to zero when idle. [Setup](fy26/setup/README.md) explains the cost and how to clean up.
+
+## Get started
+
+1. **Clone the course and install its Python environment.**
+
+   ```bash
+   git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
+   cd northwestern-msai-azure-agentic-ai/fy26
+   uv sync
+   ```
+
+2. **Open the [course home](fy26/index.html) in your browser**, from your clone (GitHub shows HTML files as source). It links setup, the Foundations primers, and every lecture, slide deck and lab.
+3. **Do [Setup](fy26/setup/README.md) once**, before Week 5: sign in to Azure, create your resources with Terraform, and deploy the starter service.
+4. **Stuck?** In VS Code, open Copilot Chat and pick **Pablo · Start here** from the Agent dropdown. [Your course agents](fy26/foundations/docs/agents.html) explains all five.
+
+The [course README](fy26/README.md) describes the weekly routine and how the harness scores your service.
+
+## What is in this repository
 
 ```
-.
-├── fy26/                    # Current cohort
-│   ├── README.md            # Calendar, weekly loop, grading
-│   ├── index.html           # Browser home: reading, slides and labs
-│   ├── setup/               # One-time setup: tools, Azure, Terraform, first deploy
-│   ├── foundations/         # Short primers: Terraform, FastAPI, containers, identity, harness
-│   ├── week05-…/ … week10-…/ # Overview, lecture source, main lab, optional deep dive
-│   │   └── docs/            # Browser lecture and slides, together
-│   ├── assets/              # Shared styles and navigation
-│   ├── app/                 # The service students build and deploy
-│   ├── harness/             # The local harness: checks and public data
-│   ├── infra/               # Terraform for each student's resource group
-│   └── pyproject.toml       # The cohort's own Python environment (uv)
-├── fy25/                    # Archived cohort, frozen exactly as taught
-├── .github/                 # CI, Copilot instructions and skills
-└── LICENSE
+fy26/          The course: home page, setup, foundations, one folder per week,
+               the service (app/), the harness, Terraform (infra/) and tests
+fy25/          The previous edition, kept as taught
+.github/       Continuous integration, and the Copilot agents and skills for the course
 ```
 
-Each cohort has its own dependency file, lockfile, Python version and environment template. This keeps one year's package changes separate from another's. Archived files preserve what was taught; cloud services, models and external links can still change or retire.
-
-## Quick start
-
-```bash
-git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
-cd northwestern-msai-azure-agentic-ai/fy26
-uv sync
-```
-
-Then open the [course home](fy26/index.html) in a browser and follow [FY26 · Start here](fy26/README.md#start-here). Open the cohort folder in VS Code for notebook work.
-
-## Starting a new cohort (instructors)
-
-1. Copy the latest cohort's course files to the new year folder. Do not copy a local environment, credentials, Terraform state or plans, reports, or agent-generated memory. Update the calendar, session folders and model versions; check availability in the region used for class.
-2. Run `uv lock --upgrade` inside `fyNN/`, run the tests, and commit the lockfile.
-3. Update the cohort matrix and infrastructure working directory in the [CI workflow](.github/workflows/ci.yml). Update internal links, instructions and agent configuration that name the previous cohort.
-4. Add the archived banner to the previous cohort's README and update the **Cohorts** table above.
-
-Archived cohorts are never edited, except to fix broken links.
-
-Before sharing a cohort with students, make sure its files and lockfile are available on the branch the setup instructions clone. Test the setup from a clean clone, not from the instructor's working directory.
-
-## Contributing
-
-See the [contributor guide](CONTRIBUTING.md) for the current code layout, testing commands, content workflow and privacy checks.
+The [previous edition](fy25/README.md) is kept for reference and is no longer updated; the cloud services and links it uses may have changed.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). Found a mistake? Open an issue; the [contributor guide](CONTRIBUTING.md) explains how the course is built and tested.

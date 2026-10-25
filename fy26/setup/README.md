@@ -10,7 +10,7 @@ Do this once, before Week 5. Allow about 45 minutes if the tools are installed a
 
 All of it is created by Terraform from the files in [`infra/`](../infra/README.md), driven from [`setup.ipynb`](setup.ipynb).
 
-**New to all of this?** That is expected. Do the steps in order, and when one fails, do not start over: open Copilot Chat in VS Code, pick **FY26 Setup Doctor**, and paste the error. [Your course agents](../foundations/docs/agents.html) shows how, and it works as soon as you have cloned the course (step 2).
+**New to all of this?** That is expected. Do the steps in order, and when one fails, do not start over: open Copilot Chat in VS Code, pick **Will · Infra and deploy**, and paste the error. [Your course agents](../foundations/docs/agents.html) shows how, and it works as soon as you have cloned the course (step 2).
 
 ## 1. Install the tools
 
@@ -42,7 +42,7 @@ Open the `fy26` folder in VS Code, open `setup/setup.ipynb`, and choose the kern
 ## 3. Azure access you need
 
 - For the default setup, you need permission to create a resource group and its resources, register resource providers, and assign roles. **Owner**, or **Contributor** plus **Role Based Access Control Administrator**, at subscription scope covers those operations. Contributor alone cannot assign roles.
-- If the class provides an existing resource group, ask for its name and confirm that its providers and access permissions are ready. In the notebook's section 3, set `RESOURCE_GROUP` to that name; the notebook then tells Terraform to use the group instead of creating one. Access only to that group does not let you create a new group at subscription scope. In the Northwestern class subscription the group is named like `<netid>_resourcegroup`, and Azure Policy allows US regions only.
+- If the class provides an existing resource group, ask for its name and confirm that its providers and access permissions are ready. In the notebook's section 3, set `RESOURCE_GROUP` to that name; the notebook then tells Terraform to use the group instead of creating one. Access only to that group does not let you create a new group at subscription scope. In the class subscription the group is named like `<netid>_resourcegroup`, and Azure Policy allows US regions only.
 - The region must offer the models in [`infra/variables.tf`](../infra/variables.tf), with quota for your subscription. The notebook picks it from the last digit of your NetID: 0 to 4 use `eastus2`, 5 to 9 use `eastus`. The class is split because a subscription holds at most 50 Container Apps environments per region. Both regions are tested with every lab. Change the region only if an instructor asks you to.
 
 If the class provides your subscription, confirm these prerequisites with the instructor before you begin.
@@ -53,7 +53,7 @@ Open [`setup.ipynb`](setup.ipynb) and run it top to bottom. It signs you in, wri
 
 ## If something goes wrong
 
-Find your error below, or ask for help in VS Code: open Copilot Chat, pick **FY26 Setup Doctor** in the Agent dropdown, and paste the error. It checks each setup step with you and explains the fix. New to the agents? [Your course agents](../foundations/docs/agents.html) shows how to use them in five minutes.
+Find your error below, or ask for help in VS Code: open Copilot Chat, pick **Will · Infra and deploy** in the Agent dropdown, and paste the error. Will checks each setup step with you and explains the fix. New to the agents? [Your course agents](../foundations/docs/agents.html) shows how to use them in five minutes.
 
 | Symptom | Cause | Fix |
 |---|---|---|

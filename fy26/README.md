@@ -1,6 +1,6 @@
 # FY26 · Agentic AI on Microsoft Foundry
 
-Northwestern MS AI, FY26 cohort. Over five sessions you build, deploy and harden one AI service: a support assistant for **Lakeshore Ride**, a fictional bike-share company. Each week adds one capability, and each week ends the same way: your service is running in Azure and a harness scores it.
+Over five sessions you build, deploy and harden one AI service: a support assistant for **Lakeshore Ride**, a fictional bike-share company. Each week adds one capability, and each week ends the same way: your service is running in Azure and a harness scores it.
 
 **Student entry point:** open the [course home](index.html) in a browser for the setup sequence and direct links to every lecture, slide deck and lab. The main lab is the core work; deep dives are optional extensions, not another required assignment.
 
@@ -106,7 +106,7 @@ flowchart LR
 
 Every command in this course runs from the `fy26/` folder. The notebooks switch to it for you.
 
-**Stuck?** In VS Code, open Copilot Chat and pick **FY26 Guide** from the Agent dropdown. It checks where you are (setup, week, deployed or not), gives you one next step, and points you to a specialist: Setup Doctor, Lab Tutor, Deploy Doctor or Submit Check. The tutor explains and gives hints; the graded code is yours. [Your course agents](foundations/docs/agents.html) shows how to use all five.
+**Stuck?** In VS Code, open Copilot Chat and pick an agent from the Agent dropdown. The course has five, named after the instructors: **Pablo · Start here** (when you are lost; it asks the experts for you), **Pablo · Fundamentals** (the AI, the lectures, the labs, hints on the fix), **Pablo · Scoring** (your score, how grading works, the course website, the check before you submit), **Will · Infra and deploy** (setup, Azure, Terraform, Container Apps, deploying, logs) and **Arvind · Data** (the handbook and station data, harness datasets and reports, evaluation, telemetry). They explain and give hints; the graded code is yours, whether you type it or direct Copilot's Agent. [Your course agents](foundations/docs/agents.html) shows how to call them and how to vibe code well.
 
 ## Grading
 
