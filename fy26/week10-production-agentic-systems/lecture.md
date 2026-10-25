@@ -196,7 +196,7 @@ Details that matter in practice:
 
 When a control blocks a request, the API returns an error with code `content_filter`; your service turns it into `guardrail="unsafe"` ([`app/guardrails.py`](../app/guardrails.py)).
 
-Sources: [Guardrails and controls](https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview) · [Prompt Shields](https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/content-filter-prompt-shields)
+Sources: [Guardrails and controls](https://learn.microsoft.com/en-us/azure/foundry/guardrails/guardrails-overview) · [Prompt Shields](https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/content-filter-prompt-shields) · [Prompt Shields API](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/jailbreak-detection)
 
 ---
 

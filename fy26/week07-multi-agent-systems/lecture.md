@@ -266,7 +266,7 @@ Real processes pause, fail and wait for people. Workflows have three mechanisms 
 
 **Events and streaming.** `workflow.run(input, stream=True)` yields events as they happen: executor started and completed, agent updates, outputs, requests for input, errors. A UI can show progress; a log can record every step.
 
-**Checkpoints.** Give the builder a `checkpoint_storage` (`InMemoryCheckpointStorage`, `FileCheckpointStorage`, or your own) and the workflow saves its state at superstep boundaries. After a crash or a deploy, `workflow.run(checkpoint_id=...)` resumes where it stopped instead of re-running (and re-paying for) every model call.
+**Checkpoints.** Give the builder a `checkpoint_storage` (`InMemoryCheckpointStorage`, `FileCheckpointStorage`, or your own) and the workflow saves its state at superstep boundaries. After a crash or a deploy, `workflow.run(checkpoint_id=...)` resumes where it stopped instead of re-running (and re-paying for) every model call. Deployed as a hosted agent, the platform adds the other half: Foundry's long-running hosted agents (preview) detect a dead process and re-enter your handler with the same input, and the handler resumes from its latest checkpoint ([resilience for long-running agents](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/long-running-agent-resilience)).
 
 **Human in the loop.** An executor calls `ctx.request_info(request, response_type)`; the workflow emits a request event and pauses. Your application collects the answer (a supervisor approves a $60 credit) and calls `workflow.run(responses={request_id: answer})`; the executor's `@response_handler` receives it and the graph continues. Orchestrations support the same through tool approvals and `with_request_info(...)`.
 
@@ -325,6 +325,8 @@ flowchart TB
 All builders accept `checkpoint_storage` and termination settings where they apply. The Magentic pattern comes from Microsoft Research's Magentic-One system.
 
 **A rule of thumb for choosing:** start with the most constrained pattern that can express the task. Sequential and concurrent are graphs you can draw before you run them. Handoff, group chat and Magentic let models choose the path, which buys flexibility and costs predictability. In a graded service with money involved, constrained wins.
+
+**The model as orchestrator.** At the far end of that spectrum, GPT-5.6 models on Foundry can delegate inside a single Responses call (preview). Pass `multi_agent={"enabled": True, "max_concurrent_subagents": 3}` and the root agent, `/root`, spawns subagents, waits for them and reconciles their findings. The coordination actions (`spawn_agent`, `wait_agent`, `interrupt_agent`, ...) come back as `multi_agent_call` items that the service executes, not your code; your own function calls, including those made by subagents, still come back to you to run. It is the least code and the least control: subagents use the same model and every tool in the request, and there is no fixed limit on the depth of the tree. The guidance is this week's: delegate only independent work, authorize every tool call no matter which agent made it, and watch the tokens. The course model, `gpt-5.4-mini`, rejects the parameter with HTTP 400 ("Multi-agent execution is not supported"). Read: [Multi-agent orchestration with the Responses API](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses-multi-agent).
 
 ---
 
@@ -447,4 +449,5 @@ This is the main reason to learn a framework rather than hand-rolled loops: the 
 | The case against | [Don't build multi-agents (Cognition)](https://cognition.ai/blog/dont-build-multi-agents) |
 | Learn modules | [Orchestrate a multi-agent solution using the Microsoft Agent Framework](https://learn.microsoft.com/en-us/training/modules/orchestrate-semantic-kernel-multi-agent-solution/) · [Develop AI Agents on Azure](https://learn.microsoft.com/en-us/training/paths/develop-ai-agents-azure/) |
 | Managed runtime | [Hosted agents in Foundry Agent Service](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents) |
+| Model-native delegation | [Multi-agent orchestration with the Responses API](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses-multi-agent) (preview) |
 | Certification | [Exam AI-500: Designing and Implementing Multi-Agent AI Solutions](https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-500/) |

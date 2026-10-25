@@ -403,6 +403,16 @@ Foundry covers a spectrum from fully declarative to fully your code:
 
 There is also a **voice-based prompt agent** (preview) for real-time spoken conversations through Voice Live, over a WebSocket instead of text requests. Hosted agents ship as a container image or as a `.zip` of your source (Foundry builds the image), and run in per-session, VM-isolated sandboxes that scale to zero and restore their files when a session resumes.
 
+**Beyond one request.** Three newer capabilities change *when* an agent runs, *for how long*, and *as whom*:
+
+| Capability | What it adds |
+|---|---|
+| **Routines** | Run a prompt or hosted agent on a schedule (cron, no more often than every five minutes), once at a set time, or when a GitHub issue opens or a Teams channel message arrives. The run uses the agent's own identity by default, and every attempt leaves a run record. A successful run means Foundry delivered the request, not that the agent finished its work |
+| **Long-running hosted agents** (preview) | Work continues after the client disconnects. If the process dies, a later process reclaims the work and re-enters the handler with the same input; a client reconnects to the stream from a cursor; a newer turn can *steer* the one in flight |
+| **Autopilots** | A hosted agent published as a blueprint. Each team creates its own instance, which gets an agent identity *and* an Entra agent user account, so it acts as itself in Microsoft 365: its own mailbox, Teams presence and files |
+
+Recovery re-enters the handler from the beginning; it does not replay it. That is the same lesson as Week 7's checkpoints and Week 10's idempotency keys: every side effect must be safe to repeat, or guarded by a durable record that it already happened.
+
 ### 10.3 · The vocabulary
 
 | Concept | Meaning |
@@ -489,7 +499,7 @@ flowchart LR
 
 We chose it for three reasons. The HTTP contract is fixed and graded, so you need full control of routes and JSON. You see every step of the loop, which is the point of a course. And nothing is lost: the same Agent Framework code can be packaged as a hosted agent, and the same instructions can become a prompt agent. Knowing when to move up the managed spectrum is part of the skill.
 
-Sources: [What is Foundry Agent Service?](https://learn.microsoft.com/en-us/azure/foundry/agents/overview) · [Quickstart: create a prompt agent](https://learn.microsoft.com/en-us/azure/foundry/agents/quickstarts/prompt-agent) · [Hosted agents](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents) · [Toolbox](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview)
+Sources: [What is Foundry Agent Service?](https://learn.microsoft.com/en-us/azure/foundry/agents/overview) · [Quickstart: create a prompt agent](https://learn.microsoft.com/en-us/azure/foundry/agents/quickstarts/prompt-agent) · [Hosted agents](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents) · [Toolbox](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview) · [Routines](https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/use-routines) · [Long-running agent resilience](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/long-running-agent-resilience) · [What is an autopilot?](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/autopilot-overview)
 
 ---
 

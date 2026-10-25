@@ -435,6 +435,13 @@ label: TicketLabel = parsed.output_parsed</code></pre>
     <tr><td>Best for</td><td>Fast start, internal tools</td><td>Custom logic, multi-agent systems</td><td>Logic that ships and versions with your app <span class="chip chip--ghost">this course</span></td></tr>
   </tbody></table></div>
   <p>There is also a voice-based prompt agent (preview) for real-time spoken conversations through Voice Live, over a WebSocket instead of text requests. Hosted agents ship as a container image or as a <code>.zip</code> of your source (Foundry builds the image), and run in per-session, isolated sandboxes that scale to zero and restore their files when a session resumes.</p>
+  <p><strong>Beyond one request.</strong> Three newer capabilities change <em>when</em> an agent runs, <em>for how long</em>, and <em>as whom</em>:</p>
+  <div class="table-wrap"><table><thead><tr><th>Capability</th><th>What it adds</th></tr></thead><tbody>
+    <tr><td><strong>Routines</strong></td><td>Run a prompt or hosted agent on a schedule (cron, no more often than every five minutes), once at a set time, or when a GitHub issue opens or a Teams channel message arrives. The run uses the agent's own identity by default, and every attempt leaves a run record. A successful run means Foundry delivered the request, not that the agent finished its work</td></tr>
+    <tr><td><strong>Long-running hosted agents</strong> (preview)</td><td>Work continues after the client disconnects. If the process dies, a later process reclaims the work and re-enters the handler with the same input; a client reconnects to the stream from a cursor; a newer turn can <em>steer</em> the one in flight</td></tr>
+    <tr><td><strong>Autopilots</strong></td><td>A hosted agent published as a blueprint. Each team creates its own instance, which gets an agent identity <em>and</em> an Entra agent user account, so it acts as itself in Microsoft 365: its own mailbox, Teams presence and files</td></tr>
+  </tbody></table></div>
+  <p>Recovery re-enters the handler from the beginning; it does not replay it. That is the same lesson as Week 7's checkpoints and Week 10's idempotency keys: every side effect must be safe to repeat, or guarded by a durable record that it already happened.</p>
   <h3 id="s10-3" data-toc="Vocabulary and tools">10.3 Vocabulary and tools</h3>
   <dl class="glossary">
     <dt>Agent</dt><dd>A named definition: model, instructions, tools, guardrail.</dd>
@@ -485,7 +492,7 @@ print(reply.output_text)</code></pre>
     <div class="diagram__col"><div class="diagram__node is-amber">Monitor<small>back to evaluate</small></div></div>
   </div>
   <p>This is the same loop you run with the harness every week. Our service is an <strong>ephemeral agent</strong>: the logic lives in <code>app/</code>, runs in your container on Azure Container Apps, and calls Foundry models through the Responses API. We chose it because the HTTP contract is fixed and graded, so you need full control of routes and JSON; because you see every step of the loop; and because nothing is lost: the same Agent Framework code can be packaged as a hosted agent, and the same instructions can become a prompt agent.</p>
-  <p class="muted">Sources: <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/overview">What is Foundry Agent Service?</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/quickstarts/prompt-agent">Create a prompt agent</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents">Hosted agents</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview">Toolbox</a></p>
+  <p class="muted">Sources: <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/overview">What is Foundry Agent Service?</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/quickstarts/prompt-agent">Create a prompt agent</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/hosted-agents">Hosted agents</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview">Toolbox</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/use-routines">Routines</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/long-running-agent-resilience">Long-running agent resilience</a> · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/autopilot-overview">What is an autopilot?</a></p>
 </section>
 
 <section id="s11" data-group="The lecture">

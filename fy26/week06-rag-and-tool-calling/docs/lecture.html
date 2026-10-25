@@ -152,7 +152,7 @@
   <p>RRF needs no score calibration (BM25 and cosine scores are on different scales), which is why Azure AI Search uses it. A bi-encoder (the embedding model) encodes query and passage separately; a <strong>cross-encoder</strong> reads them together and judges relevance much better, but is too slow for the whole index. So retrieve broadly (say 50 candidates) and rerank narrowly.</p>
   <div class="grid grid-2">
     <div class="tile tile--azure"><h4>Approximate nearest neighbor</h4><p>At scale you cannot compare a query with every vector. Indexes such as <strong>HNSW</strong> find near-best matches in logarithmic time, trading a little recall for a lot of speed. Exhaustive search is still right for small collections like ours.</p></div>
-    <div class="tile tile--amber"><h4>How many passages?</h4><p>More raise recall and lower precision. Models attend best to the beginning and end of long inputs, the "lost in the middle" effect: put the best passages first and keep <em>k</em> small.</p></div>
+    <div class="tile tile--amber"><h4>How many passages?</h4><p>More raise recall and lower precision. Models attend best to the beginning and end of long inputs, the <a href="https://arxiv.org/abs/2307.03172">"lost in the middle"</a> effect: put the best passages first and keep <em>k</em> small.</p></div>
   </div>
 </section>
 
@@ -498,6 +498,8 @@ proof = course.check(6, url)   # score the live URL with the Week 6 harness</cod
     <tr><td>Tools in Foundry</td><td><a href="https://learn.microsoft.com/en-us/training/modules/use-generative-ai-tools/">Develop generative AI apps that use tools</a> (module) · <a href="https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/toolbox-overview">Toolbox</a></td></tr>
     <tr><td>The protocol</td><td><a href="https://developers.openai.com/api/docs/guides/function-calling">Function calling (OpenAI)</a> · <a href="https://developers.openai.com/api/docs/guides/embeddings">Vector embeddings (OpenAI)</a></td></tr>
     <tr><td>Tool design</td><td><a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for agents (Anthropic)</a></td></tr>
+    <tr><td>Long contexts</td><td><a href="https://arxiv.org/abs/2307.03172">Lost in the Middle: How Language Models Use Long Contexts</a> (paper)</td></tr>
+    <tr><td>Agent Framework</td><td><a href="https://learn.microsoft.com/en-us/agent-framework/overview/">Overview</a> · <a href="https://github.com/microsoft/agent-framework">GitHub</a></td></tr>
     <tr><td>In this repository</td><td><a href="../lecture.md">Lecture notes (Markdown)</a> · <a href="slides.html">Slides</a> · <a href="../lab.ipynb">Lab</a> · <a href="../README.md">README</a> · previous: <a href="../../week05-fundamentals-of-azure-ai/docs/lecture.html">Week 5</a> · next: <a href="../../week07-multi-agent-systems/docs/lecture.html">Week 7</a></td></tr>
   </tbody></table></div>
 </section>
