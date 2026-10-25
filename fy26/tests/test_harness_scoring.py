@@ -15,6 +15,25 @@ def test_fact_score_partial_credit():
     assert fact_score("A Day Pass is $16.", facts) == 0.5
 
 
+@pytest.mark.parametrize(
+    ("answer", "facts", "expected"),
+    [
+        ("It costs $160 and lasts 24 hours.", [["$16", "16 dollars"], ["24 hours"]], 0.5),
+        ("Riders must be 160 years old.", [["16"]], 0.0),
+        ("It lasts 124 hours.", [["24 hours"]], 0.0),
+        ("The fee is $16.50.", [["$16"]], 0.0),
+        ("The fee is $16.00.", [["$16"]], 1.0),
+        ("Fees are waived. 16 is the minimum age.", [["16"]], 1.0),
+        ("The rate is 1.55 per minute.", [["1.5"]], 0.0),
+        ("The rate is 1.50 per minute.", [["1.5"]], 1.0),
+        ("It reopens on Dec 15.", [["dec 1"]], 0.0),
+        ("A supervisor handles the escalation.", [["escalat"]], 1.0),
+    ],
+)
+def test_fact_score_matches_whole_numbers(answer, facts, expected):
+    assert fact_score(answer, facts) == expected
+
+
 def test_has_number():
     assert has_number("That ride costs $7.50.", 7.5)
     assert has_number("Fee: 2,500 dollars", 2500)

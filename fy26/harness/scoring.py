@@ -19,8 +19,22 @@ def fact_score(answer: str, facts: list[list[str]]) -> float:
     if not facts:
         return 1.0
     norm = normalize(answer)
-    found = sum(any(normalize(option) in norm for option in options) for options in facts)
+    found = sum(any(_found(normalize(option), norm) for option in options) for options in facts)
     return found / len(facts)
+
+
+def _found(option: str, text: str) -> bool:
+    """`option` is in `text`, with any number in it whole: '$16' is not found in '$160', nor '16' in '160'."""
+    if not any(c.isdigit() for c in option):
+        return option in text  # a text stem such as 'escalat' may match a longer word
+    before = r"(?<!\d)(?<!\d\.)" if option[0].isdigit() else ""
+    if not option[-1].isdigit():
+        after = ""
+    elif re.search(r"\.\d+$", option):
+        after = r"(?!0*[1-9])"  # '1.5' also matches '1.50', not '1.55'
+    else:
+        after = r"(?!\d)(?!\.0*[1-9])"  # '16' also matches '16.00', not '160' or '16.5'
+    return re.search(before + re.escape(option) + after, text) is not None
 
 
 def numbers_in(text: str) -> list[float]:
