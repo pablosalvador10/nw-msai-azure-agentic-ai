@@ -12,20 +12,41 @@
     home.append(...brand.childNodes);
     brand.append(home);
   }
-  if (weekFolder && courseRoot && document.querySelector(".topbar")) {
-    const weekRoot = new URL(`${weekFolder}/`, courseRoot);
+  // Every page except the course home gets a navigation row inside the sticky header:
+  // a clear way back to the course home, then this page's sibling materials.
+  const topbar = document.querySelector(".topbar");
+  const path = decodeURIComponent(location.pathname);
+  if (courseRoot && topbar && !document.body.classList.contains("course-home")) {
+    const docs = weekFolder ? new URL(`${weekFolder}/docs/`, courseRoot) : new URL("foundations/docs/", courseRoot);
+    const items = weekFolder
+      ? [["Weekly overview", "../README.md"], ["Lecture", "lecture.html"], ["Slides", "slides.html"], ["Main lab · VS Code", "../lab.ipynb"], ["Optional deep dive", "../deep-dive.ipynb"]]
+      : /\/foundations\/docs\//.test(path)
+        ? [["Course agents", "agents.html"], ["Tool primers", "primers.html"], ["Foundations notebooks", "../README.md"], ["Setup", "../../setup/README.md"]]
+        : [];
     const materials = document.createElement("nav");
     materials.className = "materials-nav";
-    materials.setAttribute("aria-label", "Learning materials");
-    for (const [label, path] of [["Course home", "../../index.html"], ["Weekly overview", "../README.md"], ["Lecture", "lecture.html"], ["Slides", "slides.html"], ["Main lab · VS Code", "../lab.ipynb"], ["Optional deep dive", "../deep-dive.ipynb"]]) {
+    materials.setAttribute("aria-label", weekFolder ? "Learning materials" : "Course pages");
+    const home = document.createElement("a");
+    home.className = "materials-nav__home";
+    home.href = new URL("index.html", courseRoot).href;
+    home.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h4.5v-6h4v6h4.5V9"/></svg>';
+    home.append("Course home");
+    materials.append(home);
+    if (items.length) {
+      const divider = document.createElement("span");
+      divider.className = "materials-nav__divider";
+      divider.setAttribute("aria-hidden", "true");
+      materials.append(divider);
+    }
+    for (const [label, target] of items) {
       const link = document.createElement("a");
       link.textContent = label;
-      link.href = new URL(path, new URL("docs/", weekRoot)).href;
+      link.href = new URL(target, docs).href;
       if (link.pathname === location.pathname) link.setAttribute("aria-current", "page");
-      if (path.endsWith(".ipynb")) link.title = "Open this notebook in VS Code; browsers may download it.";
+      if (target.endsWith(".ipynb")) link.title = "Open this notebook in VS Code; browsers may download it.";
       materials.append(link);
     }
-    document.querySelector(".topbar").after(materials);
+    topbar.append(materials);
   }
   const nav = document.querySelector(".toc");
   const sections = [...document.querySelectorAll("main section[id]")];

@@ -49,6 +49,12 @@
   home.setAttribute("aria-label", "Course home · Agentic AI on Microsoft Foundry");
   home.append(...brand.childNodes);
   brand.append(home);
+  const homeButton = document.createElement("a");
+  homeButton.href = home.href;
+  homeButton.className = "nav-btn deck-home-link";
+  homeButton.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v11h4.5v-6h4v6h4.5V9"/></svg>';
+  homeButton.append("Course home");
+  stage.querySelector(".chrome-top").append(homeButton);
   if (weekFolder) {
     const lecture = document.createElement("a");
     lecture.href = new URL(`${weekFolder}/docs/lecture.html`, courseRoot).href;
@@ -196,5 +202,13 @@
 
   fit();
   go((parseInt(location.hash.slice(1), 10) || 1) - 1);
+  // Phones held upright: the 16:9 slide is too small to read. Offer the two ways out.
+  if (weekFolder) {
+    const hint = document.createElement("aside");
+    hint.className = "deck-phone-hint";
+    hint.innerHTML = `<p>Slides read best with the phone turned sideways.</p>
+      <p><a href="${new URL(`${weekFolder}/docs/lecture.html`, courseRoot).href}">Read the lecture</a> · <a href="${home.href}">Course home</a></p>`;
+    document.body.append(hint);
+  }
   document.documentElement.classList.add("deck-ready");
 })();
