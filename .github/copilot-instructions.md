@@ -2,79 +2,109 @@
 
 ## Project Overview
 
-This is a **teaching repository** for Northwestern University's MS AI Foundry program. Students learn to build agentic AI systems using Azure services.
+This is a **teaching repository** for Northwestern University's MS AI program. Students build, deploy and harden one AI service (a support API for **Lakeshore Ride**, a fictional bike-share company) on Azure Container Apps, with Microsoft Agent Framework on Microsoft Foundry models. A local harness scores the service every week.
 
 ## Coding Standards
 
 ### Python
-- Use **Python 3.11+** features and type hints
-- Follow **PEP 8** style guidelines
-- Use **docstrings** for all public functions and classes
+- Target **Python 3.12** (see `fy26/.python-version`) with type hints
+- Follow **PEP 8**; Ruff is the formatter and linter (`fy26/pyproject.toml`)
+- Use **docstrings** for public functions and classes; short and precise
 - Prefer `pathlib.Path` over `os.path` for file operations
-- Use **dataclasses** or **Pydantic** for data structures
+- Use **Pydantic** for request/response models and settings, **dataclasses** for internal data
 
-### Azure Functions
-- Use the **v2 programming model** with decorators (`@app.function_name()`)
-- Set `http_auth_level=func.AuthLevel.FUNCTION` for production endpoints
-- Return JSON responses with proper status codes
-- Include comprehensive logging with `logging.info()` and `logging.error()`
+### The service (`fy26/app/`)
+- FastAPI app built by `create_app()` in `app/main.py`; settings come from environment variables via `app/config.py`
+- `app/contract.py` is the fixed HTTP contract the harness grades. Changing a route or field means updating `harness/checks/`, `harness/data/`, `tests/`, and the week README in the same change
+- Business rules (fares, stations) live in `app/domain.py` as plain, deterministic Python; models never compute prices
+- Authenticate to Azure with managed identity / `DefaultAzureCredential` (Entra scope `https://ai.azure.com/.default`). Never add API keys for Azure services
+- The MCP server (`app/mcp_server.py`) is mounted at `/mcp`; tools return JSON-serializable results and have descriptions written for agents
+- The shipped week services are naive on purpose: the lab is the student's improvement. Do not replace them with the strong solution
 
-### MCP (Model Context Protocol)
-- Use `@app.generic_trigger(type="mcpToolTrigger")` for MCP tools
-- Define `toolProperties` as JSON schema with `propertyName`, `propertyType`, `description`
-- Return JSON-serialized responses from all MCP tools
-- Include descriptive `description` parameters to help AI agents understand tool usage
+### Infrastructure (`fy26/infra/`)
+- Terraform with `azurerm ~> 5.10`; one resource group per student
+- Run `terraform fmt` before committing; keep every resource readable by a beginner (one concept per file)
 
 ## Code Organization
 
-```
-src/
-├── abstractions/       # Reusable Azure service wrappers
-├── agent_core.py       # Core agent implementation
-└── tool_registry/      # MCP servers and tool definitions
-    └── mcps/           # MCP server implementations
+The repo is split into self-contained **cohorts**, one folder per fiscal year. Each cohort has its own `pyproject.toml`, `.python-version`, and `.env.example`; run `uv` commands from inside the cohort folder.
 
-notebooks/
-├── lab1_*.ipynb        # Azure Functions basics
-├── lab2_*.ipynb        # Logic Apps integration
-├── lab3_*.ipynb        # Single agent tool calling
-└── lab4_*.ipynb        # MCP server development
-
-tests/
-└── test_*.py           # Pytest test files
 ```
+fy26/                       # Current cohort: all new work goes here
+├── README.md               # Course hub: calendar, weekly loop, grading
+├── pyproject.toml          # Cohort environment (add deps with `uv add` from fy26/)
+├── setup/                  # One-time setup notebook: tools, Azure, Terraform, first deploy
+├── foundations/            # Start here: course-agents guide (docs/agents.html) and tool primers: Terraform, FastAPI, containers, identity, harness (docs/primers.html)
+├── weekNN-<topic>/         # One folder per session: README.md, lecture.md, lab.ipynb, optional deep-dive.ipynb
+│   └── docs/               # lecture.html and slides.html: lecture.md for the browser, same sections
+├── assets/                 # Shared CSS/JS for the lecture pages and slide decks
+├── app/                    # The FastAPI service students deploy
+├── harness/                # Local harness: checks per week + public data (jsonl)
+├── infra/                  # Terraform for the student's resource group
+├── tests/                  # Offline pytest suite
+├── course.py               # Notebook helpers; each prints the command it runs
+└── Dockerfile              # Image built with `az acr build`
+
+fy25/                       # Archived cohort: frozen, do not modify
+├── src/  notebooks/  tests/  docs/
+```
+
+- Never edit an archived cohort, except to fix broken links.
+- Shared assets for all cohorts (CI, Copilot skills) live in `.github/`.
+
+## Commands (run from `fy26/`)
+
+```bash
+uv sync                                              # install
+uv run ruff format . && uv run ruff check .          # format + lint
+uv run pytest --cov                                  # offline tests + coverage floor
+uv run uvicorn app.main:app --reload                 # run the service
+uv run python -m harness check --week 5 --in-process # score without deploying
+pre-commit install                                   # once, from the repo root
+```
+
+Pre-commit (`.pre-commit-config.yaml`) runs Ruff, file hygiene, gitleaks, the notebook check and `terraform fmt` on every commit. Ruff is the only formatter; never add Black. CI (`.github/workflows/ci.yml`) runs the same hooks, a gitleaks scan of the pushed commits, `uv sync --locked`, Ruff, pytest with coverage (`fail_under` in `pyproject.toml` only moves up), a notebook check (valid JSON, **no outputs**), and `terraform fmt -check` + `validate`.
+
+## Security and Privacy
+
+- Never commit `.env`, `terraform.tfvars`, `*.auto.tfvars`, `*.tfstate*`, or harness `reports/` (all gitignored)
+- No real subscription IDs, tenant IDs, emails, resource names, endpoints, or keys in committed files or notebook outputs
+- Hidden harness data and reference solutions stay **outside this repository**. Public data in `harness/data/` must never contain answers to hidden items
+- Course content is original. Do not copy material from customer or employer repositories
 
 ## Teaching Context
 
-- **Audience**: Graduate students in MS AI program (smart industry professionals)
-- **Tone**: Clear, professional, educational
+- **Audience**: Graduate students in the MS AI program: smart, but often new to cloud tooling
+- **Tone**: A professor's voice: concise, precise, no filler or hype
 - **Explanations**: Include architecture diagrams, tables, and step-by-step reasoning
 - **Examples**: Provide concrete, runnable code examples
 - **Why**: Always explain *why* something works, not just *how*
+- **Shape of a session**: Learn (from scratch) → Build (into `app/`) → Test locally (harness) → Deploy (Container Apps) → Submit one URL
 
 ## Testing
 
-- Use **pytest** for all tests
-- Use **fixtures** in `conftest.py` for shared setup
-- Mock external Azure services in unit tests
+- Use **pytest**; shared fixtures live in `fy26/tests/conftest.py`
+- Tests run **offline** (`LLM_MODE=offline`): no Azure, no network, deterministic
+- Harness datasets must agree with `app/domain.py` and the handbook (`tests/test_harness_data.py`)
+- A do-nothing service must score low (`tests/test_harness_end_to_end.py`); keep that true when adding checks
 - Test both success and error paths
 
 ## Documentation
 
 - Use Markdown for all documentation
-- Include architecture diagrams using ASCII art or Mermaid
-- Add "Key Takeaways" sections to summarize concepts
-- Link to official Microsoft documentation where appropriate
+- Include architecture diagrams using Mermaid
+- Link to the matching Microsoft Learn module or official docs for every concept
 
 ## Dependencies
 
-Core packages for this project:
-- `azure-functions` - Azure Functions SDK
-- `azure-identity` - Azure authentication
-- `azure-ai-projects` - AI Foundry SDK
-- `openai` - OpenAI API client
-- `pytest` - Testing framework
-- `requests` - HTTP client
+fy26 core packages (pinned in `fy26/uv.lock`):
+- `fastapi`, `uvicorn` - the service
+- `agent-framework-core`, `agent-framework-foundry`, `agent-framework-orchestrations` - agents and orchestration
+- `openai` - Responses API client for Foundry models
+- `azure-identity` - keyless authentication
+- `azure-monitor-opentelemetry` - tracing to Application Insights
+- `mcp` (`>=2.2,<3`, `MCPServer`) and `tenacity` - MCP server; Agent Framework's MCP client needs both
+- `pytest`, `ruff`, `httpx2` - tests and tooling (`httpx2` is the HTTP client used by the test client)
 
 ## Commit Messages
 

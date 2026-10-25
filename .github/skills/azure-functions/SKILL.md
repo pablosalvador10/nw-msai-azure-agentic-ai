@@ -1,6 +1,6 @@
 ---
 name: azure-functions
-description: Helps create, debug, and deploy Azure Functions using the Python v2 programming model. Use this skill when working with HTTP triggers, MCP triggers, timer triggers, or any Azure Functions development including local testing with func start and Azurite.
+description: 'FY25 archived cohort only (fy25/ labs). Helps create, debug, and deploy Azure Functions using the Python v2 programming model. Use this skill when working with HTTP triggers, MCP triggers, timer triggers, or any Azure Functions development including local testing with func start and Azurite. Not for fy26, which runs on Azure Container Apps: use the fy26-deploy skill.'
 ---
 
 # Azure Functions Development Skill
@@ -26,10 +26,10 @@ def my_function(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Parse request
         data = req.get_json() if req.method == "POST" else dict(req.params)
-        
+
         # Your logic here
         result = {"status": "success", "data": data}
-        
+
         return func.HttpResponse(
             body=json.dumps(result),
             status_code=200,

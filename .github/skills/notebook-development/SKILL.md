@@ -86,23 +86,23 @@ Now let's implement this:
 def example_function(data: list[float]) -> dict:
     """
     Brief description of what the function does.
-    
+
     Args:
         data: List of numbers to process
-        
+
     Returns:
         Dictionary with computed statistics
     """
     # Validate input
     if not data:
         raise ValueError("Data cannot be empty")
-    
+
     # Compute statistics
     result = {
         "count": len(data),
         "mean": sum(data) / len(data),
     }
-    
+
     return result
 
 # Test the function

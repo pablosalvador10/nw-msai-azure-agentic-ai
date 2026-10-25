@@ -1,6 +1,6 @@
 ---
 name: mcp-server
-description: Helps build MCP (Model Context Protocol) servers that expose tools to AI agents like GitHub Copilot. Use this skill when creating MCP tools, configuring MCP clients, debugging MCP connections, or integrating with VS Code Copilot Agent Mode.
+description: 'FY25 archived cohort only (fy25/ labs, MCP on Azure Functions). Helps build MCP (Model Context Protocol) servers that expose tools to AI agents like GitHub Copilot. Use this skill when creating MCP tools, configuring MCP clients, debugging MCP connections, or integrating with VS Code Copilot Agent Mode in fy25/. Not for fy26, whose MCP server is fy26/app/mcp_server.py (MCP Python SDK 2.x, revision 2026-07-28): use the fy26-labs skill.'
 ---
 
 # MCP Server Development Skill
@@ -55,10 +55,10 @@ def search_data(context) -> str:
     content = json.loads(context)
     query = content["arguments"].get("query", "")
     limit = content["arguments"].get("limit", 10)
-    
+
     # Your search logic here
     results = perform_search(query, limit)
-    
+
     return json.dumps({
         "results": results,
         "count": len(results),

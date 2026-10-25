@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars (gitignored) and fill in. See web/README.md.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+location        = "eastus2"
+
+# resource_group_name = "lectures"
+# course_repo         = "pablosalvador10/nw-msai-azure-agentic-ai"
+# course_ref          = "main"
+# min_replicas        = 0  # between terms only: scales to zero, unfinished runs can be lost
+
+# Step 2, after you create the GitHub App:
+# github_client_id     = "Iv23li..."
+# github_client_secret = "..."

@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundations · Your course agents</title>
+<meta name="description" content="How to get help from the five course agents in VS Code Copilot Chat, named after the instructors: Pablo · Start here, Pablo · Fundamentals, Pablo · Scoring, Will · Infra and deploy and Arvind · Data. Which one to ask, how to call them, how to vibe code with Copilot's Agent, and what they will and will not do.">
+<link rel="stylesheet" href="../../assets/lecture.css">
+<link rel="stylesheet" href="../../assets/agents.css">
+</head>
+<body class="agents-page">
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-guide" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+  <symbol id="i-tutor" viewBox="0 0 24 24"><path d="M2 9l10-4.5L22 9l-10 4.5z"/><path d="M6.5 11v4.5c0 1.4 2.5 3 5.5 3s5.5-1.6 5.5-3V11"/></symbol>
+  <symbol id="i-submit" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="m8.8 13 2.4 2.4 4.2-4.6"/></symbol>
+  <symbol id="i-deploy" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.6-8.96 6 6 0 0 1 11.4-1.3A4.3 4.3 0 0 1 17.5 18.5"/><path d="M12 12.5v8"/><path d="m8.8 15.5 3.2-3.2 3.2 3.2"/></symbol>
+  <symbol id="i-data" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></symbol>
+  <symbol id="i-agent" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></symbol>
+</svg>
+<a class="skip" href="#content">Skip to the document</a>
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar"><div class="topbar__inner">
+  <span class="brand-copy"><b>Agentic AI on Microsoft Foundry</b><span>Foundations · Your course agents</span></span>
+  <div class="topbar__right">
+    <span class="author"><b>Pablo Salvador Lopez</b><a href="https://github.com/pablosalvador10">github.com/pablosalvador10</a></span>
+    <button class="button" id="print" type="button">Print / PDF</button>
+  </div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents"></nav>
+<main id="content" tabindex="-1">
+
+<header class="hero" id="top">
+  <p class="eyebrow">Foundations · Start here</p>
+  <h1>Your course agents<span class="hero-subtitle"><strong>Five Copilot agents that know this course. When you are stuck, they tell you where you are, what to do next, and why.</strong></span></h1>
+  <p class="hero-copy">This course uses tools you may never have touched: a terminal, Azure, Terraform, a harness that scores your work. You do not have to work them out alone. The course ships five agents inside VS Code's Copilot Chat. Each one knows the course materials, has one job, and carries the name of the instructor who leads that part of the course: <strong>Pablo</strong> for the AI and how you are scored, <strong>Will</strong> for infrastructure and deployment, <strong>Arvind</strong> for data. Start with <strong>Pablo · Start here</strong>. Tell it where you are, even if all you can say is "I am lost", and it gives you one next step and brings in the expert you need.</p>
+  <div class="table-wrap"><table><thead><tr><th>Agent</th><th>Ask it when</th><th>Does it change things?</th></tr></thead><tbody>
+    <tr><td><a class="agent-chip is-guide" href="#start-here"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-guide"/></svg></span>Pablo · Start here</a></td><td>You are lost, you do not know the next step, or your question spans two areas</td><td>No. It checks where you are, asks the experts when needed, and sends you to the right one</td></tr>
+    <tr><td><a class="agent-chip is-tutor" href="#fundamentals"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span>Pablo · Fundamentals</a></td><td>A concept, a lecture, a lab part, a failing check to fix, a change to vibe code</td><td>No edits. It explains and gives hints; the graded code is yours</td></tr>
+    <tr><td><a class="agent-chip is-submit" href="#scoring"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-submit"/></svg></span>Pablo · Scoring</a></td><td>What a score means, how grading works, the course website, before every deadline</td><td>No. It runs the harness and reports PASS or FAIL</td></tr>
+    <tr><td><a class="agent-chip is-deploy" href="#will"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span>Will · Infra and deploy</a></td><td>Installing tools, Azure sign-in, Terraform, deploying, a broken URL, logs, rolling back</td><td>Runs setup and deploy commands; asks before it changes Azure</td></tr>
+    <tr><td><a class="agent-chip is-setup" href="#arvind"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-data"/></svg></span>Arvind · Data</a></td><td>The handbook and the datasets, the pattern behind many failures, telemetry, cost</td><td>No. It reads the data and shows you the analysis</td></tr>
+  </tbody></table></div>
+  <div class="callout callout--green"><p><strong>If you remember one thing.</strong> Open Chat, pick <strong>Pablo · Start here</strong>, and say where you are. The rest of this page explains how, how to call the four experts, and how to <a href="#vibe">vibe code</a> with Copilot's own Agent.</p></div>
+</header>
+
+<section id="what" data-group="Start here" data-toc="What an agent is">
+  <h2>What an agent is, in one minute</h2>
+  <p class="lede">A Copilot <strong>agent</strong> is the chat model you already know, plus three things: <strong>instructions</strong> that give it one job, <strong>tools</strong> that let it look at your files, run commands and search the official docs, and <strong>skills</strong> it loads when your question needs them. The agent is the same model; the job is what makes it useful.</p>
+  <div class="diagram" role="img" aria-label="You ask a question in Copilot Chat. The agent you picked answers, using its instructions, its tools and the course skills. It reads and acts on your workspace: the fy26 folder, the terminal and your Azure resources.">
+    <div class="diagram__col"><div class="diagram__node">You<small>a question, in plain words</small></div></div>
+    <div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-accent">Copilot Chat<small>the Agent dropdown picks who answers</small></div></div>
+    <div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col">
+      <div class="diagram__node is-azure">Instructions<small>a role, rules, the shape of the reply</small></div>
+      <div class="diagram__node is-azure">Tools<small>read files, search, run commands you approve, Microsoft Learn</small></div>
+      <div class="diagram__node is-azure">Skills<small>course know-how, loaded when relevant</small></div>
+    </div>
+    <div class="diagram__arrow">&harr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Your workspace<small>files in <code>fy26/</code>, the terminal, your Azure resources</small></div></div>
+  </div>
+  <div class="grid grid-3">
+    <div class="tile tile--accent"><h4>One job each</h4><p>A narrow job gives sharper answers and safer actions. Pablo · Start here only routes; Pablo · Fundamentals only teaches; only Will changes Azure, and only after you say yes.</p></div>
+    <div class="tile tile--azure"><h4>Grounded in the course</h4><p>They read the week's README, lecture notes, lab and your harness report before they answer, so their advice matches what you are graded on. When the course does not cover something, they check Microsoft Learn.</p></div>
+    <div class="tile tile--green"><h4>Plain files you can read</h4><p>Each agent is one Markdown file in <code>.github/agents/</code>; each skill is a folder in <code>.github/skills/</code>. Open them: they are short.</p></div>
+  </div>
+  <div class="callout"><p><strong>You will build this pattern yourself.</strong> In Week 7 your service routes a support case to specialist agents, the way Pablo · Start here routes you and consults Will and Arvind. In Week 8 you write instructions for a coding agent in <code>fy26/AGENTS.md</code>. Reading the five agent files now is a preview of both weeks.</p></div>
+  <div class="callout callout--amber"><p><strong>They are AI assistants, not your instructors.</strong> Each one says so in its first reply. They are modeled on what each instructor teaches, and they can be wrong. Grades, extensions and anything personal go to Pablo, Will and Arvind themselves.</p></div>
+</section>
+
+<section id="once" data-group="Start here" data-toc="Before the first time">
+  <h2>Before the first time</h2>
+  <p class="lede">Do this once. After that, the five steps in the next section are all you need, every time. If any step here fails, go to <a href="#trouble">If the agents do not appear</a>.</p>
+  <ol class="flow flow--4">
+    <li><b>Get Copilot</b><span>Verified students get <strong>Copilot Student</strong> free through GitHub Education. Approval and activation can take a few days, so apply in the first week. Copilot Free also works, with monthly limits.</span></li>
+    <li><b>Sign in in VS Code</b><span>Install VS Code. The first time you use Chat, it asks you to sign in with GitHub: use the account that has Copilot.</span></li>
+    <li><b>Open the <code>fy26</code> folder</b><span>Clone the course (<a href="../../setup/README.md">Setup</a>, step 2). Then File, Open Folder, and pick the <code>fy26</code> folder inside it. If VS Code asks whether to trust the folder or its parent, trust them: the agents live one level up, in <code>.github/</code>.</span></li>
+    <li><b>Check the list</b><span>Open Chat, open the Agent dropdown, and look for the five agents named Pablo, Will and Arvind. Then ask Pablo · Start here your first question.</span></li>
+  </ol>
+  <div class="callout callout--amber"><p><strong>You do not need to finish Setup first.</strong> The agents need only VS Code, Copilot and the cloned course. If a later step of <a href="../../setup/README.md">Setup</a> fails, ask <strong>Will · Infra and deploy</strong>: it checks each step with you, in order.</p></div>
+</section>
+
+<section id="start" data-group="Start here" data-toc="Start in five steps">
+  <h2>Start in five steps</h2>
+  <p class="lede">This is the whole routine, every time you need help. The drawing shows VS Code with the course open on the left and the Chat view on the right. The yellow numbers match the steps below it.</p>
+
+  <div class="vsc" role="img" aria-label="Drawing of VS Code. The Explorer shows the fy26 folder; the editor shows the Setup README. On the right is the Chat view. Marker 1 is the Chat view itself, marker 2 the New Chat plus button, marker 3 the Agent dropdown set to Pablo · Start here, marker 4 the message box, and marker 5 the line in Pablo's reply that names the next agent.">
+    <div class="vsc__titlebar"><span class="vsc__dots"><i></i><i></i><i></i></span><span class="vsc__title">fy26 · Visual Studio Code</span></div>
+    <div class="vsc__body">
+      <div class="vsc__activity"><span></span><span></span><span></span><span></span></div>
+      <div class="vsc__explorer">
+        <b>EXPLORER</b>
+        <p>&#9662; FY26</p>
+        <p class="d1">&rsaquo; app</p>
+        <p class="d1">&rsaquo; foundations</p>
+        <p class="d1">&rsaquo; harness</p>
+        <p class="d1">&rsaquo; infra</p>
+        <p class="d1">&#9662; setup</p>
+        <p class="d2 is-open">README.md</p>
+        <p class="d2">setup.ipynb</p>
+        <p class="d1">&rsaquo; week05-fundamentals-of-azure-ai</p>
+        <p class="d1">&rsaquo; week06-rag-and-tool-calling</p>
+        <p class="d1 dim">&rsaquo; &hellip;</p>
+        <p class="d1">course.py</p>
+        <p class="d1">README.md</p>
+      </div>
+      <div class="vsc__editor">
+        <div class="vsc__tabs"><span class="vsc__tab">README.md</span></div>
+        <pre class="vsc__code"><span class="k"># Setup · Your course environment</span>
+
+Do this once, before Week 5. Allow about
+45 minutes if the tools are installed and
+Azure access is ready.
+
+<span class="k">## 1. Install the tools</span>
+
+<span class="s">| Tool | Why | Install | Check |</span></pre>
+      </div>
+      <div class="vsc__chat">
+        <div class="vsc__chathead"><span class="mark">1</span>CHAT<span class="plus">+</span><span class="mark">2</span></div>
+        <div class="vsc__messages">
+          <div class="vsc__msg vsc__msg--me">I am lost. I cloned the course and have not done anything else.</div>
+          <div class="vsc__msg">
+            <div class="vsc__who"><span class="agent-icon is-guide"><svg aria-hidden="true"><use href="#i-guide"/></svg></span>Pablo · Start here</div>
+            <p><b>Where you are:</b> course found, no Python environment yet.</p>
+            <p><b>Your next step:</b> in a terminal, in <code>fy26/</code>, run <code>uv sync</code>.</p>
+            <p class="vsc__next"><span class="mark">5</span><b>Who takes it from here:</b> Will · Infra and deploy.</p>
+          </div>
+        </div>
+        <div class="vsc__input">
+          <div class="vsc__prompt is-placeholder"><span class="mark">4</span>Tell me what you are trying to do, or just say "I am lost"</div>
+          <div class="vsc__controls"><span class="vsc__pill">Copilot &#9662;</span><span class="mark">3</span><span class="vsc__pill is-active"><span class="agent-icon is-guide"><svg aria-hidden="true"><use href="#i-guide"/></svg></span>Pablo · Start here &#9662;</span><span class="vsc__pill">Auto &#9662;</span><span class="vsc__send">&#10148;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ol class="marks-legend">
+    <li data-n="1"><span><b>Open Chat</b><kbd>&#8963;</kbd><kbd>&#8984;</kbd><kbd>I</kbd> on a Mac, or the <b>Chat</b> menu in the title bar, then <b>Open Chat</b>.</span></li>
+    <li data-n="2"><span><b>Start a new chat</b>The <b>+</b> at the top of the Chat view. One topic per chat.</span></li>
+    <li data-n="3"><span><b>Pick the agent</b>The <b>Agent</b> dropdown under the message box. Choose <b>Pablo · Start here</b>.</span></li>
+    <li data-n="4"><span><b>Say where you are</b>One sentence is enough. "I am lost" is a fine start.</span></li>
+    <li data-n="5"><span><b>Take the one next step</b>Then switch to the agent the reply names, from the same dropdown.</span></li>
+  </ol>
+  <p class="muted">A schematic drawing, not a screenshot: your version of VS Code may place things slightly differently, but the names are the same. The other controls under the message box choose where the session runs, the model, and how much the agent may do without asking; leave them as they are.</p>
+
+  <h3 id="dropdown" data-toc="What the dropdown shows">What the Agent dropdown shows</h3>
+  <div class="split">
+    <div>
+      <p>The dropdown lists VS Code's built-in agents, such as <strong>Agent</strong> and <strong>Plan</strong>, and the five agents this repository adds. Each course agent shows an instructor's name and its job, so they are easy to spot.</p>
+      <p>Pick one <strong>before</strong> you type. The placeholder text in the message box tells you what that agent wants to hear: Will, for example, asks for "Your OS, and the step, error or URL behavior you see".</p>
+      <p>You can switch agents in the middle of a chat. If the new agent seems to miss the context, restate the week and the problem in one line. When the topic changes completely, start a new chat.</p>
+    </div>
+    <div class="vsc vsc--menu" role="img" aria-label="Drawing of the open Agent dropdown: the built-in Agent entry, then Arvind · Data, Pablo · Fundamentals, Pablo · Scoring, Pablo · Start here (highlighted) and Will · Infra and deploy.">
+      <div class="vsc__menu">
+        <p>Agent</p>
+        <p class="dim">&hellip;</p>
+        <hr>
+        <p class="is-setup"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-data"/></svg></span>Arvind · Data</p>
+        <p class="is-tutor"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span>Pablo · Fundamentals</p>
+        <p class="is-submit"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-submit"/></svg></span>Pablo · Scoring</p>
+        <p class="is-guide is-picked"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-guide"/></svg></span>Pablo · Start here</p>
+        <p class="is-deploy"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span>Will · Infra and deploy</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="which" data-group="The agents" data-toc="Which agent, when">
+  <h2>Which agent, when</h2>
+  <p class="lede">There is one door. Pablo · Start here finds where you are and sends you to the expert for that moment, or asks them for you. Once you know who you need, go to that expert directly.</p>
+  <div class="route" role="img" aria-label="Route map. You start with Pablo · Start here, which sends you to one of four experts: Pablo · Fundamentals for concepts, labs and the fix; Pablo · Scoring for scores, grading, the website and the check before a deadline; Will · Infra and deploy for tools, Azure, Terraform and deploying; Arvind · Data for data, failure patterns and telemetry.">
+    <div class="route__you"><strong>You</strong><span>"I am lost", or any question</span></div>
+    <div class="route__arrow"></div>
+    <div class="route__guide is-guide"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-guide"/></svg></span><strong>Pablo · Start here</strong><span>Where you are · one next step · who takes it from here</span></div>
+    <div class="route__fan"></div>
+    <div class="route__team">
+      <div class="route__spec is-tutor"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span><div><strong>Pablo · Fundamentals</strong><span>Concepts, lectures, lab parts, coaching the fix, vibe coding</span></div></div>
+      <div class="route__spec is-submit"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-submit"/></svg></span><div><strong>Pablo · Scoring</strong><span>Scores, grading, the course website, before every deadline</span></div></div>
+      <div class="route__spec is-deploy"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span><div><strong>Will · Infra and deploy</strong><span>Tools, Azure sign-in, Terraform, deploying, broken URLs, logs</span></div></div>
+      <div class="route__spec is-setup"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-data"/></svg></span><div><strong>Arvind · Data</strong><span>Handbook and datasets, failure patterns, telemetry, cost</span></div></div>
+    </div>
+  </div>
+
+  <h3 id="rhythm" data-toc="Across the course">Across the course</h3>
+  <p>The experts follow the rhythm of every week: set up once, then learn and build, deploy, and submit.</p>
+  <div class="journey">
+    <div class="journey__step is-deploy"><small>Once, before Week 5</small><h4>Set up</h4><p>Tools, Python environment, Azure, Terraform, first deploy.</p><span class="agent-chip"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span>Will</span></div>
+    <div class="journey__step is-tutor"><small>Every week, in the lab</small><h4>Learn and build</h4><p>Understand the idea, change <code>app/</code> yourself or with Copilot's Agent, run the harness, read what failed.</p><span class="agent-chip"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span>Pablo · Fundamentals</span></div>
+    <div class="journey__step is-deploy"><small>After each improvement</small><h4>Deploy</h4><p>Ship it to Azure and score the live URL. Only a deployed improvement counts.</p><span class="agent-chip"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span>Will</span></div>
+    <div class="journey__step is-submit"><small>Before each deadline</small><h4>Submit</h4><p>Check this week and every earlier week on the URL you hand in.</p><span class="agent-chip"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-submit"/></svg></span>Pablo · Scoring</span></div>
+  </div>
+  <div class="journey__any is-guide"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-guide"/></svg></span><span><strong>Any time you are unsure which of these you need,</strong> ask Pablo · Start here. When the answer hides in many failures or in your telemetry, ask Arvind · Data.</span></div>
+</section>
+
+<section id="agents" data-group="The agents" data-toc="The five agents">
+  <h2>The five agents</h2>
+  <p class="lede">What each one is for, what to say to it, and where its job stops. Use the <strong>Copy</strong> buttons to paste a prompt into Chat, then edit it to fit your situation.</p>
+
+  <article class="agent-card is-guide">
+    <div class="agent-card__head"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-guide"/></svg></span><div><h3 id="start-here" data-toc="Pablo · Start here">Pablo · Start here</h3><p>The front desk. Start here when you are lost; it brings in the experts when you need them.</p></div><span class="agent-card__badge">Read-only</span></div>
+    <div class="agent-card__body">
+      <div><h4>Ask it when</h4><ul><li>You are new, or back after a break</li><li>You do not know what to do next</li><li>You are not sure which agent you need</li><li>Your question spans two areas, such as a score that differs between your laptop and your URL</li></ul></div>
+      <div><h4>What it does</h4><ul><li>Checks, without changing anything: the course folder, the Python environment, your Azure sign-in, your infrastructure, <code>.env</code>, and whether your URL answers</li><li>Asks the four experts for you when your question needs them, and puts their answers together</li><li>Replies in three parts: <b>Where you are</b>, <b>Your next step</b>, <b>Who takes it from here</b></li></ul></div>
+      <div class="wide"><h4>Try saying</h4><div class="prompts">
+        <p class="prompt"><q>I am lost.</q><button class="copy" type="button" data-copy="I am lost." hidden>Copy</button></p>
+        <p class="prompt"><q>I finished setup. What do I do for Week 6?</q><button class="copy" type="button" data-copy="I finished setup. What do I do for Week 6?" hidden>Copy</button></p>
+        <p class="prompt"><q>My URL stopped working and the deadline is tomorrow. Where do I start?</q><button class="copy" type="button" data-copy="My URL stopped working and the deadline is tomorrow. Where do I start?" hidden>Copy</button></p>
+      </div></div>
+      <div class="wide no"><h4>Where its job stops</h4><ul><li>It does not change files or Azure; Will does that, with your consent</li><li>It does not do the lab for you</li></ul></div>
+    </div>
+  </article>
+
+  <article class="agent-card is-tutor">
+    <div class="agent-card__head"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span><div><h3 id="fundamentals" data-toc="Pablo · Fundamentals">Pablo · Fundamentals</h3><p>Explains the ideas and coaches you to a better service. The code stays yours.</p></div><span class="agent-card__badge">Explains; you own the code</span></div>
+    <div class="agent-card__body">
+      <div><h4>Ask it when</h4><ul><li>A concept in the lecture or lab is unclear: models and the Responses API, structured output, RAG, tool calling, Agent Framework, multi-agent systems, MCP, guardrails, evaluation</li><li>A harness check fails and you do not see why</li><li>You want to raise a score and do not know where to look</li><li>You want Copilot's Agent to build a change and need help with the prompt or the review</li></ul></div>
+      <div><h4>What it does</h4><ul><li>Explains from first principles, using the week's lecture notes and lab, and links the section it used; checks Microsoft Learn when the course does not cover something</li><li>Reads your newest harness report and names the pattern the failures share</li><li>Hints one rung at a time: a question about the evidence, then the concept, then the file and function, then a small example on a different problem</li><li>Ends with one next step that takes under 15 minutes</li></ul></div>
+      <div class="wide"><h4>Try saying</h4><div class="prompts">
+        <p class="prompt"><q>Week 5. Explain structured output as if I had never seen it, then point me to the lab part that uses it.</q><button class="copy" type="button" data-copy="Week 5. Explain structured output as if I had never seen it, then point me to the lab part that uses it." hidden>Copy</button></p>
+        <p class="prompt"><q>Week 6. My newest report shows w06.ask.citations as PART. What do the failing cases have in common? Give me the first hint only.</q><button class="copy" type="button" data-copy="Week 6. My newest report shows w06.ask.citations as PART. What do the failing cases have in common? Give me the first hint only." hidden>Copy</button></p>
+        <p class="prompt"><q>Week 7. Why does the lab say prices must be computed in code and not by the model?</q><button class="copy" type="button" data-copy="Week 7. Why does the lab say prices must be computed in code and not by the model?" hidden>Copy</button></p>
+        <p class="prompt"><q>Week 6. I want Copilot's Agent to make the citation change. Help me write the prompt, and tell me what to check in the diff.</q><button class="copy" type="button" data-copy="Week 6. I want Copilot's Agent to make the citation change. Help me write the prompt, and tell me what to check in the diff." hidden>Copy</button></p>
+      </div></div>
+      <div class="wide no"><h4>Where its job stops</h4><ul><li>It does not edit your files or write the graded change</li><li>It never suggests hardcoding the public harness questions; the private harness uses different ones</li><li>In Week 8 directing a coding agent is the exercise: it coaches your prompt and your review, and Copilot's built-in <strong>Agent</strong> writes the code</li></ul></div>
+    </div>
+  </article>
+
+  <article class="agent-card is-submit">
+    <div class="agent-card__head"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-submit"/></svg></span><div><h3 id="scoring" data-toc="Pablo · Scoring">Pablo · Scoring</h3><p>How you are scored, how grading works, the course website, and the last look before a deadline.</p></div><span class="agent-card__badge">Read-only</span></div>
+    <div class="agent-card__body">
+      <div><h4>Ask it when</h4><ul><li>You want to know what a score means, or what a check measures and weighs</li><li>You want to know how grading works: the private harness, the deadlines, the cumulative service</li><li>You want to use the course website or <strong>Score your deployed service</strong></li><li>Before every deadline, and after a late fix</li></ul></div>
+      <div><h4>What it does</h4><ul><li>Shows how the week's score is computed: a weighted average of its checks, with PASS, PART and FAIL, and one or two points of noise between runs</li><li>Reads your report and proof, and says which items a check missed and how many points that costs</li><li>Before a deadline: runs the tests and the linter, confirms the deployed version and your <code>student_id</code>, scores this week <strong>and every earlier week</strong> on the live URL, checks the Week 10 API key and that no secrets are staged in git</li><li>Reports PASS, FAIL or UNKNOWN for each item, with evidence, then the exact URL to submit</li></ul></div>
+      <div class="wide"><h4>Try saying</h4><div class="prompts">
+        <p class="prompt"><q>Week 5. How is my score computed, and how many points is one wrong category worth?</q><button class="copy" type="button" data-copy="Week 5. How is my score computed, and how many points is one wrong category worth?" hidden>Copy</button></p>
+        <p class="prompt"><q>Week 6. w06.ask.citations is PART. What does the check measure, and which cases did I miss?</q><button class="copy" type="button" data-copy="Week 6. w06.ask.citations is PART. What does the check measure, and which cases did I miss?" hidden>Copy</button></p>
+        <p class="prompt"><q>How do I score my deployed URL on the course website?</q><button class="copy" type="button" data-copy="How do I score my deployed URL on the course website?" hidden>Copy</button></p>
+        <p class="prompt"><q>Week 6. Am I ready to submit?</q><button class="copy" type="button" data-copy="Week 6. Am I ready to submit?" hidden>Copy</button></p>
+      </div></div>
+      <div class="wide no"><h4>Where its job stops</h4><ul><li>It does not fix anything: it hands a failing check to Pablo · Fundamentals and a broken deployment to Will</li><li>It never predicts your grade and never looks for the private grading data</li></ul></div>
+    </div>
+  </article>
+
+  <article class="agent-card is-deploy">
+    <div class="agent-card__head"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span><div><h3 id="will" data-toc="Will · Infra and deploy">Will · Infra and deploy</h3><p>Gets your laptop and your Azure environment working, ships your service, and finds out why a live URL misbehaves.</p></div><span class="agent-card__badge">Asks before changing Azure</span></div>
+    <div class="agent-card__body">
+      <div><h4>Ask it when</h4><ul><li>Installing uv, the Azure CLI, Terraform or Git; <code>uv sync</code> fails or the notebook kernel is missing</li><li><code>az login</code>, Terraform or <code>.env</code> give you an error</li><li>You want to deploy an improvement, your URL returns errors, or a deploy timed out</li><li>You need the logs for a request, to roll back, or to turn on the Week 10 API key</li></ul></div>
+      <div><h4>What it does</h4><ul><li>Checks each setup step in order and stops at the first one that fails; ends setup replies with a status line, for example <code>Setup: tools OK · venv OK · signed in OK · infra MISSING -&gt; next: terraform apply</code></li><li>Runs the deploy after asking, confirms the new revision is live, and scores the URL</li><li>Diagnoses layer by layer: the image, the revision, the running process, configuration, the model identity, your application code, and the week's feature</li><li>Rolls back to a previous image when a new one is broken</li></ul></div>
+      <div class="wide"><h4>Try saying</h4><div class="prompts">
+        <p class="prompt"><q>I am on Windows and uv sync fails with a certificate error. What should I check first?</q><button class="copy" type="button" data-copy="I am on Windows and uv sync fails with a certificate error. What should I check first?" hidden>Copy</button></p>
+        <p class="prompt"><q>terraform apply stopped with AuthorizationFailed. What does that mean and what do I ask for?</q><button class="copy" type="button" data-copy="terraform apply stopped with AuthorizationFailed. What does that mean and what do I ask for?" hidden>Copy</button></p>
+        <p class="prompt"><q>Deploy my Week 6 changes and tell me the score on the live URL.</q><button class="copy" type="button" data-copy="Deploy my Week 6 changes and tell me the score on the live URL." hidden>Copy</button></p>
+        <p class="prompt"><q>My URL returns 500 for /v1/ask. The response has a request_id. Find out what happened.</q><button class="copy" type="button" data-copy="My URL returns 500 for /v1/ask. The response has a request_id. Find out what happened." hidden>Copy</button></p>
+      </div></div>
+      <div class="wide no"><h4>Where its job stops</h4><ul><li>It asks before any command that changes Azure; read-only checks need no confirmation</li><li>It never deletes the resource group, the app or the Foundry resource unless you confirm after it explains what you lose, and it never guesses a subscription, tenant or region</li><li>It edits only the infrastructure files in <code>infra/</code>, with your consent; a bug in your lab code goes to Pablo · Fundamentals</li></ul></div>
+    </div>
+  </article>
+
+  <article class="agent-card is-setup">
+    <div class="agent-card__head"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-data"/></svg></span><div><h3 id="arvind" data-toc="Arvind · Data">Arvind · Data</h3><p>The data your service reads, the data the harness grades with, and the data your service produces.</p></div><span class="agent-card__badge">Read-only</span></div>
+    <div class="agent-card__body">
+      <div><h4>Ask it when</h4><ul><li>You want to know what the handbook or the station data contains, or how the handbook is split into chunks for retrieval</li><li>You want to know what a public harness dataset contains and what its fields mean</li><li>You want the pattern behind many failing checks, with counts</li><li>You want latency, token use or cost from your telemetry</li></ul></div>
+      <div><h4>What it does</h4><ul><li>Opens the data and counts before concluding</li><li>Groups failures into patterns: categories that get confused, pages never cited, kinds of question</li><li>Says how many points a miss is worth and whether a change is beyond noise</li><li>Shows the Python or KQL behind every number, so you can rerun it after your change</li></ul></div>
+      <div class="wide"><h4>Try saying</h4><div class="prompts">
+        <p class="prompt"><q>Week 5. From my newest report, which ticket categories does my service confuse, and how many points is that?</q><button class="copy" type="button" data-copy="Week 5. From my newest report, which ticket categories does my service confuse, and how many points is that?" hidden>Copy</button></p>
+        <p class="prompt"><q>Week 6. Which questions cite a different handbook page than expected? Show me how you found them.</q><button class="copy" type="button" data-copy="Week 6. Which questions cite a different handbook page than expected? Show me how you found them." hidden>Copy</button></p>
+        <p class="prompt"><q>Week 10. Write a KQL query for the p95 latency and the tokens per call of my service over the last hour.</q><button class="copy" type="button" data-copy="Week 10. Write a KQL query for the p95 latency and the tokens per call of my service over the last hour." hidden>Copy</button></p>
+      </div></div>
+      <div class="wide no"><h4>Where its job stops</h4><ul><li>It does not edit files, deploy or change Azure</li><li>It never looks for the private grading data and never suggests rules that fit public items</li><li>It explains the pattern and where it comes from; Pablo · Fundamentals coaches the fix in your graded code</li></ul></div>
+    </div>
+  </article>
+</section>
+
+<section id="call" data-group="The agents" data-toc="How to call an agent">
+  <h2>How to call an agent</h2>
+  <p class="lede">Picking from the dropdown is the everyday way. There are three more, and the second is worth learning early: you can ask Pablo to bring the experts into one conversation.</p>
+  <ol class="flow flow--4">
+    <li><b>Pick it from the dropdown</b><span>Choose the agent under the message box before you type. It answers every message in that chat until you switch.</span></li>
+    <li><b>Ask Pablo to consult</b><span>Name the experts in your message to <strong>Pablo · Start here</strong>. It asks each one as a <em>subagent</em>, in its own context, and combines the answers into one reply.</span></li>
+    <li><b>Follow a handoff</b><span>In a Local session, a button under a reply moves you to the agent it names, with a prompt filled in. In a Copilot session, pick that agent from the dropdown.</span></li>
+    <li><b>Load a skill with <code>/</code></b><span>Type <code>/</code> and pick a skill, such as <code>/fy26-harness</code>. Its know-how goes to whichever agent you are talking to.</span></li>
+  </ol>
+
+  <h3 id="consult" data-toc="Ask Pablo to consult">Ask Pablo to consult the experts</h3>
+  <p>Use it when one question touches two areas. Say the week, say what you see, and name who should answer which part.</p>
+  <div class="prompts is-guide">
+    <p class="prompt"><q>Week 6. My laptop scores 78 but my URL scores 41. Ask Will whether the deployed version matches my code, and ask Pablo · Scoring which checks differ.</q><button class="copy" type="button" data-copy="Week 6. My laptop scores 78 but my URL scores 41. Ask Will whether the deployed version matches my code, and ask Pablo · Scoring which checks differ." hidden>Copy</button></p>
+    <p class="prompt"><q>Week 5. Ask Arvind which categories my service confuses most, then ask Pablo · Fundamentals for the first hint on the biggest one.</q><button class="copy" type="button" data-copy="Week 5. Ask Arvind which categories my service confuses most, then ask Pablo · Fundamentals for the first hint on the biggest one." hidden>Copy</button></p>
+    <p class="prompt"><q>Week 10. Ask Will whether my API key is on, then ask Pablo · Scoring whether I am ready to submit.</q><button class="copy" type="button" data-copy="Week 10. Ask Will whether my API key is on, then ask Pablo · Scoring whether I am ready to submit." hidden>Copy</button></p>
+  </div>
+  <div class="grid grid-2">
+    <div class="tile tile--azure"><h4>What you see</h4><p>Each consultation appears in the reply as a subagent entry with the agent's name. Select it to read what Pablo asked and what came back. The final reply says who said what.</p></div>
+    <div class="tile tile--amber"><h4>When to go direct</h4><p>Each consultation is one more model call against your Copilot allowance. When you already know who you need, pick that agent yourself. Pablo · Fundamentals and Pablo · Scoring can also ask the other experts, one fact at a time.</p></div>
+  </div>
+</section>
+
+<section id="conversation" data-group="The agents" data-toc="A conversation, start to finish">
+  <h2>A conversation, start to finish</h2>
+  <p class="lede">A first exchange with Pablo · Start here, then the move to Will. Notice the shape: Pablo does not lecture, it gives you <strong>one</strong> step.</p>
+  <div class="chat">
+    <div class="chat__row chat__row--me"><div class="chat__bubble">I am lost. I cloned the course last week and have not done anything else.</div></div>
+    <div class="chat__row is-guide"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-guide"/></svg></span><div class="chat__bubble">
+      <span class="chat__name">Pablo · Start here</span>
+      <p>I am the course's AI assistant, modeled on Pablo, not Pablo himself.</p>
+      <p><span class="chat__label">Where you are</span>The course is here; the Python environment (<code>fy26/.venv</code>) does not exist yet. Setup has not started.</p>
+      <p><span class="chat__label">Your next step</span>Open a terminal in the <code>fy26</code> folder and run <code>uv sync</code>. It installs Python 3.12 and every package the course uses, in a few minutes. Every later step needs it.</p>
+      <p><span class="chat__label">Who takes it from here</span>Will · Infra and deploy walks you through the rest of setup.</p>
+      <div class="handoffs"><span>Pablo · Fundamentals: learn it</span><span>Pablo · Scoring: my score</span><span>Will: set up, deploy or fix Azure</span><span>Arvind: look at the data</span></div>
+    </div></div>
+    <div class="chat__row chat__row--me"><div class="chat__bubble">Done, uv sync finished. What next?</div></div>
+    <div class="chat__row is-deploy"><span class="agent-icon agent-icon--sm"><svg aria-hidden="true"><use href="#i-deploy"/></svg></span><div class="chat__bubble">
+      <span class="chat__name">Will · Infra and deploy</span>
+      <p>Next, sign in to Azure so Terraform can create your resources. I will run <code>az login</code>, which opens your browser. Shall I go ahead?</p>
+      <p><code>Setup: tools OK · venv OK · signed in MISSING -&gt; next: az login</code></p>
+    </div></div>
+  </div>
+  <div class="grid grid-2">
+    <div class="tile tile--azure"><h4>The buttons under a reply</h4><p>Agents can offer <strong>handoff buttons</strong> such as <em>Will: set up, deploy or fix Azure</em>. They appear when the chat session runs in VS Code's <strong>Local</strong> harness. In a <strong>Copilot</strong> session, the usual default, they do not: pick the agent the reply names from the Agent dropdown yourself. Same agent, same help.</p></div>
+    <div class="tile tile--amber"><h4>When an agent asks to run a command</h4><p>VS Code shows you the exact command and waits. Read it. Allow it if you understand what it does; if you do not, ask the agent to explain first. Nothing that changes Azure should ever run without your yes.</p></div>
+  </div>
+</section>
+
+<section id="ask" data-group="Use them well" data-toc="How to ask">
+  <h2>How to ask</h2>
+  <p class="lede">An agent can only work with what you tell it and what it can find. Four habits make the difference between a vague answer and the right one.</p>
+  <ol class="points">
+    <li><b>Say the week.</b>"Week 6" tells the agent which lab, which checks and which files matter.</li>
+    <li><b>Paste the exact error, not a summary.</b>Copy the text, starting at the first line that says <code>Error</code>. Text beats a screenshot: the agent can search for it. Never paste secrets (see below).</li>
+    <li><b>Name the check.</b>Harness checks have ids such as <code>w06.ask.citations</code>. The id points the agent at the exact failing cases in your report.</li>
+    <li><b>One problem per chat.</b>Start a new chat (<strong>+</strong>) when you change topic. Long, mixed conversations make every answer worse.</li>
+  </ol>
+  <div class="table-wrap"><table class="ask-table"><thead><tr><th>Vague</th><th>Clear</th></tr></thead><tbody>
+    <tr><td>It doesn't work.</td><td>Week 5. <code>course.deploy()</code> has waited for the new revision for 12 minutes. What is happening?</td></tr>
+    <tr><td>Fix my code.</td><td>Week 6, <code>w06.ask.citations</code> is PART. Explain what the check wants, then give me the first hint.</td></tr>
+    <tr><td>Explain RAG.</td><td>Explain retrieval in Week 6 as if I had never seen embeddings. Then show me the lab part that builds it.</td></tr>
+    <tr><td>Is it OK?</td><td>Week 7. Am I ready to submit?</td></tr>
+  </tbody></table></div>
+  <div class="callout"><p><strong>Ask why, not only what.</strong> The agents are tutors as much as tools. "Why does this fix work?" turns a fix into something you understand, and understanding is what carries over to the private harness, which uses questions you have not seen.</p></div>
+</section>
+
+<section id="vibe" data-group="Use them well" data-toc="Vibe coding with Copilot's Agent">
+  <h2>Vibe coding with Copilot's Agent</h2>
+  <p class="lede"><strong>Vibe coding</strong> means describing the change you want in plain words and letting a coding agent write it, run it and fix it while you steer. In this course the coding agent is Copilot's built-in <strong>Agent</strong>, in the same dropdown as the course agents. The course agents teach, measure and deploy; Agent writes code. Week 8 makes directing it the exercise; the habits below are the ones Week 8 teaches, and they pay off from Week 5.</p>
+  <div class="grid grid-3">
+    <div class="tile tile--accent"><h4>You</h4><p>Decide what to build, write the prompt, approve each command, read every diff, and keep only what you can explain.</p></div>
+    <div class="tile tile--azure"><h4>Copilot's Agent</h4><p>Reads <code>AGENTS.md</code>, plans, edits files in <code>app/</code>, runs the tests and the harness, and fixes what fails.</p></div>
+    <div class="tile tile--green"><h4>The course agents</h4><p>Pablo · Fundamentals helps you understand the change and write the prompt. Pablo · Scoring reads the result. Will deploys it.</p></div>
+  </div>
+
+  <h3 id="vibe-loop" data-toc="The loop">The loop</h3>
+  <ol class="points">
+    <li><b>Understand.</b>Know what the change should do and which check measures it. An agent cannot build what you cannot describe; ask Pablo · Fundamentals if the idea is unclear.</li>
+    <li><b>Plan.</b>Commit your work first, so the agent's diff stands alone. Ask for a short plan before any edit, and read it: which files, which tests.</li>
+    <li><b>Prompt.</b>Pick <strong>Agent</strong> in the dropdown. Give the goal, the files, the limits, and what done means: the tests and the harness check (template below).</li>
+    <li><b>Review.</b>Approve only commands you understand. Read every changed file. <strong>Restore Checkpoint</strong> on a request undoes its file edits; then try a narrower prompt.</li>
+    <li><b>Measure and ship.</b>Run the tests, then the harness in-process. Then Will deploys and Pablo · Scoring checks the live URL.</li>
+  </ol>
+
+  <h3 id="vibe-prompt" data-toc="A prompt that works">A prompt that works</h3>
+  <p>Goal, scope, limits, plan first, and a definition of done the agent can check by itself. Adapt the week, the files and the check.</p>
+<pre class="code" data-plain><code>Week 6. Goal: every answer from /v1/ask cites the handbook pages it used.
+Read AGENTS.md first and follow its rules.
+Scope: app/services/ask.py and app/rag.py, plus tests if needed.
+Do not change app/contract.py, harness/ or harness/data/,
+and never hardcode harness questions or answers.
+First show me a short plan and wait for my OK.
+Done means: uv run pytest passes, and
+uv run python -m harness check --week 6 --in-process
+shows w06.ask.citations higher than before and the week's score no lower.
+Report both scores.</code></pre>
+  <div class="prompts is-tutor">
+    <p class="prompt"><q>Copy this template, then edit the week, the goal, the files and the check.</q><button class="copy" type="button" data-copy="Week 6. Goal: every answer from /v1/ask cites the handbook pages it used.&#10;Read AGENTS.md first and follow its rules.&#10;Scope: app/services/ask.py and app/rag.py, plus tests if needed.&#10;Do not change app/contract.py, harness/ or harness/data/,&#10;and never hardcode harness questions or answers.&#10;First show me a short plan and wait for my OK.&#10;Done means: uv run pytest passes, and&#10;uv run python -m harness check --week 6 --in-process&#10;shows w06.ask.citations higher than before and the week's score no lower.&#10;Report both scores." hidden>Copy</button></p>
+  </div>
+  <div class="callout"><p><strong>Agent already knows the course rules.</strong> <code>fy26/AGENTS.md</code> tells any coding agent the commands, the rules (do not change the contract or the harness; prices come from code) and what done means, and Copilot adds it to its instructions when you work in <code>fy26</code>. Expand <b>References</b> under a reply to see that it was used. In Week 8 you learn to write such files yourself.</p></div>
+
+  <h3 id="vibe-mistakes" data-toc="Four mistakes to avoid">Four mistakes to avoid</h3>
+  <div class="grid grid-2">
+    <div class="tile tile--red"><h4>Keeping code you cannot explain</h4><p>The private harness uses items you have not seen. If you cannot say why a change works, you cannot fix it when it fails there. Ask Agent, or Pablo · Fundamentals, to explain the diff until you can say it in three sentences.</p></div>
+    <div class="tile tile--amber"><h4>Fitting the public items</h4><p>A change that names harness ids, exact questions or expected answers raises your local score and nothing else. Reject it, and say why in your next prompt.</p></div>
+    <div class="tile tile--azure"><h4>One giant prompt</h4><p>Ask for one behavior at a time, measured by one check. Small diffs are easy to review and easy to undo; a large one hides the line that broke an earlier week.</p></div>
+    <div class="tile"><h4>Letting it touch Azure</h4><p>A checkpoint undoes file edits, not terminal commands or deployments. Deploy with Will, who asks first and confirms the new revision.</p></div>
+  </div>
+</section>
+
+<section id="safe" data-group="Use them well" data-toc="What they will and will not do">
+  <h2>What they will and will not do</h2>
+  <p class="lede">The agents follow written rules. Knowing them tells you when to trust a step, and when to stop and ask.</p>
+  <div class="grid grid-3">
+    <div class="tile tile--green"><h4>Will asks before changing Azure</h4><p>Deploying, <code>terraform apply</code> and registering providers all wait for your yes. Read-only checks run without asking. The Pablos and Arvind never change Azure.</p></div>
+    <div class="tile tile--red"><h4>They never destroy on their own</h4><p>Deleting the resource group, <code>terraform destroy</code> or purging Foundry happens only if you ask and confirm after Will explains what you lose.</p></div>
+    <div class="tile tile--amber"><h4>They never handle secrets</h4><p>They report which keys exist in <code>.env</code>, never their values. Do the same: never paste keys, <code>.env</code> lines or Terraform state into chat.</p></div>
+    <div class="tile tile--accent"><h4>You own the graded code</h4><p>The course agents explain, hint and show the data; they do not write your graded change. When you vibe code with Copilot's Agent, you review every diff and can explain it.</p></div>
+    <div class="tile tile--azure"><h4>The harness is the referee</h4><p>Agents can be wrong. Check a claim against the harness, the lecture notes and the official docs each README links.</p></div>
+    <div class="tile"><h4>No shortcuts on grading</h4><p>They never look for hidden grading data or edit the harness or the contract. Neither should you: the private harness uses unseen data.</p></div>
+  </div>
+</section>
+
+<section id="docs" data-group="Use them well" data-toc="Official docs, through MCP">
+  <h2>Official docs, through MCP</h2>
+  <p class="lede">The course changes slower than Azure does. So that the agents can cite current documentation, the course connects them to Microsoft Learn's MCP server, the same kind of tool server you build in Week 8.</p>
+  <p>The file <code>fy26/.mcp.json</code> adds one server, <code>microsoftLearn</code>, at <code>https://learn.microsoft.com/api/mcp</code>. It needs no sign-in and gives the agents two main tools: <code>microsoft_docs_search</code> to find relevant passages and <code>microsoft_docs_fetch</code> to read a whole page. When an agent uses them, the tool calls appear in the reply; expand one to see the query and the source.</p>
+  <div class="callout callout--amber"><p><strong>The first time,</strong> VS Code may ask you to trust or start the <code>microsoftLearn</code> server: allow it. If it does not start, run <b>MCP: List Servers</b> from the Command Palette, pick <code>microsoftLearn</code> and choose <b>Start Server</b>. The agents still work without it, from the course files alone.</p></div>
+</section>
+
+<section id="skills" data-group="Use them well" data-toc="Skills: what they know">
+  <h2>Skills: what the agents know</h2>
+  <p class="lede">A <strong>skill</strong> is a folder of instructions on one topic. Copilot reads its one-line description all the time and loads the full text only when your question needs it. The agents use these eight; you can call them directly too.</p>
+  <div class="table-wrap"><table><thead><tr><th>Skill</th><th>What it knows</th><th>Used most by</th></tr></thead><tbody>
+    <tr><td><code>fy26-labs</code></td><td>Week by week: what to build, which file in <code>app/</code>, the lab parts, which checks score it</td><td>Pablo · Fundamentals, Pablo · Start here</td></tr>
+    <tr><td><code>fy26-harness</code></td><td>Running the harness, reading reports, PASS, PART and FAIL, noise</td><td>Pablo · Scoring, Pablo · Fundamentals</td></tr>
+    <tr><td><code>fy26-submit-checklist</code></td><td>The checklist before a deadline</td><td>Pablo · Scoring</td></tr>
+    <tr><td><code>fy26-website</code></td><td>The course website: signing in, what it shows, <strong>Score your deployed service</strong></td><td>Pablo · Scoring</td></tr>
+    <tr><td><code>fy26-setup-environment</code></td><td>Tools, <code>uv sync</code>, the kernel, <code>az login</code>, Terraform, <code>.env</code>, the first deploy</td><td>Will</td></tr>
+    <tr><td><code>fy26-deploy</code></td><td>Deploying, revisions, logs, rollback, Terraform changes, the Week 10 API key</td><td>Will</td></tr>
+    <tr><td><code>fy26-troubleshooting</code></td><td>Error message to cause to fix, for every common error in the course</td><td>Will, and all of them</td></tr>
+    <tr><td><code>fy26-data</code></td><td>The handbook, stations and harness datasets; reports and proofs; analysis recipes; evaluation metrics; KQL</td><td>Arvind</td></tr>
+  </tbody></table></div>
+  <div class="split">
+    <div><h4>Call a skill directly</h4><p>Type <code>/</code> in the message box and pick a skill, for example <code>/fy26-troubleshooting</code>, then paste your error. Or simply ask: when your question matches a skill's description, Copilot loads it for you.</p></div>
+    <div><h4>Ignore the others</h4><p>Skills without the <code>fy26-</code> prefix belong to last year's archived labs or to instructors. You do not need them.</p></div>
+  </div>
+</section>
+
+<section id="trouble" data-group="Reference" data-toc="If the agents do not appear">
+  <h2>If the agents do not appear</h2>
+  <p class="lede">Nearly always one of the first four causes. Work down the table.</p>
+  <div class="table-wrap"><table><thead><tr><th>What you see</th><th>Why</th><th>Fix</th></tr></thead><tbody>
+    <tr><td>No Pablo, Will or Arvind in the dropdown</td><td>VS Code only finds agents in the folders it has open, and the agents live in the repository's <code>.github/</code>, one level above <code>fy26/</code></td><td>Open <code>fy26</code> from the course you cloned, not from a copy or a download of that folder alone. Trust the folder and its parent when asked. Start a new chat. If they still do not appear, see the next row</td></tr>
+    <tr><td>Still no agents after opening <code>fy26</code></td><td>The setting that searches the parent repository is off, or the folder is not trusted (VS Code applies that setting only in trusted folders)</td><td>Open Settings, search <code>chat.useCustomizationsInParentRepositories</code> and turn it on. Then run <b>Developer: Reload Window</b> from the Command Palette. Or open the repository root folder instead (see the note below)</td></tr>
+    <tr><td>No Chat, or a sign-in prompt</td><td>VS Code is not signed in to an account with Copilot</td><td>Sign in with the GitHub account that has Copilot (the Accounts icon, bottom of the left bar). Students: activate Copilot Student first</td></tr>
+    <tr><td>No <code>fy26-</code> skills after typing <code>/</code></td><td>Skills are turned off (they are on by default)</td><td>Turn on <code>chat.useAgentSkills</code> in Settings, then reload the window</td></tr>
+    <tr><td>The agents never cite Microsoft Learn</td><td>The <code>microsoftLearn</code> MCP server is not running</td><td>Command Palette, <b>MCP: List Servers</b>, <code>microsoftLearn</code>, <b>Start Server</b>; allow it when VS Code asks</td></tr>
+    <tr><td>No handoff buttons under a reply</td><td>Expected in Copilot sessions</td><td>Pick the agent the reply names from the Agent dropdown</td></tr>
+    <tr><td>Something else</td><td>An agent or skill file failed to load</td><td>Right-click in the Chat view and open <b>Diagnostics</b>: it lists the agents and skills that loaded, and any errors</td></tr>
+  </tbody></table></div>
+  <div class="callout callout--amber"><p><strong>If you open the repository root instead of <code>fy26</code>.</strong> The agents appear, but VS Code may offer the Python environment at the root, which belongs to last year's archived labs. In every notebook, choose the kernel from <code>fy26/.venv</code>, and run commands from the <code>fy26</code> folder.</p></div>
+</section>
+
+<section id="learn" data-group="Reference" data-toc="Learn more">
+  <h2>Learn more</h2>
+  <div class="table-wrap"><table><thead><tr><th>Topic</th><th>Where to learn it</th></tr></thead><tbody>
+    <tr><td>Getting Copilot as a student</td><td><a href="https://docs.github.com/en/copilot/how-tos/manage-your-account/free-access-with-copilot-student">Access GitHub Copilot for free as a student</a> · <a href="https://docs.github.com/en/copilot/get-started/plans">Plans for GitHub Copilot</a></td></tr>
+    <tr><td>Copilot in VS Code, first steps</td><td><a href="https://code.visualstudio.com/docs/setup/copilot">Set up GitHub Copilot in VS Code</a> · <a href="https://code.visualstudio.com/docs/agents/quickstart">Agents quickstart</a></td></tr>
+    <tr><td>The Chat view</td><td><a href="https://code.visualstudio.com/docs/agents/run/chat-view">Use the Chat view</a></td></tr>
+    <tr><td>Custom agents, subagents and skills</td><td><a href="https://code.visualstudio.com/docs/agent-customization/custom-agents">Custom agents in VS Code</a> · <a href="https://code.visualstudio.com/docs/agents/run/subagents">Use subagents</a> · <a href="https://code.visualstudio.com/docs/agent-customization/agent-skills">Use Agent Skills in VS Code</a> · <a href="https://code.visualstudio.com/docs/agent-customization/overview">Customization overview</a></td></tr>
+    <tr><td>Vibe coding well</td><td><a href="https://code.visualstudio.com/docs/agents/best-practices">Best practices for using AI in VS Code</a> · <a href="https://code.visualstudio.com/docs/agents/run/planning">Plan before you build</a> · <a href="https://code.visualstudio.com/docs/agents/run/review-code-edits">Review and undo agent edits</a> · <a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">Custom instructions and AGENTS.md</a> · <a href="https://learn.microsoft.com/en-us/training/modules/github-copilot-agent-mode/">Building Applications with GitHub Copilot Agent Mode</a> (module)</td></tr>
+    <tr><td>MCP servers in VS Code</td><td><a href="https://code.visualstudio.com/docs/agent-customization/mcp-servers">Add MCP servers</a> · <a href="https://learn.microsoft.com/en-us/training/support/mcp">Microsoft Learn MCP server</a></td></tr>
+    <tr><td>Where a session runs</td><td><a href="https://code.visualstudio.com/docs/agents/run/agent-harnesses">Agent harnesses</a> (Copilot, Local and others)</td></tr>
+    <tr><td>In this repository</td><td><a href="../README.md">Foundations README</a> · <a href="primers.html">Tool primers</a> · <a href="../../setup/README.md">Setup</a> · <a href="../../AGENTS.md">AGENTS.md</a> · next: <a href="../../week05-fundamentals-of-azure-ai/docs/lecture.html">Week 5 lecture</a></td></tr>
+  </tbody></table></div>
+</section>
+
+<p class="page-end">Foundations · Agentic AI on Microsoft Foundry · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</p>
+</main>
+</div>
+<button id="back-to-top" type="button" aria-label="Back to top">&uarr;</button>
+<script src="../../assets/lecture.js"></script>
+<script src="../../assets/copy.js"></script>
+</body>
+</html>

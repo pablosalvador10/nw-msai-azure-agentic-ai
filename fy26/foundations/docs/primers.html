@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundations · The tools, one at a time · Primers</title>
+<meta name="description" content="Foundations primers: Terraform, FastAPI, containers and Azure Container Apps, identity and access, and the evaluation harness, with the code each primer runs.">
+<link rel="stylesheet" href="../../assets/lecture.css">
+</head>
+<body>
+<a class="skip" href="#content">Skip to the document</a>
+<div id="progress" aria-hidden="true"></div>
+<header class="topbar"><div class="topbar__inner">
+  <span class="brand-copy"><b>Agentic AI on Microsoft Foundry</b><span>Foundations · The tools, one at a time</span></span>
+  <div class="topbar__right">
+    <span class="author"><b>Pablo Salvador Lopez</b><a href="https://github.com/pablosalvador10">github.com/pablosalvador10</a></span>
+    <button class="button" id="print" type="button">Print / PDF</button>
+  </div>
+</div></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents"></nav>
+<main id="content" tabindex="-1">
+
+<header class="hero" id="top">
+  <p class="eyebrow">Foundations · Primers</p>
+  <h1>The tools, one at a time<span class="hero-subtitle"><strong>Terraform, FastAPI, containers, identity and the harness: what each one is, why the course uses it, and the few commands you need.</strong></span></h1>
+  <p class="hero-copy">The weekly labs use five tools you may not have met before. Each one has a short notebook primer: what the tool is, why we use it, and a few cells you run to see it work. This page holds the same content in one place, so you can read it before you run it, or come back to it in the middle of a lab. Do the primers you need before the session where the tool first appears.</p>
+  <div class="table-wrap"><table><thead><tr><th>Primer</th><th>You need it from</th><th>What you will be able to do</th><th class="num">Time</th><th>Notebook</th></tr></thead><tbody>
+    <tr><td><a href="#terraform"><strong>Terraform</strong></a></td><td>Setup</td><td>Read our <code>infra/</code> files, run plan and apply, change a resource safely</td><td class="num">20 min</td><td><a href="../terraform.ipynb">terraform.ipynb</a></td></tr>
+    <tr><td><a href="#fastapi"><strong>FastAPI</strong></a></td><td>Week 5</td><td>Build an HTTP API with validated JSON, test it without a server</td><td class="num">20 min</td><td><a href="../fastapi.ipynb">fastapi.ipynb</a></td></tr>
+    <tr><td><a href="#containers"><strong>Containers and Container Apps</strong></a></td><td>Week 5</td><td>Explain an image, read our Dockerfile, inspect revisions and logs</td><td class="num">15 min</td><td><a href="../containers.ipynb">containers.ipynb</a></td></tr>
+    <tr><td><a href="#identity"><strong>Identity and access</strong></a></td><td>Week 5</td><td>Explain how the app calls Foundry without keys; read a token; list role assignments</td><td class="num">15 min</td><td><a href="../identity.ipynb">identity.ipynb</a></td></tr>
+    <tr><td><a href="#harness"><strong>The harness</strong></a></td><td>Week 5</td><td>Run the harness, read a report, write your own check</td><td class="num">15 min</td><td><a href="../harness.ipynb">harness.ipynb</a></td></tr>
+  </tbody></table></div>
+  <div class="callout"><p><strong>How to use this page.</strong> Each primer below follows its notebook, part by part, with the code the notebook runs. The notebooks run from <code>fy26/</code> with the course environment (<code>uv sync</code>). The Terraform, containers and identity primers read the resources you created in <a href="../../setup/README.md">Setup</a>; none of them changes those resources.</p></div>
+  <div class="callout callout--green"><p><strong>Stuck on a primer, or on anything else?</strong> In VS Code's Copilot Chat, pick <strong>Pablo · Start here</strong> and say where you are; it brings in the expert you need, such as Will for Terraform and containers. <a href="agents.html">Your course agents</a> shows how.</p></div>
+</header>
+
+<section id="terraform" data-group="Terraform" data-toc="Terraform: infrastructure as text">
+  <h2>Terraform: infrastructure as text</h2>
+  <p class="lede"><strong>Terraform</strong> turns text files into cloud resources. You write the end state you want ("a container registry named X, a model deployment named Y"); Terraform compares it with what exists and makes the minimum changes.</p>
+  <div class="grid grid-3">
+    <div class="tile tile--accent"><h4>Repeatable</h4><p>The same files give every student the same platform, and give you the same platform back after <code>destroy</code>.</p></div>
+    <div class="tile tile--azure"><h4>Reviewable</h4><p>A change is a diff in a file, and <code>plan</code> shows its effect before anything happens.</p></div>
+    <div class="tile tile--green"><h4>Explainable</h4><p>The files are the documentation of what you run.</p></div>
+  </div>
+  <div class="diagram" role="img" aria-label="The .tf files (desired state), the state file (what Terraform created) and Azure (what exists) feed terraform plan, which produces a diff; terraform apply executes it, updating Azure and the state.">
+    <div class="diagram__col">
+      <div class="diagram__node is-accent">*.tf files<small>desired state</small></div>
+      <div class="diagram__node">terraform.tfstate<small>what Terraform created</small></div>
+      <div class="diagram__node is-azure">Azure<small>what exists</small></div>
+    </div>
+    <div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-amber">terraform plan<small>the diff</small></div></div>
+    <div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">terraform apply<small>executes exactly the plan; updates Azure and the state</small></div></div>
+  </div>
+
+  <h3 id="tf-1" data-toc="1 · A resource block">1 · A resource block</h3>
+  <p>Everything in Terraform is a block. A <code>resource</code> block has a <strong>type</strong> (<code>azurerm_container_registry</code>, defined by the Azure provider), a <strong>local name</strong> (<code>this</code>, used to refer to it from other blocks) and <strong>arguments</strong>. The notebook prints <a href="../../infra/registry.tf"><code>infra/registry.tf</code></a>:</p>
+<pre class="code"><code>print((course.INFRA / "registry.tf").read_text())</code></pre>
+  <ul>
+    <li><code>local.name</code> and <code>local.rg_name</code> are <strong>locals</strong>: values computed once in <code>main.tf</code>.</li>
+    <li><code>local.tags</code> adds the same tags to every resource, so you can find and bill them together.</li>
+    <li>Other blocks refer to this one as <code>azurerm_container_registry.this.login_server</code>. That reference is also how Terraform knows the order: the Container App cannot be created before the registry it pulls from.</li>
+  </ul>
+
+  <h3 id="tf-2" data-toc="2 · Inputs, computed values, outputs">2 · Inputs, computed values, outputs</h3>
+  <div class="table-wrap"><table><thead><tr><th>Kind</th><th>File</th><th>Role</th></tr></thead><tbody>
+    <tr><td><strong>Variables</strong></td><td><code>variables.tf</code></td><td>Inputs you set, in <code>terraform.tfvars</code></td></tr>
+    <tr><td><strong>Locals</strong></td><td><code>main.tf</code></td><td>Values derived from inputs</td></tr>
+    <tr><td><strong>Outputs</strong></td><td><code>outputs.tf</code></td><td>What you read back: endpoints, names</td></tr>
+  </tbody></table></div>
+  <p><code>terraform console</code> evaluates any expression against your real configuration:</p>
+<pre class="code"><code>for expression in ["var.student_id", "local.name", "local.foundry_project_endpoint", "var.chat_model"]:
+    result = subprocess.run(
+        [shutil.which("terraform"), "-chdir=infra", "console"], input=expression, capture_output=True, text=True
+    )
+    print(f"{expression:32s} = {result.stdout.strip()}")</code></pre>
+
+  <h3 id="tf-3" data-toc="3 · State: Terraform's memory">3 · State: Terraform's memory</h3>
+  <p><code>terraform.tfstate</code> maps each block to the real Azure resource it created. Without it, Terraform would not know that <code>azurerm_container_registry.this</code> is the registry <code>acr…</code> in your subscription.</p>
+<pre class="code"><code>course.tf("state", "list")
+course.tf("state", "show", "azurerm_cognitive_deployment.chat")</code></pre>
+  <div class="callout callout--red"><p><strong>Treat the state file like a password.</strong> It can contain secrets, so it is gitignored. Teams keep it in a shared, locked storage account instead: a <em>remote backend</em>.</p></div>
+
+  <h3 id="tf-4" data-toc="4 · Change something, safely">4 · Change something, safely</h3>
+  <p>The notebook adds a tag to every resource, shows the plan, and does <strong>not</strong> apply it. Any file ending in <code>.auto.tfvars</code> in <code>infra/</code> is read automatically.</p>
+<pre class="code"><code>exercise = course.INFRA / "zz_exercise.auto.tfvars"
+exercise.write_text('tags = { owner = "me", purpose = "terraform-primer" }\n')
+try:
+    course.tf("plan", "-input=false", "-no-color")
+finally:
+    exercise.unlink()
+    print("Removed", exercise.name)</code></pre>
+  <div class="table-wrap"><table><thead><tr><th>In the plan</th><th>Meaning</th></tr></thead><tbody>
+    <tr><td><code>~ update in-place</code></td><td>Azure can change the resource without recreating it. Tags are always in place.</td></tr>
+    <tr class="hl"><td><code>-/+ destroy and then create replacement</code></td><td>The change forces a new resource, for example a rename. That deletes data: always read the plan before you apply.</td></tr>
+    <tr><td>The summary line</td><td>Counts adds, changes and destroys. Before every apply, make sure those numbers are what you expect.</td></tr>
+  </tbody></table></div>
+
+  <h3 id="tf-5" data-toc="What to remember">What to remember</h3>
+  <ol class="points">
+    <li><b>Files describe the end state; <code>plan</code> shows the diff; <code>apply</code> executes exactly the plan.</b></li>
+    <li><b>References between blocks define the order.</b>You rarely need <code>depends_on</code>.</li>
+    <li><b>State is Terraform's memory.</b>Keep it private; share it through a remote backend in teams.</li>
+    <li><b>Never edit Terraform-managed resources in the portal.</b>The next <code>plan</code> will try to undo your change.</li>
+  </ol>
+  <p class="muted">Run it: <a href="../terraform.ipynb">terraform.ipynb</a> · Learn more: <a href="https://learn.microsoft.com/en-us/azure/developer/terraform/">Terraform on Azure (Microsoft Learn)</a> · <a href="https://developer.hashicorp.com/terraform/tutorials/azure-get-started">Get started with Terraform on Azure (HashiCorp)</a> · <a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs">azurerm provider docs</a> · <a href="../../infra/README.md">Our infra README</a></p>
+</section>
+
+<section id="fastapi" data-group="FastAPI" data-toc="FastAPI: an HTTP API in Python">
+  <h2>FastAPI: an HTTP API in Python</h2>
+  <p class="lede">Your service is an <strong>HTTP API</strong>: programs send it a request and get a response. <strong>FastAPI</strong> is a Python framework for writing one. You declare routes as functions and the shapes of requests and responses as Pydantic models; FastAPI does the parsing, validation, error messages and documentation.</p>
+  <div class="table-wrap"><table><thead><tr><th>Part of an HTTP exchange</th><th>Example</th></tr></thead><tbody>
+    <tr><td>Method</td><td><code>POST</code> (send data), <code>GET</code> (read)</td></tr>
+    <tr><td>Path</td><td><code>/v1/classify</code></td></tr>
+    <tr><td>Headers</td><td><code>Content-Type: application/json</code>, <code>X-Request-ID: 42</code></td></tr>
+    <tr><td>Body</td><td><code>{"id": "t1", "text": "My brake is broken"}</code></td></tr>
+    <tr class="hl"><td>Status code</td><td><code>200</code> OK, <code>401</code> not authenticated, <code>413</code> too large, <code>422</code> invalid input, <code>429</code> slow down, <code>500</code> server bug, <code>503</code> not ready</td></tr>
+  </tbody></table><caption>The status code is part of your contract. The harness checks it as carefully as the body.</caption></table></div>
+
+  <h3 id="fa-1" data-toc="1 · A complete API in ten lines">1 · A complete API in ten lines</h3>
+  <p><code>TestClient</code> calls the app directly, in this process: no server, no port, no network. It is how our tests and the harness's in-process mode work.</p>
+<pre class="code"><code>from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field
+
+demo = FastAPI()
+
+
+class FareRequest(BaseModel):
+    minutes: int = Field(ge=0, le=1440, description="Ride length in minutes")
+    ebike: bool = False
+
+
+class FareResponse(BaseModel):
+    total: float
+
+
+@demo.post("/fare")
+def fare(body: FareRequest) -> FareResponse:
+    rate = 0.40 if body.ebike else 0.20
+    return FareResponse(total=round(1.25 + rate * body.minutes, 2))
+
+
+client = TestClient(demo)
+response = client.post("/fare", json={"minutes": 30, "ebike": True})
+print(response.status_code, response.json())</code></pre>
+
+  <h3 id="fa-2" data-toc="2 · Validation is free">2 · Validation is free</h3>
+  <p>Send bad input. You did not write a single <code>if</code>: the Pydantic model is the validation, and FastAPI answers <code>422</code> with a precise message.</p>
+<pre class="code"><code>for bad in [{"minutes": -5}, {"minutes": "half an hour"}, {}]:
+    r = client.post("/fare", json=bad)
+    print(r.status_code, r.json()["detail"][0]["msg"])</code></pre>
+
+  <h3 id="fa-3" data-toc="3 · def or async def">3 · <code>def</code> or <code>async def</code></h3>
+  <div class="grid grid-2">
+    <div class="tile"><h4><code>def</code></h4><p>Routes run in a thread pool. Fine for quick work.</p></div>
+    <div class="tile tile--accent"><h4><code>async def</code></h4><p>Routes run on the event loop. While one request <strong>waits</strong> (for a model, a database, another API), the loop serves others.</p></div>
+  </div>
+  <div class="callout callout--amber"><p>Our routes are <code>async def</code> because nearly all their time is spent waiting for a model. The one rule: inside <code>async def</code>, never call something slow that is not awaited, or every request waits behind it.</p></div>
+
+  <h3 id="fa-4" data-toc="4 · The course service, in-process">4 · The course service, in-process</h3>
+  <p>The same technique works on the real service. Offline mode replaces the models with deterministic stand-ins, so this needs no Azure.</p>
+<pre class="code"><code>from app.config import LLMMode, Settings
+from app.main import create_app
+
+offline = Settings(llm_mode=LLMMode.OFFLINE, student_id="demo", _env_file=None)
+with TestClient(create_app(offline)) as service:
+    print(service.get("/v1/info").json())
+    print(service.post("/v1/classify", json={"id": "t1", "text": "I was charged twice"}).json())
+    routes = service.get("/openapi.json").json()["paths"]
+    print("Routes:", ", ".join(routes))</code></pre>
+
+  <h3 id="fa-5" data-toc="5 · A real server">5 · A real server</h3>
+  <p>To run the service as a server, open a terminal in <code>fy26/</code>:</p>
+<pre class="code" data-plain><code>uv run uvicorn app.main:app --reload</code></pre>
+  <p>Then open <code>http://localhost:8000/docs</code>: an interactive page generated from your models, where you can call every route. <code>--reload</code> restarts the server when you save a file. Stop it with Ctrl+C.</p>
+
+  <h3 id="fa-6" data-toc="6 · Exercise">6 · Exercise</h3>
+  <div class="card">
+    <h3>A route that can say "not found"</h3>
+    <p>Add a <code>GET /stations/{station_id}</code> route to <code>demo</code> that returns <code>app.domain.get_station(station_id)</code>, and answers <strong>404</strong> when the station does not exist (the function returns a dict with an <code>error</code> key). Hint: <code>from fastapi import HTTPException</code> and <code>raise HTTPException(status_code=404, detail=...)</code>. The notebook's check cell expects <code>LS-05</code> to be Central Station and <code>LS-99</code> to return 404.</p>
+  </div>
+
+  <h3 id="fa-7" data-toc="What to remember">What to remember</h3>
+  <ol class="points">
+    <li><b>A route is a function; its parameters and return type are the contract.</b></li>
+    <li><b>Pydantic models validate input for you</b>and document the API at <code>/docs</code>.</li>
+    <li><b>Status codes are part of the contract:</b>4xx means the caller's fault, 5xx means yours.</li>
+    <li><b><code>TestClient</code> tests the whole app without a server.</b></li>
+  </ol>
+  <p class="muted">Run it: <a href="../fastapi.ipynb">fastapi.ipynb</a> · Learn more: <a href="https://fastapi.tiangolo.com/tutorial/">FastAPI tutorial</a> · <a href="https://fastapi.tiangolo.com/release-notes/">FastAPI release notes</a></p>
+</section>
+
+<section id="containers" data-group="Containers" data-toc="Containers and Azure Container Apps">
+  <h2>Containers and Azure Container Apps</h2>
+  <p class="lede">A <strong>container image</strong> is your program plus everything it needs to run (Python, packages, files), frozen into one artifact. A <strong>container</strong> is a running copy of an image. A <strong>registry</strong> stores images. The same image runs on your laptop, a teammate's and in Azure, which removes "it works on my machine". <strong>Azure Container Apps</strong> runs your image for you: it gives it an HTTPS address, restarts it if it crashes, adds copies under load and removes them when idle.</p>
+  <div class="diagram" role="img" aria-label="The Dockerfile and app code are built in Azure by az acr build into an image in your registry; Container Apps creates a revision from it, runs zero to two replicas, and serves HTTPS through ingress.">
+    <div class="diagram__col"><div class="diagram__node">Dockerfile + app/<small>the build context</small></div></div><div class="diagram__arrow">&rarr;<small>az acr build</small></div>
+    <div class="diagram__col"><div class="diagram__node is-accent">Image<small>acr….azurecr.io/app:&lt;tag&gt;</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-azure">Revision<small>image + settings, immutable</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node">Replicas<small>0 to 2 running copies</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Ingress<small>public HTTPS to port 8000</small></div></div>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Concept</th><th>In our setup</th></tr></thead><tbody>
+    <tr><td>Image</td><td><code>acr….azurecr.io/app:&lt;tag&gt;</code>, built from <a href="../../Dockerfile"><code>fy26/Dockerfile</code></a></td></tr>
+    <tr><td>Registry</td><td>Your Azure Container Registry</td></tr>
+    <tr><td>Environment</td><td><code>cae-…</code>: the shared network and logging boundary for apps</td></tr>
+    <tr><td>Container App</td><td><code>ca-…</code>: your service, with its URL</td></tr>
+    <tr class="hl"><td>Revision</td><td>An immutable snapshot of the app (image + settings). Every deploy creates one</td></tr>
+    <tr><td>Replica</td><td>A running copy of a revision. We allow 0 to 2</td></tr>
+    <tr><td>Ingress</td><td>The public HTTPS endpoint, forwarding to port 8000</td></tr>
+    <tr><td>Probes</td><td>Liveness <code>/health</code>, readiness <code>/ready</code></td></tr>
+  </tbody></table></div>
+
+  <h3 id="ct-1" data-toc="1 · The Dockerfile">1 · The Dockerfile</h3>
+  <p>Two stages. The first installs dependencies with <code>uv</code> from the lockfile; the second copies only the result and the code, and runs as a non-root user. Smaller image, fewer things to attack, faster starts. The notebook prints the Dockerfile and <code>.dockerignore</code>, which decides what is sent to the build.</p>
+
+  <h3 id="ct-2" data-toc="2 · Images in your registry">2 · Images in your registry</h3>
+  <p><code>az acr build</code> sends the build context to Azure and builds there, so you never need Docker on your laptop. Each deploy pushes a new tag; old tags stay, which is how you roll back.</p>
+<pre class="code"><code>course.run(["az", "acr", "repository", "show-tags", "--name", ACR, "--repository", "app",
+            "--orderby", "time_desc", "-o", "table"])</code></pre>
+
+  <h3 id="ct-3" data-toc="3 · Revisions and replicas">3 · Revisions and replicas</h3>
+  <p>The active revision serves the traffic. With <code>min_replicas = 0</code>, the replica list is empty while nobody calls the service.</p>
+<pre class="code"><code>course.run(["az", "containerapp", "revision", "list", "-n", APP, "-g", RG, "--query",
+            "[].{revision:name, active:properties.active, created:properties.createdTime, "
+            "health:properties.healthState, replicas:properties.replicas}", "-o", "table"])</code></pre>
+
+  <h3 id="ct-4" data-toc="4 · Cold start, measured">4 · Cold start, measured</h3>
+  <p>Call <code>/health</code> twice. If the app had scaled to zero, the first call waits for a replica to start (pull the image, start Python, build the handbook index). The second call is fast.</p>
+<pre class="code"><code>for attempt in (1, 2):
+    start = time.perf_counter()
+    status = httpx2.get(f"{course.app_url()}/health", timeout=120).status_code
+    print(f"call {attempt}: {status} in {time.perf_counter() - start:.1f} s")</code></pre>
+
+  <h3 id="ct-5" data-toc="5 · Logs">5 · Logs</h3>
+  <p>What your service prints goes to the console log. Each request line carries its <code>request_id</code>, which also comes back in the <code>X-Request-ID</code> response header: the thread that ties a user's complaint to a log line.</p>
+<pre class="code"><code>course.run(["az", "containerapp", "logs", "show", "-n", APP, "-g", RG, "--tail", "20", "--format", "text"])</code></pre>
+
+  <h3 id="ct-6" data-toc="What to remember">What to remember</h3>
+  <ol class="points">
+    <li><b>Image = program + dependencies, built once, run anywhere.</b>Tag every build; never reuse a tag.</li>
+    <li><b>A deploy creates a new revision;</b>the old one keeps serving until the new one is ready.</li>
+    <li><b>Scale to zero saves money</b>and costs a slow first request.</li>
+    <li><b>Probes tell the platform</b>when to restart (liveness) and when to send traffic (readiness).</li>
+  </ol>
+  <p class="muted">Run it: <a href="../containers.ipynb">containers.ipynb</a> · Learn more: <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">What is a container? (Docker)</a> · <a href="https://learn.microsoft.com/en-us/training/paths/deploy-cloud-native-applications-to-azure-container-apps/">Deploy cloud-native apps using Azure Container Apps</a> · <a href="https://learn.microsoft.com/en-us/azure/container-apps/health-probes">Health probes</a> · <a href="https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull">Image pull with managed identity</a></p>
+</section>
+
+<section id="identity" data-group="Identity" data-toc="Identity and access: no keys">
+  <h2>Identity and access: no keys</h2>
+  <p class="lede">API keys are the most common way cloud credentials leak: pasted in a notebook, committed to Git, shared in a chat. This course uses no keys. With keys turned off on Foundry (<code>local_auth_enabled = false</code>), a request needs a valid token <strong>and</strong> a role assignment. Nothing to leak, nothing to rotate.</p>
+  <div class="table-wrap"><table><thead><tr><th>Term</th><th>Meaning</th><th>In our setup</th></tr></thead><tbody>
+    <tr><td><strong>Microsoft Entra ID</strong></td><td>Azure's identity service</td><td>Your organization's account</td></tr>
+    <tr><td><strong>Principal</strong></td><td>Someone or something that can sign in</td><td>You; the app's managed identity <code>id-…</code></td></tr>
+    <tr><td><strong>Token</strong></td><td>Short-lived proof of identity (about an hour), for one audience</td><td>What <code>DefaultAzureCredential</code> fetches</td></tr>
+    <tr><td><strong>Audience</strong> (scope)</td><td>The service a token is for</td><td><code>https://ai.azure.com</code> for Foundry</td></tr>
+    <tr><td><strong>Role</strong></td><td>A named set of permissions</td><td><strong>Foundry User</strong> (call models), <strong>AcrPull</strong> (pull images)</td></tr>
+    <tr class="hl"><td><strong>Role assignment</strong></td><td>Principal + role + scope (which resource)</td><td>Created by <a href="../../infra/identity.tf"><code>infra/identity.tf</code></a></td></tr>
+  </tbody></table></div>
+
+  <h3 id="id-1" data-toc="1 · Look inside a token">1 · Look inside a token</h3>
+  <p>A token is a signed JSON document. The middle part is readable: it says who you are (<code>oid</code>), who the token is for (<code>aud</code>) and when it expires (<code>exp</code>). The notebook prints the claims, never the token.</p>
+<pre class="code"><code>token = DefaultAzureCredential().get_token("https://ai.azure.com/.default")
+payload = token.token.split(".")[1]
+claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+for key in ["aud", "iss", "oid", "upn", "name", "exp"]:
+    value = claims.get(key)
+    if key == "exp":
+        value = f"{value}  ({datetime.fromtimestamp(value):%H:%M})"
+    print(f"{key:5s} {value}")</code></pre>
+
+  <h3 id="id-2" data-toc="2 · Where DefaultAzureCredential gets it">2 · Where <code>DefaultAzureCredential</code> gets it</h3>
+  <ol class="flow flow--4">
+    <li><b>Environment variables</b><span>Service principals in CI.</span></li>
+    <li><b>Workload identity</b><span>Kubernetes.</span></li>
+    <li><b>Managed identity</b><span>In Azure. Our Container App sets <code>AZURE_CLIENT_ID</code> so it picks the user-assigned identity <code>id-…</code>.</span></li>
+    <li><b>Azure CLI</b><span>On your laptop: your <code>az login</code>.</span></li>
+  </ol>
+  <p>It tries the sources in order and uses the first that works. Same code, two places, no secrets.</p>
+
+  <h3 id="id-3" data-toc="3 · Who can do what">3 · Who can do what on your Foundry resource</h3>
+<pre class="code"><code>course.run(["az", "role", "assignment", "list", "--scope", foundry_id, "--query",
+            "[].{who:principalName, type:principalType, role:roleDefinitionName}", "-o", "table"])</code></pre>
+  <p>You should see two assignments of <strong>Foundry User</strong> (shown as "Azure AI User" while Microsoft renames it): one for you, one for the app's managed identity. That is least privilege: enough to call models and run agents, not enough to delete the resource or change who has access.</p>
+
+  <h3 id="id-4" data-toc="4 · Without a token, nothing works">4 · Without a token, nothing works</h3>
+<pre class="code"><code>r = httpx2.post(f"{out['foundry_openai_endpoint']}responses", json={"model": out["chat_deployment"], "input": "hi"})
+print(r.status_code, r.text[:200])</code></pre>
+  <p>A request with no <code>Authorization</code> header is refused: there is no key to fall back on.</p>
+
+  <h3 id="id-5" data-toc="What to remember">What to remember</h3>
+  <ol class="points">
+    <li><b>Identities, tokens and roles replace keys.</b>Tokens expire within the hour; roles are revoked in one place.</li>
+    <li><b><code>DefaultAzureCredential</code> makes the same code work</b>on your laptop (your login) and in Azure (managed identity).</li>
+    <li><b>Grant the smallest role that works,</b>on the smallest scope that works.</li>
+  </ol>
+  <p class="muted">Run it: <a href="../identity.ipynb">identity.ipynb</a> · Learn more: <a href="https://learn.microsoft.com/en-us/azure/foundry/concepts/rbac-foundry">Role-based access control for Microsoft Foundry</a> · <a href="https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull">Image pull from ACR with managed identity</a></p>
+</section>
+
+<section id="harness" data-group="The harness" data-toc="The harness: measure, don't guess">
+  <h2>The harness: measure, don't guess</h2>
+  <p class="lede">A model gives a different answer every time you ask, so "it worked when I tried it" proves little. A <strong>harness</strong> asks the same questions every time, records every request and response, and turns them into a score. It is to an AI system what a test suite is to ordinary code, and the only honest way to say "this change made things better".</p>
+  <div class="diagram" role="img" aria-label="Public data feeds the client, which calls your service; checks score the exchanges; the engine weights them into a score and writes a Markdown report and a JSON proof.">
+    <div class="diagram__col"><div class="diagram__node">Data<small>harness/data/week*.jsonl</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-accent">Client<small>calls your service; retries 429/503; records every exchange</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-azure">Checks<small>score 0 to 1, plus a detail line</small></div></div><div class="diagram__arrow">&rarr;</div>
+    <div class="diagram__col"><div class="diagram__node is-green">Engine and report<small>score out of 100; report and proof with a SHA-256 digest</small></div></div>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Part</th><th>File</th><th>Role</th></tr></thead><tbody>
+    <tr><td>Client</td><td><a href="../../harness/client.py"><code>harness/client.py</code></a></td><td>Sends HTTP requests, retries on 429/503, records every exchange as evidence</td></tr>
+    <tr><td>Checks</td><td><code>harness/checks/week*.py</code></td><td>Functions that return a score from 0 to 1 and a detail line</td></tr>
+    <tr><td>Data</td><td><code>harness/data/week*.jsonl</code></td><td>The public questions and expected answers</td></tr>
+    <tr><td>Engine and report</td><td><code>harness/engine.py</code>, <code>harness/report.py</code></td><td>Weighted score out of 100; a Markdown report and a JSON proof</td></tr>
+  </tbody></table></div>
+  <div class="callout callout--amber"><p><strong>The grade uses unseen data.</strong> The instructors run the same engine with more questions you have not seen. Improve the capability, not the answers to the public questions.</p></div>
+
+  <h3 id="hn-1" data-toc="1 · A check is a small function">1 · A check is a small function</h3>
+<pre class="code"><code>import inspect
+
+from harness.checks import week05
+
+print(inspect.getsource(week05._accuracy))</code></pre>
+
+  <h3 id="hn-2" data-toc="2 · Run it without Azure">2 · Run it without Azure</h3>
+  <p><code>in_process=True</code> runs the service inside the notebook. <code>LLM_MODE=offline</code> swaps the models for deterministic stand-ins, so the run costs nothing and takes seconds. The offline score is meaningless as a grade; the point is the mechanics.</p>
+<pre class="code"><code>os.environ["LLM_MODE"] = "offline"
+try:
+    proof = course.check(5, in_process=True)
+finally:
+    os.environ["LLM_MODE"] = "foundry"</code></pre>
+
+  <h3 id="hn-3" data-toc="3 · Read the proof">3 · Read the proof</h3>
+  <p>Each check keeps the exchanges it made. When a check fails, this is where you find out why: the exact request, the exact response, the status and the latency.</p>
+<pre class="code"><code>print("score: ", proof["score"])
+print("digest:", proof["digest"])
+check = next(c for c in proof["checks"] if c["id"] == "w05.validation")
+for exchange in check["exchanges"]:
+    print(exchange["status"], exchange["method"], exchange["path"], json.dumps(exchange["request"])[:60])</code></pre>
+
+  <h3 id="hn-4" data-toc="4 · Write your own check">4 · Write your own check</h3>
+  <p>A check takes a <code>Context</code> (with <code>ctx.target</code> to call the service) and returns <code>(score, detail)</code>. This one verifies that the service reports a real version, not <code>dev</code>.</p>
+<pre class="code"><code>def version_is_set(ctx: Context) -> tuple[float, str]:
+    info = ctx.target.get("/v1/info").json()
+    ok = info.get("version") not in (None, "", "dev")
+    return (1.0 if ok else 0.0), f"version = {info.get('version')!r}"
+
+
+settings = Settings(llm_mode=LLMMode.OFFLINE, student_id="demo", app_version="dev", _env_file=None)
+with TestClient(create_app(settings)) as client:
+    print(version_is_set(Context(target=Target(client=client), week=5)))</code></pre>
+
+  <h3 id="hn-5" data-toc="What to remember">What to remember</h3>
+  <ol class="points">
+    <li><b>Measure before and after every change.</b>One score, same data, same checks.</li>
+    <li><b>Read failures in the proof, not in your head:</b>request, response, status, latency.</li>
+    <li><b>Public data is for learning; the grade uses unseen data.</b>Generalize.</li>
+    <li><b>A check is a function.</b>When you find a failure mode, write a check for it.</li>
+  </ol>
+  <p class="muted">Run it: <a href="../harness.ipynb">harness.ipynb</a> · Learn more: <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Effective harnesses for long-running agents (Anthropic)</a> · <a href="https://learn.microsoft.com/en-us/training/paths/operationalize-gen-ai-apps/">Operationalize generative AI applications</a></p>
+</section>
+
+<section id="useful" data-group="Reference" data-toc="Also useful">
+  <h2>Also useful</h2>
+  <div class="table-wrap"><table><thead><tr><th>Topic</th><th>Where to learn it</th></tr></thead><tbody>
+    <tr><td>Python environments with uv</td><td><a href="https://docs.astral.sh/uv/guides/projects/">uv: working on projects</a></td></tr>
+    <tr><td>Git and GitHub</td><td><a href="https://learn.microsoft.com/en-us/training/paths/github-foundations/">GitHub Foundations (Microsoft Learn)</a></td></tr>
+    <tr><td>Azure CLI</td><td><a href="https://learn.microsoft.com/en-us/training/modules/create-azure-resources-by-using-azure-cli/">Create Azure resources using the Azure CLI</a></td></tr>
+    <tr><td>Containers, conceptually</td><td><a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">What is a container? (Docker)</a></td></tr>
+    <tr><td>Container Apps, end to end</td><td><a href="https://learn.microsoft.com/en-us/training/paths/deploy-cloud-native-applications-to-azure-container-apps/">Deploy cloud-native apps using Azure Container Apps</a> (learning path)</td></tr>
+    <tr><td>FastAPI, in depth</td><td><a href="https://fastapi.tiangolo.com/tutorial/">FastAPI tutorial</a></td></tr>
+    <tr><td>Terraform, in depth</td><td><a href="https://developer.hashicorp.com/terraform/tutorials/azure-get-started">Get started with Terraform on Azure (HashiCorp)</a></td></tr>
+    <tr><td>In this repository</td><td><a href="../README.md">Foundations README</a> · <a href="agents.html">Course agents</a> · <a href="../../setup/README.md">Setup</a> · next: <a href="../../week05-fundamentals-of-azure-ai/docs/lecture.html">Week 5 lecture</a></td></tr>
+  </tbody></table></div>
+</section>
+
+<p class="page-end">Foundations · Agentic AI on Microsoft Foundry · Pablo Salvador Lopez (<a href="https://github.com/pablosalvador10">@pablosalvador10</a>)</p>
+</main>
+</div>
+<button id="back-to-top" type="button" aria-label="Back to top">&uarr;</button>
+<script src="../../assets/lecture.js"></script>
+</body>
+</html>
