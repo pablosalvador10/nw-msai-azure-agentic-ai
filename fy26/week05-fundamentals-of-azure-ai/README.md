@@ -1,6 +1,6 @@
 # Week 5 · Fundamentals of Azure AI
 
-**Date:** Oct 27 · **Instructors:** Pablo, Arvind · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 6 session
+**Date:** Oct 27 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 6 session
 
 [FY26 home](../README.md) · [Next: Week 6 →](../week06-rag-and-tool-calling/README.md)
 

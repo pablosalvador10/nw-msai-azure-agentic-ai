@@ -1,6 +1,6 @@
 # Week 6 · RAG Apps + Tool Calling
 
-**Date:** Nov 3 · **Instructors:** Pablo, Will · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 7 session
+**Date:** Nov 3 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 7 session
 
 [← Week 5](../week05-fundamentals-of-azure-ai/README.md) · [FY26 home](../README.md) · [Next: Week 7 →](../week07-multi-agent-systems/README.md)
 

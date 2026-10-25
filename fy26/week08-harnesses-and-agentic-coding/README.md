@@ -1,6 +1,6 @@
 # Week 8 · Harnesses and Agentic Coding
 
-**Date:** Nov 17 · **Instructors:** Will, Pablo, Arvind · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 10 session
+**Date:** Nov 17 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 10 session
 
 [← Week 7](../week07-multi-agent-systems/README.md) · [FY26 home](../README.md) · [Next: Week 10 →](../week10-production-agentic-systems/README.md)
 

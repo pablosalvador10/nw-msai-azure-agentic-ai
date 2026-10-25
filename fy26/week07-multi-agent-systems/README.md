@@ -1,6 +1,6 @@
 # Week 7 · Multi-Agent Systems
 
-**Date:** Nov 10 · **Instructors:** Pablo, Will · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 8 session
+**Date:** Nov 10 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 8 session
 
 [← Week 6](../week06-rag-and-tool-calling/README.md) · [FY26 home](../README.md) · [Next: Week 8 →](../week08-harnesses-and-agentic-coding/README.md)
 

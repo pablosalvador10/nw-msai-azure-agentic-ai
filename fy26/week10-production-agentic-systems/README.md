@@ -1,6 +1,6 @@
 # Week 10 · Production Agentic Systems
 
-**Date:** Dec 1 · **Instructors:** Will, Arvind, Pablo · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL and your API key, by the final deadline
+**Date:** Dec 1 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL and your API key, by the final deadline
 
 [← Week 8](../week08-harnesses-and-agentic-coding/README.md) · [FY26 home](../README.md)
 
