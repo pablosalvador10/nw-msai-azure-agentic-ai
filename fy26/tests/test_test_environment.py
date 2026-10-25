@@ -20,7 +20,7 @@ def offline_only(settings):
     assert not settings.applicationinsights_connection_string, "Test run tried to enable Azure telemetry"
 
 telemetry.configure_telemetry = offline_only
-raise SystemExit(pytest.main(["-q", "-c", sys.argv[1], sys.argv[2]]))
+raise SystemExit(pytest.main(["-q", "-c", sys.argv[1], *sys.argv[2:]]))
 """
     result = subprocess.run(
         [
@@ -29,6 +29,9 @@ raise SystemExit(pytest.main(["-q", "-c", sys.argv[1], sys.argv[2]]))
             code,
             str(course / "pyproject.toml"),
             str(course / "tests/test_api_offline.py") + "::test_health_and_ready",
+            # These modules import app.main, which builds an app (and configures telemetry) at import time.
+            str(course / "tests/test_harness_cli.py") + "::test_list_prints_every_week_and_check",
+            str(course / "tests/test_mcp_transport.py"),
         ],
         cwd=tmp_path,
         env=env,

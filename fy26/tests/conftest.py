@@ -1,5 +1,6 @@
 """Shared fixtures. Every test runs offline: no Azure, no network."""
 
+import os
 from collections.abc import Iterator
 
 import pytest
@@ -7,6 +8,11 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from app.config import LLMMode, Settings
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Turn telemetry off before collection: importing app.main builds an app at module level."""
+    os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"] = ""
 
 
 def offline_settings(**overrides) -> Settings:
