@@ -7,8 +7,11 @@ Every command it runs is printed first, like course.py: copy any of them into a 
 """
 
 import argparse
+import io
 import json
 import shutil
+import subprocess
+import tarfile
 import time
 from datetime import datetime
 from pathlib import Path
@@ -22,13 +25,27 @@ FY26 = course.FY26
 WEB = FY26 / "web"
 INFRA = WEB / "infra"
 BUILD = WEB / "build"
-RUNTIME = ["__init__.py", "auth.py", "config.py", "hints.py", "main.py", "render.py", "runs.py", "site.py"]
+RUNTIME = [
+    "__init__.py",
+    "auth.py",
+    "catalog.py",
+    "config.py",
+    "hints.py",
+    "main.py",
+    "render.py",
+    "runs.py",
+    "shell.py",
+    "site.py",
+]
 
 
-def tracked() -> set[str]:
-    """Files git tracks in fy26/: only committed course files are published."""
-    out = course.run(["git", "ls-files", "-z", "."], quiet=True)
-    return {name for name in out.split("\0") if name}
+def committed() -> dict[str, bytes]:
+    """fy26/ as of the last commit (HEAD): edits that are not committed yet never reach the site."""
+    # Run from fy26/, git archive packs only this folder, with paths relative to it.
+    print("$ git archive HEAD")
+    tar = subprocess.run(["git", "archive", "HEAD"], cwd=FY26, capture_output=True, check=True).stdout
+    with tarfile.open(fileobj=io.BytesIO(tar)) as archive:
+        return {m.name: archive.extractfile(m).read() for m in archive.getmembers() if m.isfile()}
 
 
 def stage() -> Path:
@@ -42,12 +59,12 @@ def stage() -> Path:
     for name in RUNTIME:
         shutil.copy2(WEB / name, BUILD / "web" / name)
     shutil.copytree(WEB / "static", BUILD / "web" / "static", ignore=shutil.ignore_patterns("vendor"))
-    committed = tracked()
-    pages = [rel for rel in published_files(FY26) if rel in committed]
+    files = committed()
+    pages = [rel for rel in published_files(FY26) if rel in files]
     skipped = sorted(set(published_files(FY26)) - set(pages))
     for rel in pages:
         (BUILD / "site" / rel).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(FY26 / rel, BUILD / "site" / rel)
+        (BUILD / "site" / rel).write_bytes(files[rel])
     print(f"Staged {BUILD.relative_to(FY26)}/ with {len(pages)} course files.")
     if skipped:
         print(f"Not published (not committed yet): {', '.join(skipped)}")

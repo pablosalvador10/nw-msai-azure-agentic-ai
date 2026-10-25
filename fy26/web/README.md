@@ -61,7 +61,7 @@ uv run python -m web.publish
 
 | Task | How |
 |---|---|
-| Publish new lectures or slides | `uv run python -m web.publish`. The pages are baked into the image, so every version is a tag you can roll back to |
+| Publish new lectures or slides | Commit them, then `uv run python -m web.publish`. The pages are baked into the image, so every version is a tag you can roll back to |
 | Remove a student | Remove their repository access. Sessions end within 8 hours (`session_hours`) |
 | Rotate the client secret | Generate a new one in the GitHub App, update `terraform.tfvars`, `terraform -chdir=web/infra apply`. Everyone signs in again |
 | See runs and sign-ins | `az containerapp logs show -n <container_app_name> -g lectures --follow`. Each run logs user, week, target, status, score and duration |
@@ -78,8 +78,8 @@ Cost: Container Apps consumption (scales to zero), a Basic registry, and Log Ana
 | Sign-in | GitHub App OAuth with `state` and PKCE ([auth.py](auth.py)) | Container Apps' built-in authentication has no Terraform resource in `azurerm` 5.x and cannot tell who may read a repository |
 | Who gets in | The user's token can read `course_repo` | Access follows the repository: no second roster to maintain |
 | Session | Signed cookie with the login only, 8 h, `HttpOnly`, `Secure`, `SameSite=Lax` | The GitHub token is dropped after sign-in; nothing to steal from the server |
-| What is served | Course pages as they are (`index.html`, `assets/`, `docs/`); every Markdown file, notebook and source file rendered in the lecture style ([site.py](site.py), [render.py](render.py)) | The whole course reads in one place. Notebooks are read-only (no outputs are committed) with a download button; diagrams are drawn by Mermaid 12.2.0, pinned and checksum-verified in the [Dockerfile](Dockerfile) |
-| What is never served | Hidden files (`.env`), Terraform variables and state, `reports/`, `web/`, caches; the image also keeps only files tracked by git | An allowlist of folders and file types, so a stray secret or scratch file cannot be published |
+| What is served | Lecture pages and slide decks as they are (`assets/`, `docs/`); every README, lecture note, notebook and source file rendered as a documentation page with a course sidebar, an "On this page" column and search (`Ctrl K` / `⌘K`) ([shell.py](shell.py), [render.py](render.py), [site.py](site.py)). The home page and the sidebar are built from the week folders ([catalog.py](catalog.py)): date from each README, title and "You build" from each lecture page | The whole course reads in one place, and a new week appears without editing the site. Notebooks are read-only (no outputs are committed) with a download button; diagrams are drawn by Mermaid 12.2.0, pinned and checksum-verified in the [Dockerfile](Dockerfile) |
+| What is never served | Hidden files (`.env`), Terraform variables and state, `reports/`, `web/`, caches; the image also takes every course file from the last commit (`git archive HEAD`), so uncommitted edits stay on your laptop | An allowlist of folders and file types, so a stray secret, scratch file or half-finished edit cannot be published |
 | Online harness | The same engine as `python -m harness check --url` ([runs.py](runs.py)) | Students see the score and evidence they would see locally |
 | Which URLs it calls | `https`, `*.azurecontainerapps.io`, public IP addresses only | Otherwise the site could be pointed at addresses inside Azure (server-side request forgery) |
 | Fair use | Three runs at once, one per student, 20 per student per hour | One student cannot block the queue before a deadline |

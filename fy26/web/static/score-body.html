@@ -1,0 +1,63 @@
+<div class="score">
+  <form id="run-form" class="panel score-form" novalidate>
+    <div class="field">
+      <label for="url">Service URL</label>
+      <input id="url" name="url" type="url" required inputmode="url" spellcheck="false" autocomplete="url"
+             placeholder="https://ca-yourid-123abc.yourenv.eastus2.azurecontainerapps.io" aria-describedby="url-help">
+      <p class="field-help" id="url-help">The base URL from <code>terraform output app_url</code> or <code>course.app_url()</code>, without a path.</p>
+    </div>
+    <fieldset class="field">
+      <legend>Week</legend>
+      <div class="week-picker">
+        <label><input type="radio" name="week" value="5" checked><span><b>Week 5</b>Fundamentals of Azure AI</span></label>
+        <label><input type="radio" name="week" value="6"><span><b>Week 6</b>RAG and tool calling</span></label>
+        <label><input type="radio" name="week" value="7"><span><b>Week 7</b>Multi-agent systems</span></label>
+        <label><input type="radio" name="week" value="8"><span><b>Week 8</b>Harnesses and agentic coding</span></label>
+        <label><input type="radio" name="week" value="10"><span><b>Week 10</b>Production agentic systems</span></label>
+      </div>
+    </fieldset>
+    <div class="field">
+      <label for="api-key">API key <span class="field-optional">once you turn it on in Week 10</span></label>
+      <input id="api-key" name="api_key" type="password" autocomplete="off" spellcheck="false" aria-describedby="key-help">
+      <p class="field-help" id="key-help">Sent to your service as <code>X-API-Key</code> for this run only. The site does not store it.</p>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn--primary" type="submit" id="run">Run the harness</button>
+      <span class="field-help">A run takes one to five minutes. You can keep reading while it runs.</span>
+    </div>
+    <p id="form-error" class="form-error" role="alert" hidden></p>
+  </form>
+
+  <section class="panel" id="status" hidden aria-live="polite">
+    <h2>Running</h2>
+    <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+    <p id="status-text"></p>
+  </section>
+
+  <section class="panel" id="result" hidden aria-labelledby="result-title">
+    <h2 id="result-title" tabindex="-1">Result</h2>
+    <div class="summary">
+      <p class="score-value"><span id="score"></span><small>/ 100</small></p>
+      <div>
+        <p id="score-caption" class="caption"></p>
+        <p id="score-count"></p>
+        <div class="result-actions">
+          <button class="btn btn--ghost btn--sm" type="button" id="download">Download proof (JSON)</button>
+          <span id="week-links" class="week-links"></span>
+        </div>
+      </div>
+    </div>
+    <div id="next" class="callout" hidden></div>
+    <ol id="checks" class="checks"></ol>
+  </section>
+
+  <section class="panel" id="history-section" hidden aria-labelledby="history-title">
+    <h2 id="history-title">Your recent runs <span class="field-help">in this browser</span></h2>
+    <ol id="history" class="history"></ol>
+  </section>
+
+  <div class="callout callout--warn">
+    <p><b>Reach 100 by fixing causes, not cases.</b> Grading runs the same checks with hidden cases of the same kind, so rules written for the listed ids lose those points again.</p>
+    <p>Iterate on your laptop first (<code>uv run python -m harness check --week N --in-process</code>), deploy, then confirm the deployed URL here. The service is cumulative: score earlier weeks again before you submit.</p>
+  </div>
+</div>

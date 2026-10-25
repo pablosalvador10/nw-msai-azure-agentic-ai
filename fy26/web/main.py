@@ -12,6 +12,7 @@ import hmac
 import html
 import logging
 import secrets
+from datetime import date
 from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlencode, urlsplit
@@ -23,27 +24,32 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from pydantic import BaseModel, Field
 
 from web.auth import GitHub, GitHubError, Signer, User, pkce_challenge
+from web.catalog import Catalog
 from web.config import Settings
 from web.hints import WEEK_TITLES, advice, week_links
+from web.render import MERMAID
 from web.runs import Resolver, Run, RunQueue, RunRejected, TargetError, resolve_host, validate_target
+from web.shell import Page, Shell
 from web.site import Site
 
 log = logging.getLogger("lectures")
 
 STATIC = Path(__file__).parent / "static"
-SCORE_FILES = {"score.js", "score.css"}
 # Shared website assets at /_site/. The Mermaid bundle is downloaded at image build (see web/Dockerfile).
-SITE_FILES = {"site.js": STATIC / "site.js", "site.css": STATIC / "site.css"}
+SITE_FILES = {name: STATIC / name for name in ("site.js", "site.css", "score.js", "lecture-addon.js", "favicon.svg")}
 VENDOR_FILES = {"mermaid-12.2.0.min.js": STATIC / "vendor" / "mermaid-12.2.0.min.js"}
 SESSION_COOKIE = "lectures_session"
 STATE_COOKIE = "lectures_oauth"
 STATE_TTL_S = 600
 
 PAGE_CSS = (
-    "body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;color:#20242a;background:#f6f7f9}"
-    "main{max-width:620px;margin:12vh auto;padding:32px 36px;border:1px solid #dde1e6;border-radius:14px;"
-    "background:#fff}h1{margin:.2em 0 .5em;font-size:1.6rem}a{color:#3341b8}"
-    ".brand{margin:0;color:#3341b8;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}"
+    "body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;"
+    "font:16px/1.6 'Segoe UI Variable Text','Segoe UI',-apple-system,system-ui,sans-serif;color:#11142b;"
+    "background:#f6f7fb}main{width:min(520px,100%);padding:36px 40px;border:1px solid #e3e6ee;border-radius:16px;"
+    "background:#fff;box-shadow:0 1px 2px rgba(16,20,48,.04),0 18px 48px rgba(16,20,48,.07)}"
+    ".brand{display:flex;align-items:center;gap:10px;margin:0 0 22px;font-weight:650;font-size:.92rem}"
+    ".brand i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#3341b8,#4b5bdb 48%,#0078d4)}"
+    "h1{margin:0 0 10px;font-size:1.45rem;letter-spacing:-.015em}p{margin:0;color:#454b60}a{color:#252f8c}"
 )
 
 
@@ -59,7 +65,7 @@ def page(status: int, title: str, body_html: str) -> HTMLResponse:
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{html.escape(title)} · Agentic AI on Microsoft Foundry</title><style>{PAGE_CSS}</style></head>"
-        f'<body><main><p class="brand">Agentic AI on Microsoft Foundry</p><h1>{html.escape(title)}</h1>'
+        f'<body><main><p class="brand"><i></i>Agentic AI on Microsoft Foundry</p><h1>{html.escape(title)}</h1>'
         f"<p>{body_html}</p></main></body></html>",
         status_code=status,
         headers={"Cache-Control": "no-store"},
@@ -90,6 +96,7 @@ def create_app(
     github = github or GitHub(settings.github_client_id, settings.github_client_secret.get_secret_value())
     runs = runs or RunQueue(workers=settings.max_parallel_runs, per_hour=settings.runs_per_hour)
     site = Site(settings.site_dir, settings.course_repo, settings.course_ref, settings.course_dir)
+    shell = Shell(Catalog.load(settings.site_dir), MERMAID)
 
     public = urlsplit(settings.public_url)
     public_origin = f"{public.scheme}://{public.netloc}"
@@ -230,14 +237,25 @@ def create_app(
         return RedirectResponse("/score/", status_code=308)
 
     @app.get("/score/")
-    def score_page() -> Response:
-        return FileResponse(STATIC / "score.html", media_type="text/html")
+    def score_page(request: Request) -> Response:
+        score = Page(
+            title="Score your service",
+            path="/score/",
+            kicker="Online harness",
+            lede="Paste the URL of your deployed service and choose the week. The site runs the same checks as "
+            "the harness on your laptop, then shows every check, its evidence, and what to try next.",
+            crumbs=[("Course home", "/")],
+            body_html=(STATIC / "score-body.html").read_text(encoding="utf-8"),
+            toc=False,
+            track=False,
+            prose=False,
+            scripts=["/_site/score.js"],
+        )
+        return HTMLResponse(shell.render(score, request.state.user))
 
-    @app.get("/score/{name}")
-    def score_asset(name: str) -> Response:
-        if name not in SCORE_FILES:
-            return page(404, "Not found", '<a href="/score/">Back to the score page</a>')
-        return FileResponse(STATIC / name)
+    @app.get("/_site/search.json")
+    def search_index() -> Response:
+        return JSONResponse(site.search_index, headers={"Cache-Control": "private, max-age=300"})
 
     @app.get("/_site/{name}")
     def site_asset(name: str) -> Response:
@@ -249,8 +267,16 @@ def create_app(
             return FileResponse(vendor, headers={"Cache-Control": "private, max-age=604800, immutable"})
         return page(404, "Not found", '<a href="/">Course home</a>')
 
+    @app.get("/")
+    def home(request: Request) -> Response:
+        return HTMLResponse(shell.render(shell.home(date.today()), request.state.user))
+
+    @app.get("/index.html")
+    def old_home() -> Response:
+        return RedirectResponse("/", status_code=308)
+
     @app.get("/{path:path}")
-    def site_file(path: str, download: bool = False) -> Response:
+    def site_file(path: str, request: Request, download: bool = False) -> Response:
         file = site.file(path)
         if file is not None:
             rendered = site.render(file)
@@ -259,12 +285,12 @@ def create_app(
         if content is not None:
             if download:
                 return FileResponse(content, filename=content.name, content_disposition_type="attachment")
-            return HTMLResponse(site.document(content))
+            return HTMLResponse(shell.render(site.document(content), request.state.user))
         folder = site.folder(path)
         if folder is not None:
             if not path.endswith("/"):
                 return RedirectResponse(f"/{path}/", status_code=308)
-            return HTMLResponse(site.listing(folder))
+            return HTMLResponse(shell.render(site.listing(folder), request.state.user))
         source = None if path.startswith(("api/", "_site/")) else site.source_url(path)
         if source:
             return RedirectResponse(source, status_code=302)

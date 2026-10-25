@@ -1,4 +1,4 @@
-"""Course Markdown, notebooks and source files as web pages, in the same style as the lectures.
+"""Course Markdown, notebooks and source files as pages of the website.
 
 The site serves the repository's own files: a README, lecture.md, a lab notebook or app/domain.py
 render here exactly as they are in the course folder, with links that stay on the site. Notebooks
@@ -17,11 +17,23 @@ from urllib.parse import quote, urlsplit
 from markdown_it import MarkdownIt
 
 from web.hints import WEEK_DIRS, WEEK_TITLES
+from web.shell import Page
 
 MERMAID = "/_site/mermaid-12.2.0.min.js"
 H1 = re.compile(r'<h1 id="[^"]*">(.*?)</h1>\s*', re.S)
-H2 = re.compile(r'<h2 id="([^"]*)">')
 TAGS = re.compile(r"<[^>]+>")
+LANGUAGES = {".py": "Python", ".tf": "Terraform", ".json": "JSON", ".jsonl": "JSON Lines", ".toml": "TOML"}
+FOLDER_TITLES = {
+    "app": "Service code",
+    "app/data": "Service data",
+    "app/data/handbook": "Lakeshore Ride handbook",
+    "app/services": "Service routes",
+    "harness": "Harness",
+    "infra": "Infrastructure",
+    "tests": "Tests",
+    "setup": "Setup",
+    "foundations": "Foundations",
+}
 
 
 def slugify(text: str) -> str:
@@ -29,39 +41,32 @@ def slugify(text: str) -> str:
     return re.sub(r"[^\w\- ]", "", text.strip().lower()).replace(" ", "-")
 
 
-def describe(rel: str) -> tuple[str, str]:
-    """(topbar subtitle, eyebrow) for a course file."""
+def describe(rel: str) -> tuple[list[tuple[str, str]], str]:
+    """(breadcrumbs above the title, kicker) for a course file. The page itself is the last crumb."""
     parts = PurePosixPath(rel).parts
     name = parts[-1]
     week = next((w for w, folder in WEEK_DIRS.items() if parts[0] == folder), None)
-    if week:
-        crumb = f"Week {week} · {WEEK_TITLES[week]}"
-    elif parts[0] == "setup":
-        crumb = "Setup"
-    elif parts[0] == "foundations":
-        crumb = "Foundations"
-    elif rel.startswith("app/data/handbook/"):
-        crumb = "Lakeshore Ride handbook"
-    elif len(parts) == 1 and name.endswith(".md"):
-        crumb = "Course guide"
-    else:
-        crumb = "Course files"
-    eyebrows = {
+    home = [("Course home", "/")]
+    kinds = {
         "README.md": "Overview",
-        "lecture.md": "Lecture notes · Markdown source",
-        "lab.ipynb": "Main lab · notebook",
-        "deep-dive.ipynb": "Optional deep dive · notebook",
+        "lecture.md": "Lecture notes (Markdown)",
+        "lab.ipynb": "Main lab",
+        "deep-dive.ipynb": "Optional deep dive",
         "setup.ipynb": "Setup notebook",
     }
-    if name in eyebrows:
-        return crumb, eyebrows[name]
-    if parts[0] == "foundations" and name.endswith(".ipynb"):
-        return crumb, "Foundations primer · notebook"
+    kind = kinds.get(name, "Notebook" if name.endswith(".ipynb") else "Notes" if name.endswith(".md") else "Source")
+    if week:
+        return [*home, (f"Week {week} · {WEEK_TITLES[week]}", f"/{parts[0]}/README.md")], f"Week {week} · {kind}"
+    if parts[0] in ("setup", "foundations") and len(parts) == 2:
+        section = parts[0].capitalize()
+        return [*home, (section, f"/{parts[0]}/README.md")], f"{section} · {kind}"
     if rel.startswith("app/data/handbook/"):
-        return crumb, "Handbook page"
-    if name.endswith(".md"):
-        return crumb, "Notes"
-    return crumb, "Source file"
+        return [*home, ("Lakeshore Ride handbook", "/app/data/handbook/")], "Lakeshore Ride handbook"
+    if len(parts) == 1:
+        return home, "Course guide" if name.endswith(".md") else "Source"
+    folders = ["/".join(parts[: i + 1]) for i in range(len(parts) - 1)]
+    crumbs = [*home] + [(FOLDER_TITLES.get(f, PurePosixPath(f).name), f"/{f}/") for f in folders]
+    return crumbs, FOLDER_TITLES.get(parts[0], kind)
 
 
 class Renderer:
@@ -144,72 +149,130 @@ class Renderer:
     # ------------------------------------------------------------------ whole pages
 
     @lru_cache(maxsize=512)  # noqa: B019 - one Renderer per app; keyed by mtime so edits show up
-    def document(self, rel: str, mtime_ns: int) -> str:
+    def document(self, rel: str, mtime_ns: int) -> Page:
         """The page for a Markdown file, a notebook or a source file."""
         path = self.root / rel
+        name = PurePosixPath(rel).name
         text = path.read_text(encoding="utf-8")
         env: dict[str, Any] = {"rel": rel}
-        crumb, eyebrow = describe(rel)
-        notes: list[str] = []
-        actions = [f'<a class="button button--quiet" href="{html.escape(self.github_url(rel))}">View on GitHub</a>']
+        crumbs, kicker = describe(rel)
+        badges: list[str] = []
+        actions = [("View on GitHub", self.github_url(rel), "github")]
+        lede = ""
 
         if rel.endswith(".md"):
             body = self.markdown(text, env)
         elif rel.endswith(".ipynb"):
             body = self._notebook(text, env)
-            actions.insert(0, f'<a class="button" href="/{quote(rel)}?download=1">Download notebook</a>')
-            notes.append(
-                "<p><strong>Read-only copy.</strong> To run this notebook, open "
-                f"<code>fy26/{html.escape(rel)}</code> in VS Code from your clone of the course repository and "
-                'select the Python environment in <code>fy26/.venv</code> (see <a href="/setup/README.md">Setup</a>).</p>'
+            badges.append({"lab.ipynb": "Required", "deep-dive.ipynb": "Optional"}.get(name, "Notebook"))
+            actions.insert(0, ("Download notebook", f"/{quote(rel)}?download=1", "download"))
+            body = (
+                '<div class="callout callout--info"><p><b>Read-only copy.</b> Run it in VS Code: open '
+                f"<code>fy26/{html.escape(rel)}</code> in your clone of the course repository and pick the "
+                '<code>fy26/.venv</code> kernel (<a href="/setup/README.md">Setup</a> shows how).</p></div>\n' + body
             )
         else:
-            body = f'<pre class="code"><code>{html.escape(text, quote=False)}</code></pre>\n'
-            notes.append(
-                f"<p>Source file <code>fy26/{html.escape(rel)}</code>, as committed to the course repository.</p>"
-            )
+            language = LANGUAGES.get(PurePosixPath(rel).suffix, "Source")
+            badges.append(language if name != "Dockerfile" else "Dockerfile")
+            lede = f"fy26/{rel}, as committed to the course repository."
+            body = f'<pre class="code code--file" data-lang="{html.escape(language)}"><code>{html.escape(text, quote=False)}</code></pre>\n'
 
-        if PurePosixPath(rel).name == "lecture.md":
-            folder = PurePosixPath(rel).parent.as_posix()
-            notes.append(
-                f'<p>The same lecture, formatted for reading: <a href="/{quote(folder)}/docs/lecture.html">lecture page</a>'
-                f' · <a href="/{quote(folder)}/docs/slides.html">slides</a>.</p>'
-            )
+        if name == "lecture.md":
+            folder = quote(PurePosixPath(rel).parent.as_posix())
+            badges.append("Markdown source")
+            actions.insert(0, ("Lecture page", f"/{folder}/docs/lecture.html", "book"))
 
         title_html, body = self._split_title(body)
-        title_html = title_html or html.escape(PurePosixPath(rel).name)
-        return self._page(
+        title_html = title_html or html.escape(name)
+        return Page(
+            title=html.unescape(TAGS.sub("", title_html)).strip(),
             title_html=title_html,
-            crumb=crumb,
-            eyebrow=eyebrow,
-            notes=notes,
+            path=f"/{rel}",
+            body_html=body,
+            kicker=kicker,
+            lede=lede,
+            crumbs=crumbs,
+            badges=badges,
             actions=actions,
-            body=self._sections(body),
+            toc=rel.endswith((".md", ".ipynb")),
+            wide=not rel.endswith((".md", ".ipynb")),
             mermaid=bool(env.get("mermaid")),
         )
 
-    def directory(self, rel: str, entries: list[tuple[str, bool]], readme: str | None) -> str:
+    def directory(self, rel: str, entries: list[tuple[str, bool]], readme: str | None) -> Page:
         """A folder: its README (when it has one) followed by the list of what it contains."""
-        crumb, _ = describe(f"{rel}/README.md")
-        items = "".join(
-            f'<li><a href="/{quote(posixpath.join(rel, name))}{"/" if is_dir else ""}">'
-            f"{html.escape(name)}{'/' if is_dir else ''}</a></li>"
-            for name, is_dir in entries
-        )
-        listing = f'<section id="files"><h2>In this folder</h2><ul class="file-list">{items}</ul></section>'
+        parts = PurePosixPath(rel).parts
+        week = next((w for w, folder in WEEK_DIRS.items() if parts[0] == folder), None)
+        crumbs = [("Course home", "/")] + [
+            (FOLDER_TITLES.get("/".join(parts[: i + 1]), p), "/" + "/".join(parts[: i + 1]) + "/")
+            for i, p in enumerate(parts[:-1])
+        ]
+        rows = []
+        for entry, is_dir in entries:
+            title = "" if is_dir else self._title_of(self.root / rel / entry)
+            label = (
+                f'<span class="file-list__name">{html.escape(title)}</span>'
+                f'<span class="file-list__file">{html.escape(entry)}</span>'
+                if title
+                else f'<span class="file-list__name file-list__name--mono">{html.escape(entry)}{"/" if is_dir else ""}</span>'
+            )
+            rows.append(
+                f'<li><a href="/{quote(posixpath.join(rel, entry))}{"/" if is_dir else ""}">'
+                f'<span class="file-list__icon file-list__icon--{"dir" if is_dir else "file"}" aria-hidden="true"></span>'
+                f"{label}</a></li>"
+            )
+        listing = f'<h2 id="in-this-folder">In this folder</h2>\n<ul class="file-list">{"".join(rows)}</ul>\n'
         env: dict[str, Any] = {"rel": f"{rel}/README.md"}
         title_html, body = self._split_title(self.markdown(readme, env) if readme else "")
-        return self._page(
-            title_html=title_html or html.escape(f"{rel}/"),
-            crumb=crumb,
-            eyebrow="Folder",
-            notes=[],
-            actions=[
-                f'<a class="button button--quiet" href="{html.escape(self.github_url(rel, folder=True))}">View on GitHub</a>'
-            ],
-            body=self._sections(body) + listing,
+        name = FOLDER_TITLES.get(rel, f"{parts[-1]}/")
+        return Page(
+            title=html.unescape(TAGS.sub("", title_html)).strip() if title_html else name,
+            title_html=title_html or html.escape(name),
+            path=f"/{rel}/",
+            body_html=body + listing,
+            kicker=f"Week {week} · Folder" if week else f"fy26/{rel}/",
+            crumbs=crumbs,
+            actions=[("View on GitHub", self.github_url(rel, folder=True), "github")],
             mermaid=bool(env.get("mermaid")),
         )
+
+    def _title_of(self, path: Path) -> str:
+        """The first '# ' heading of a Markdown file, for friendlier folder listings."""
+        if path.suffix != ".md":
+            return ""
+        try:
+            with path.open(encoding="utf-8") as handle:
+                for line in handle:
+                    if line.startswith("# "):
+                        return line[2:].strip()
+        except OSError:
+            pass
+        return ""
+
+    def headings(self, text: str, notebook: bool = False) -> list[tuple[int, str, str]]:
+        """(level, text, anchor) of every heading, with the same anchors the rendered page uses."""
+        sources = [text]
+        if notebook:
+            cells = json.loads(text).get("cells", [])
+            sources = [
+                "".join(c["source"]) if isinstance(c.get("source"), list) else str(c.get("source", ""))
+                for c in cells
+                if c.get("cell_type") == "markdown"
+            ]
+        seen: dict[str, int] = {}
+        found = []
+        for source in sources:
+            tokens = self.md.parse(source)
+            for i, token in enumerate(tokens):
+                if token.type != "heading_open":
+                    continue
+                inline = tokens[i + 1]
+                label = "".join(c.content for c in (inline.children or []) if c.type in ("text", "code_inline"))
+                slug = slugify(label) or "section"
+                count = seen.get(slug, 0)
+                seen[slug] = count + 1
+                found.append((int(token.tag[1]), label, slug if count == 0 else f"{slug}-{count}"))
+        return found
 
     def _notebook(self, raw: str, env: dict) -> str:
         cells = json.loads(raw).get("cells", [])
@@ -220,7 +283,9 @@ class Renderer:
             if cell.get("cell_type") == "markdown":
                 out.append(self.markdown(source, env))
             elif cell.get("cell_type") == "code" and source.strip():
-                out.append(f'<pre class="code nb-cell"><code>{html.escape(source, quote=False)}</code></pre>\n')
+                out.append(
+                    f'<pre class="code nb-cell" data-lang="Python"><code>{html.escape(source, quote=False)}</code></pre>\n'
+                )
         return "".join(out)
 
     @staticmethod
@@ -229,66 +294,3 @@ class Renderer:
         if not match:
             return None, body
         return match.group(1), body[: match.start()] + body[match.end() :]
-
-    @staticmethod
-    def _sections(body: str) -> str:
-        """Wrap each h2 and what follows in <section id>, which the lecture script turns into contents links."""
-        chunks = re.split(r'(?=<h2 id=")', body)
-        out = [f'<div class="doc-intro">{chunks[0]}</div>' if chunks[0].strip() else ""]
-        for chunk in chunks[1:]:
-            match = H2.match(chunk)
-            section_id = match.group(1) if match else ""
-            out.append(f'<section id="{section_id}">{H2.sub("<h2>", chunk, count=1)}</section>')
-        return "".join(out)
-
-    def _page(
-        self,
-        *,
-        title_html: str,
-        crumb: str,
-        eyebrow: str,
-        notes: list[str],
-        actions: list[str],
-        body: str,
-        mermaid: bool,
-    ) -> str:
-        title_text = html.escape(html.unescape(TAGS.sub("", title_html)).strip())
-        note_html = f'<div class="callout">{"".join(notes)}</div>' if notes else ""
-        return f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{title_text} · {html.escape(crumb)} · Agentic AI on Microsoft Foundry</title>
-<link rel="stylesheet" href="/assets/lecture.css">
-<link rel="stylesheet" href="/_site/site.css">
-</head>
-<body class="doc-page">
-<a class="skip" href="#content">Skip to the document</a>
-<div id="progress" aria-hidden="true"></div>
-<header class="topbar"><div class="topbar__inner">
-  <span class="brand-copy"><b>Agentic AI on Microsoft Foundry</b><span>{html.escape(crumb)}</span></span>
-  <div class="topbar__right">
-    {"".join(actions)}
-    <button class="button" id="print" type="button">Print / PDF</button>
-  </div>
-</div></header>
-<div class="layout">
-<nav class="toc" aria-label="Contents"></nav>
-<main id="content" tabindex="-1">
-<header class="hero">
-  <p class="eyebrow">{html.escape(eyebrow)}</p>
-  <h1>{title_html}</h1>
-  {note_html}
-</header>
-<div class="doc-body">
-{body}
-</div>
-</main>
-</div>
-<button id="back-to-top" type="button" aria-label="Back to top">↑</button>
-<script src="/assets/lecture.js"></script>
-<script src="/_site/site.js"{' data-mermaid="' + MERMAID + '"' if mermaid else ""}></script>
-</body>
-</html>
-"""
