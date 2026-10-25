@@ -8,33 +8,47 @@ from typing import Any
 
 def normalize(text: str) -> str:
     """Lowercase, '7 a.m.' -> '7am', '2,500' -> '2500', no whitespace."""
+    return _flat(text).replace(" ", "")
+
+
+def _flat(text: str) -> str:
+    """Like normalize, but words keep one space between them, so '$16. 5 riders' stays two numbers."""
     text = text.lower()
     text = re.sub(r"(?<=[a-z])\.", "", text)
     text = re.sub(r"(?<=\d),(?=\d{3})", "", text)
-    return re.sub(r"\s+", "", text)
+    return re.sub(r"\s+", " ", text)
 
 
 def fact_score(answer: str, facts: list[list[str]]) -> float:
     """Share of facts present. Each fact is a list of acceptable phrasings."""
     if not facts:
         return 1.0
-    norm = normalize(answer)
-    found = sum(any(_found(normalize(option), norm) for option in options) for options in facts)
+    flat = _flat(answer)
+    found = sum(any(_found(option, flat) for option in options) for options in facts)
     return found / len(facts)
 
 
-def _found(option: str, text: str) -> bool:
-    """`option` is in `text`, with any number in it whole: '$16' is not found in '$160', nor '16' in '160'."""
-    if not any(c.isdigit() for c in option):
-        return option in text  # a text stem such as 'escalat' may match a longer word
-    before = r"(?<!\d)(?<!\d\.)" if option[0].isdigit() else ""
-    if not option[-1].isdigit():
+def _found(option: str, flat: str) -> bool:
+    """`option` is in the answer, spaces optional as in normalize(), with any number in it whole.
+
+    '$16' is not found in '$160' or '$16.50', nor '16' in '160', but it is found in '$16. 5 riders'.
+    """
+    chars = normalize(option)
+    if not any(c.isdigit() for c in chars):
+        return chars in flat.replace(" ", "")  # a text stem such as 'escalat' may match a longer word
+    number = "0123456789."
+    pattern = "".join(
+        ("" if i == 0 or (chars[i - 1] in number and ch in number) else " ?") + re.escape(ch)
+        for i, ch in enumerate(chars)
+    )  # a space may separate '24' and 'hours', never the digits of one number
+    before = r"(?<!\d)(?<!\d\.)" if chars[0].isdigit() else ""
+    if not chars[-1].isdigit():
         after = ""
-    elif re.search(r"\.\d+$", option):
+    elif re.search(r"\.\d+$", chars):
         after = r"(?!0*[1-9])"  # '1.5' also matches '1.50', not '1.55'
     else:
         after = r"(?!\d)(?!\.0*[1-9])"  # '16' also matches '16.00', not '160' or '16.5'
-    return re.search(before + re.escape(option) + after, text) is not None
+    return re.search(before + pattern + after, flat) is not None
 
 
 def numbers_in(text: str) -> list[float]:

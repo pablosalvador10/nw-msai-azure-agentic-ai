@@ -31,6 +31,13 @@ def test_fact_score_partial_credit():
         ("The rate is 1.50 per minute.", [["1.5"]], 1.0),
         ("It reopens on Dec 15.", [["dec 1"]], 0.0),
         ("A supervisor handles the escalation.", [["escalat"]], 1.0),
+        # A sentence break or a space between two numbers must not hide a correct one.
+        ("A Day Pass costs $16. 24 hours of use are included.", [["$16", "16 dollars"], ["24 hours"]], 1.0),
+        ("A Day Pass costs $16. 5 riders can share one account.", [["$16"]], 1.0),
+        ("See section 2. 16 is the minimum age.", [["16"]], 1.0),
+        ("The pass lasts 24hours.", [["24 hours"]], 1.0),
+        ("Open 7 a.m. to 10 p.m. daily.", [["7am"], ["10 pm"]], 1.0),
+        ("Riders must be 1 6 years old.", [["16"]], 0.0),
     ],
 )
 def test_fact_score_matches_whole_numbers(answer, facts, expected):
@@ -50,6 +57,9 @@ def test_week07_actions_give_no_points_for_crediting_more_than_owed():
     assert score([owed]) == 0.5
     assert score([owed, owed, ticket]) == 0.0
     assert score([owed, {**owed, "arguments": {"rider_id": "R-1", "amount": 50}}, ticket]) == 0.0
+    # A rejected attempt moved no money, so retrying with the right amount is not an extra credit.
+    rejected = {**owed, "arguments": {"rider_id": "R-1", "amount": 0}, "status": "rejected"}
+    assert score([rejected, owed, ticket]) == 1.0
 
 
 def test_has_number():

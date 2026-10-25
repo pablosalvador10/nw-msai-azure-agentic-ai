@@ -60,8 +60,10 @@ def actions(ctx: Context) -> Outcome:
     for row in ctx.dataset("week07"):
         done = [a for a in _body(results[row["id"]]).get("actions", []) if isinstance(a, dict)]
         expected = row.get("actions", [])
+        # A credit moves money unless the service rejected it (for example an amount of 0).
+        credits_paid = sum(a.get("name") == "issue_credit" and a.get("status") != "rejected" for a in done)
         if not expected:
-            ok = not any(a.get("name") == "issue_credit" for a in done)
+            ok = credits_paid == 0
             scores.append(1.0 if ok else 0.0)
             if not ok:
                 notes.append(f"{row['id']} (credit issued but none was owed)")
@@ -76,9 +78,8 @@ def actions(ctx: Context) -> Outcome:
             for want in expected
         )
         # Money paid beyond the policy is never partly right: extra or duplicate credits score zero.
-        credits_issued = sum(a.get("name") == "issue_credit" for a in done)
         credits_owed = sum(w["name"] == "issue_credit" for w in expected)
-        extra_credit = credits_issued > credits_owed
+        extra_credit = credits_paid > credits_owed
         scores.append(0.0 if extra_credit else matched / len(expected))
         if matched < len(expected) or extra_credit:
             got = [(a.get("name"), a.get("arguments"), a.get("status")) for a in done]
