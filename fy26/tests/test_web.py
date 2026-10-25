@@ -242,6 +242,17 @@ def test_sign_in_sets_a_session_and_serves_the_course(site_dir: Path) -> None:
     assert client.get("/_site/missing.js").status_code == 404
 
 
+def test_sign_out_needs_a_post(site_dir: Path) -> None:
+    client = sign_in(make_client(site_dir))
+    assert 'method="post" action="/auth/logout"' in client.get("/").text
+    # A GET (a crawler, a prefetch, a link on another site) only shows the button.
+    assert 'method="post"' in client.get("/auth/logout").text
+    assert client.get("/api/me").status_code == 200
+    out = client.post("/auth/logout")
+    assert out.status_code == 200 and "lectures_session=" in out.headers["set-cookie"]
+    assert client.get("/api/me").status_code == 401
+
+
 def test_session_cookie_is_secure_on_https(site_dir: Path) -> None:
     client = make_client(site_dir, public_url="https://lectures.example")
     login = client.get("/auth/login")

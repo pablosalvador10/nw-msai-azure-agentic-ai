@@ -147,7 +147,8 @@ class Shell:
                 f'<img class="avatar" src="{esc(avatar)}" alt="" width="30" height="30">'
                 '</summary><div class="account__menu" role="menu">'
                 f'<p class="account__who">Signed in as<br><b>@{esc(user.login)}</b></p>'
-                '<a role="menuitem" href="/auth/logout">Sign out</a></div></details>'
+                '<form method="post" action="/auth/logout"><button role="menuitem" type="submit">Sign out</button>'
+                "</form></div></details>"
             )
         return f"""<header class="site-header">
   <button class="icon-btn nav-toggle" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Open course navigation">{icon("menu", 20)}</button>

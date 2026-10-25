@@ -54,8 +54,8 @@ kbd{display:inline-flex;align-items:center;height:20px;padding:0 6px;border:1px 
 .account__menu{position:absolute;right:0;top:calc(100% + 10px);width:220px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
 .account__who{margin:0;padding:10px 12px 12px;border-bottom:1px solid var(--line-2);color:var(--muted);font-size:.82rem;line-height:1.4}
 .account__who b{color:var(--ink);font-size:.9rem}
-.account__menu a{display:block;margin-top:6px;padding:8px 12px;border-radius:8px;color:var(--ink-2);font-size:.88rem;text-decoration:none}
-.account__menu a:hover{background:var(--bg-sunken)}
+.account__menu button{display:block;width:100%;margin-top:6px;padding:8px 12px;border:0;border-radius:8px;background:none;color:var(--ink-2);font:inherit;font-size:.88rem;text-align:left;cursor:pointer}
+.account__menu button:hover{background:var(--bg-sunken)}
 
 /* Layout */
 .site-body{display:grid;grid-template-columns:var(--nav-w) minmax(0,1fr);min-height:calc(100vh - var(--header-h));

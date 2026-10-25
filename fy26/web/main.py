@@ -49,7 +49,9 @@ PAGE_CSS = (
     "background:#fff;box-shadow:0 1px 2px rgba(16,20,48,.04),0 18px 48px rgba(16,20,48,.07)}"
     ".brand{display:flex;align-items:center;gap:10px;margin:0 0 22px;font-weight:650;font-size:.92rem}"
     ".brand i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#3341b8,#4b5bdb 48%,#0078d4)}"
-    "h1{margin:0 0 10px;font-size:1.45rem;letter-spacing:-.015em}p{margin:0;color:#454b60}a{color:#252f8c}"
+    "h1{margin:0 0 10px;font-size:1.45rem;letter-spacing:-.015em}.body{color:#454b60}a{color:#252f8c}"
+    "button{margin-top:18px;padding:9px 16px;border:0;border-radius:10px;background:#3341b8;color:#fff;"
+    "font:inherit;font-weight:600;cursor:pointer}button:hover{background:#252f8c}"
 )
 
 
@@ -66,7 +68,7 @@ def page(status: int, title: str, body_html: str) -> HTMLResponse:
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{html.escape(title)} · Agentic AI on Microsoft Foundry</title><style>{PAGE_CSS}</style></head>"
         f'<body><main><p class="brand"><i></i>Agentic AI on Microsoft Foundry</p><h1>{html.escape(title)}</h1>'
-        f"<p>{body_html}</p></main></body></html>",
+        f'<div class="body">{body_html}</div></main></body></html>',
         status_code=status,
         headers={"Cache-Control": "no-store"},
     )
@@ -183,6 +185,12 @@ def create_app(
         return response
 
     @app.get("/auth/logout")
+    def logout_page() -> Response:
+        # Signing out is a POST: a GET link would let crawlers, prefetchers or another site end the session.
+        form = '<form method="post" action="/auth/logout"><button type="submit">Sign out</button></form>'
+        return page(200, "Sign out", f"Sign out of the course website on this browser.{form}")
+
+    @app.post("/auth/logout")
     def logout() -> Response:
         response = page(200, "Signed out", '<a href="/auth/login">Sign in again</a>')
         response.delete_cookie(SESSION_COOKIE, path="/")
