@@ -257,7 +257,7 @@ GitHub Copilot is a family of surfaces sharing one set of customizations: chat a
 
 Choose by **trigger**: instructions for rules that always apply, skills for procedures needed sometimes, custom agents for roles you switch into, hooks for things that must happen every time (format after each edit, block commands that touch secrets).
 
-**This repository is a worked example.** `.github/copilot-instructions.md` holds course-wide conventions; `.github/skills/` holds skills for Agent Framework, MCP servers, notebooks and tests; `fy26/AGENTS.md` holds the rules for the service. Open them and judge them by the standard of section 3.
+**This repository is a worked example.** `.github/copilot-instructions.md` holds course-wide conventions; `.github/agents/` holds the five course agents you have been asking for help (Pablo, Will and Arvind), each with its own instructions, tools and handoffs; `.github/skills/fy26-*` holds the skills they load (labs, harness, deploy, data, troubleshooting); `fy26/.mcp.json` connects them to Microsoft Learn's MCP server; `fy26/AGENTS.md` holds the rules for the service. Open them and judge them by the standard of section 3.
 
 ### 9.2 · The cloud agent
 
