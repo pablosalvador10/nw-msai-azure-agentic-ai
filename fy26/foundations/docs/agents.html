@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Foundations · Your course agents</title>
-<meta name="description" content="How to get help from the five course agents in VS Code Copilot Chat, named after the instructors: Pablo · Start here, Pablo · Fundamentals, Pablo · Scoring, Will · Infra and deploy and Arvind · Data. Which one to ask, how to call them, how to vibe code with Copilot's Agent, and what they will and will not do.">
+<meta name="description" content="How to get help from the five course agents in VS Code Copilot Chat: Pablo · Start here, Pablo · Fundamentals, Pablo · Scoring, Will · Infra and deploy and Arvind · Data. Which one to ask, how to call them, how to vibe code with Copilot's Agent, and what they will and will not do.">
 <link rel="stylesheet" href="../../assets/lecture.css">
 <link rel="stylesheet" href="../../assets/agents.css">
 </head>
@@ -33,7 +33,7 @@
 <header class="hero" id="top">
   <p class="eyebrow">Foundations · Start here</p>
   <h1>Your course agents<span class="hero-subtitle"><strong>Five Copilot agents that know this course. When you are stuck, they tell you where you are, what to do next, and why.</strong></span></h1>
-  <p class="hero-copy">This course uses tools you may never have touched: a terminal, Azure, Terraform, a harness that scores your work. You do not have to work them out alone. The course ships five agents inside VS Code's Copilot Chat. Each one knows the course materials, has one job, and carries the name of the instructor who leads that part of the course: <strong>Pablo</strong> for the AI and how you are scored, <strong>Will</strong> for infrastructure and deployment, <strong>Arvind</strong> for data. Start with <strong>Pablo · Start here</strong>. Tell it where you are, even if all you can say is "I am lost", and it gives you one next step and brings in the expert you need.</p>
+  <p class="hero-copy">This course uses tools you may never have touched: a terminal, Azure, Terraform, a harness that scores your work. You do not have to work them out alone. The course ships five agents inside VS Code's Copilot Chat. Each one knows the course materials and has one job: <strong>Pablo</strong> for the AI and how you are scored, <strong>Will</strong> for infrastructure and deployment, <strong>Arvind</strong> for data. Start with <strong>Pablo · Start here</strong>. Tell it where you are, even if all you can say is "I am lost", and it gives you one next step and brings in the expert you need.</p>
   <div class="table-wrap"><table><thead><tr><th>Agent</th><th>Ask it when</th><th>Does it change things?</th></tr></thead><tbody>
     <tr><td><a class="agent-chip is-guide" href="#start-here"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-guide"/></svg></span>Pablo · Start here</a></td><td>You are lost, you do not know the next step, or your question spans two areas</td><td>No. It checks where you are, asks the experts when needed, and sends you to the right one</td></tr>
     <tr><td><a class="agent-chip is-tutor" href="#fundamentals"><span class="agent-icon"><svg aria-hidden="true"><use href="#i-tutor"/></svg></span>Pablo · Fundamentals</a></td><td>A concept, a lecture, a lab part, a failing check to fix, a change to vibe code</td><td>No edits. It explains and gives hints; the graded code is yours</td></tr>
@@ -66,7 +66,7 @@
     <div class="tile tile--green"><h4>Plain files you can read</h4><p>Each agent is one Markdown file in <code>.github/agents/</code>; each skill is a folder in <code>.github/skills/</code>. Open them: they are short.</p></div>
   </div>
   <div class="callout"><p><strong>You will build this pattern yourself.</strong> In Week 7 your service routes a support case to specialist agents, the way Pablo · Start here routes you and consults Will and Arvind. In Week 8 you write instructions for a coding agent in <code>fy26/AGENTS.md</code>. Reading the five agent files now is a preview of both weeks.</p></div>
-  <div class="callout callout--amber"><p><strong>They are AI assistants, not your instructors.</strong> Each one says so in its first reply. They are modeled on what each instructor teaches, and they can be wrong. Grades, extensions and anything personal go to Pablo, Will and Arvind themselves.</p></div>
+  <div class="callout callout--amber"><p><strong>They are AI assistants, not people.</strong> Each one says so in its first reply, and they can be wrong. Grades, extensions and anything personal go to the course owner, Pablo Salvador Lopez.</p></div>
 </section>
 
 <section id="once" data-group="Start here" data-toc="Before the first time">
@@ -148,7 +148,7 @@ Azure access is ready.
   <h3 id="dropdown" data-toc="What the dropdown shows">What the Agent dropdown shows</h3>
   <div class="split">
     <div>
-      <p>The dropdown lists VS Code's built-in agents, such as <strong>Agent</strong> and <strong>Plan</strong>, and the five agents this repository adds. Each course agent shows an instructor's name and its job, so they are easy to spot.</p>
+      <p>The dropdown lists VS Code's built-in agents, such as <strong>Agent</strong> and <strong>Plan</strong>, and the five agents this repository adds. Each course agent shows a name and its job, so they are easy to spot.</p>
       <p>Pick one <strong>before</strong> you type. The placeholder text in the message box tells you what that agent wants to hear: Will, for example, asks for "Your OS, and the step, error or URL behavior you see".</p>
       <p>You can switch agents in the middle of a chat. If the new agent seems to miss the context, restate the week and the problem in one line. When the topic changes completely, start a new chat.</p>
     </div>
@@ -418,7 +418,7 @@ Report both scores.</code></pre>
   </tbody></table></div>
   <div class="split">
     <div><h4>Call a skill directly</h4><p>Type <code>/</code> in the message box and pick a skill, for example <code>/fy26-troubleshooting</code>, then paste your error. Or simply ask: when your question matches a skill's description, Copilot loads it for you.</p></div>
-    <div><h4>Ignore the others</h4><p>Skills without the <code>fy26-</code> prefix belong to last year's archived labs or to instructors. You do not need them.</p></div>
+    <div><h4>Ignore the others</h4><p>Skills without the <code>fy26-</code> prefix belong to last year's archived labs or to course authoring. You do not need them.</p></div>
   </div>
 </section>
 

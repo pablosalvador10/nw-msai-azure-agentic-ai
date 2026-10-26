@@ -590,7 +590,7 @@ result = await agent.run(
                        {"station_id": "LS-99"})
     ok = isinstance(result, dict) and "error" in result
     return (1.0 if ok else 0.0), f"LS-99 -> {result}"</code></pre>
-      <p class="small" style="margin-top:10px">A check takes a <code>Context</code> and returns a score and a detail line. Instructors add checks like this to the private harness.</p>
+      <p class="small" style="margin-top:10px">A check takes a <code>Context</code> and returns a score and a detail line. The private harness adds checks like this one.</p>
     </div>
     <ul class="check-list build" style="font-size:17px">
       <li><b>Grade the outcome, not the path.</b> Check the answer, not which helper produced it.</li>

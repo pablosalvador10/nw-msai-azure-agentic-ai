@@ -4,7 +4,7 @@ Two things to have before Week 5: a way to get help when you are stuck, and enou
 
 ## 1. Your course agents
 
-VS Code's Copilot Chat has five agents for this course, each named after the instructor who leads that part of it. Start with **Pablo · Start here** whenever you are lost: it finds where you are, gives you one next step, and asks the experts for you when your question needs them. **Pablo · Fundamentals** teaches the AI and coaches the labs; **Pablo · Scoring** explains your score, how grading works and the course website, and runs the check before you submit; **Will · Infra and deploy** handles setup, Azure, Terraform and deployment; **Arvind · Data** handles the course data, your harness reports, evaluation and telemetry.
+VS Code's Copilot Chat has five agents for this course, each with one job. Start with **Pablo · Start here** whenever you are lost: it finds where you are, gives you one next step, and asks the experts for you when your question needs them. **Pablo · Fundamentals** teaches the AI and coaches the labs; **Pablo · Scoring** explains your score, how grading works and the course website, and runs the check before you submit; **Will · Infra and deploy** handles setup, Azure, Terraform and deployment; **Arvind · Data** handles the course data, your harness reports, evaluation and telemetry.
 
 **Read first:** [docs/agents.html](docs/agents.html) shows how to open them, which one to ask when, how to call them (including asking Pablo to consult the others), how to vibe code with Copilot's Agent, and what they will and will not do. It takes about ten minutes, and you need only the cloned course, not a finished setup.
 

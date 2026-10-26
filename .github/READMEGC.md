@@ -8,7 +8,7 @@ This folder contains custom instructions, custom agents and Agent Skills to tail
 .github/
 ├── copilot-instructions.md    # Always-on coding standards
 ├── READMEGC.md                # This file
-├── agents/                    # FY26 student agents, named after the instructors (pick them in the Chat agent dropdown)
+├── agents/                    # FY26 student agents (pick them in the Chat agent dropdown)
 │   ├── pablo.agent.md         # Pablo · Start here (front door; consults the others)
 │   ├── pablo-fundamentals.agent.md  # Pablo · Fundamentals
 │   ├── pablo-scoring.agent.md # Pablo · Scoring
@@ -26,7 +26,7 @@ This folder contains custom instructions, custom agents and Agent Skills to tail
     ├── agentic-ai/            # FY25 (archived)
     ├── azure-functions/       # FY25 (archived)
     ├── mcp-server/            # FY25 (archived)
-    ├── notebook-development/  # Instructors: writing lab notebooks
+    ├── notebook-development/  # Course authoring: writing lab notebooks
     └── python-testing/        # FY25 (archived)
 ```
 
@@ -34,7 +34,7 @@ This folder contains custom instructions, custom agents and Agent Skills to tail
 
 Stuck? Open Copilot Chat, open the Agent dropdown, and pick **Pablo · Start here**. It finds where you are (setup, week, deployed or not), gives you one next step, and names the agent who takes it from there, or asks that agent for you. The student guide, with drawings, example prompts and a section on vibe coding with Copilot's Agent, is [Your course agents](../fy26/foundations/docs/agents.html).
 
-Five agents, one job each, named after the instructor who leads that part of the course: Pablo for the AI and how students are scored, Will for infrastructure and deployment, Arvind for data. Each one says in its first reply that it is the course's AI assistant, not the instructor.
+Five agents, one job each: Pablo for the AI and how students are scored, Will for infrastructure and deployment, Arvind for data. Each one says in its first reply that it is the course's AI assistant, not a person.
 
 | Agent | Use it when | Skills it loads | Can it change things? |
 |---|---|---|---|
@@ -83,7 +83,7 @@ Skills are **loaded on-demand** when relevant to your prompt.
 | `mcp-server` | FY25 (archived): MCP on Azure Functions |
 | `python-testing` | FY25 (archived): pytest for Azure Functions |
 | `agentic-ai` | FY25 (archived): agents with tool calling |
-| `notebook-development` | Instructors: creating teaching lab notebooks |
+| `notebook-development` | Course authoring: creating teaching lab notebooks |
 
 ### Enable Skills
 

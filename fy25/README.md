@@ -130,8 +130,8 @@ Add safety, evaluation, and observability for production deployment.
 
 ```bash
 # Clone and install
-git clone https://github.com/pablosalvador10/northwestern-msai-azure-agentic-ai.git
-cd northwestern-msai-azure-agentic-ai/fy25
+git clone https://github.com/pablosalvador10/nw-msai-azure-agentic-ai.git
+cd nw-msai-azure-agentic-ai/fy25
 
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh

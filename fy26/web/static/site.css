@@ -203,6 +203,8 @@ dialog.search::backdrop{background:rgba(17,20,43,.38);-webkit-backdrop-filter:bl
 .home-hero__lede{margin:18px 0 0;max-width:600px;color:var(--muted);font-size:1.14rem;line-height:1.6}
 .home-hero__lede b{color:var(--ink);font-weight:650}
 .home-hero__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.home-hero__owner{margin:22px 0 0;color:var(--faint);font-size:.88rem}
+.home-hero__owner a{color:var(--muted)}
 .continue{margin:20px 0 0;color:var(--muted);font-size:.9rem}
 .continue a{font-weight:600}
 .focus-card{position:relative;overflow:hidden;padding:26px 26px 22px;border:1px solid var(--brand-100);border-radius:18px;background:linear-gradient(180deg,var(--brand-50),#fff 70%);box-shadow:var(--shadow)}

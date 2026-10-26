@@ -171,7 +171,7 @@ def create_app(
                 403,
                 "No access yet",
                 f"You are signed in to GitHub as <b>@{html.escape(user.login)}</b>, but this account cannot read "
-                "the course repository. Accept the repository invitation from your instructor (GitHub notifications "
+                "the course repository. Accept the invitation to the course repository (GitHub notifications "
                 f'or email), then {again} again. Wrong account? <a href="https://github.com/logout">Sign out of '
                 "GitHub</a> first.",
             )
