@@ -1,7 +1,5 @@
 # Agentic AI on Microsoft Foundry
 
-By **Pablo Salvador Lopez** ([@pablosalvador10](https://github.com/pablosalvador10)).
-
 A hands-on course in building AI agents that hold up in production. You build one service, a support API for **Lakeshore Ride** (a fictional bike-share company), and give it a new capability each week: structured output, retrieval with citations, tools, several agents working together, MCP, and the guardrails a public service needs. Every week ends the same way: the service runs on Azure and a test harness scores it, so you always know what works and what to fix next.
 
 Each topic starts from first principles in plain Python, so you see what a framework does before you use one.
@@ -52,8 +50,6 @@ fy26/          The course: home page, setup, foundations, one folder per week,
 fy25/          The previous edition, kept as taught
 .github/       Continuous integration, and the Copilot agents and skills for the course
 ```
-
-The [previous edition](fy25/README.md) is kept for reference and is no longer updated; the cloud services and links it uses may have changed.
 
 ## License
 
