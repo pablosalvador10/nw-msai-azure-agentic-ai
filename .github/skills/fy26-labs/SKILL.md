@@ -30,6 +30,7 @@ Weeks 1 to 4 and 9 are taught by other instructors and have no materials here. I
 | `docs/lecture.html`, `docs/slides.html` | The same notes for the browser (`lecture.html#sN` is section N) and the slide deck | No |
 | `lab.ipynb` | The main lab: parts in order, then deploy. **Required** | Its result, your deployed URL, is graded |
 | `deep-dive.ipynb` | Optional, for after you submit. Does not edit `app/` or deploy | No |
+| `in-class-exercise.ipynb` (Week 8) | Run in class: build an agent harness (T, M, I, G, O, E) on Foundry, then a 20-minute mission. Does not edit `app/` or deploy | No |
 
 Open notebooks in VS Code with the kernel **`.venv (Python 3.12)`** from `fy26/.venv`. The **course website** (sign in with the GitHub account that can read the course repository) shows all of it in a browser, plus **Score your deployed service**, which runs the public harness against your URL.
 

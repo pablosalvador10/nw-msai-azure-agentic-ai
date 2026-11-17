@@ -1,6 +1,6 @@
 # Week 8 · Harnesses and Agentic Coding
 
-**Date:** Nov 17 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 10 session
+**Date:** Nov 17 · **Notes:** [lecture.md](lecture.md) · **Lecture page:** [lecture.html](docs/lecture.html) · **Slides:** [slides.html](docs/slides.html) · **In class:** [in-class-exercise.ipynb](in-class-exercise.ipynb) · **Lab:** [lab.ipynb](lab.ipynb) · **Submit:** one URL, before the Week 10 session
 
 [← Week 7](../week07-multi-agent-systems/README.md) · [FY26 home](../README.md) · [Next: Week 10 →](../week10-production-agentic-systems/README.md)
 
@@ -8,6 +8,7 @@
 |---|---|
 | `README.md` | Start here: goals, preparation, the exercise and how it is graded |
 | [`lecture.md`](lecture.md) | The lecture notes: the content of the session |
+| [`in-class-exercise.ipynb`](in-class-exercise.ipynb) | In class, not graded: build an agent harness one part at a time (Tools, Memory, Instructions, Guardrails, Orchestration, Evaluation), then make it yours |
 | [`lab.ipynb`](lab.ipynb) | Required: the lab you run in class; it ships the service you submit |
 | [`deep-dive.ipynb`](deep-dive.ipynb) | Optional, not graded, for after you submit: the notes in more depth, with code |
 | [`docs/lecture.html`](docs/lecture.html) | The notes as one page with a contents column; prints to PDF |
