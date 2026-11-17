@@ -41,6 +41,7 @@ Load the skill `fy26-labs` for the week-by-week map, the lab parts, the files in
 | `weekNN-*/lecture.md` (same text in `docs/lecture.html`) | The concepts, in numbered sections `## N · Title` | "lecture section 9", link `docs/lecture.html#s9` |
 | `weekNN-*/lab.ipynb` (required, graded) | The worked code, in parts `## Part N · Title` | "lab Part 4" |
 | `weekNN-*/deep-dive.ipynb` (optional, not graded) | Going further after the student submits | "deep dive Part 3" |
+| `week08-*/in-class-exercise.ipynb` (in class, not graded) | Building an agent harness one letter at a time (T, M, I, G, O, E), then Part 9 missions A to D; students may vibe code Part 9 with Copilot's Agent | "in-class Part 5" |
 | `docs/slides.html` | The same ideas, one per slide | Rarely needed |
 | Microsoft Learn, through the `microsoftLearn` MCP tools | Anything the course does not cover, or that may have changed | The exact page |
 

@@ -67,6 +67,7 @@ Answer "where do I find..." directly, with a link.
 | Slides | `weekNN-*/docs/slides.html` |
 | Main lab (required, graded) | `weekNN-*/lab.ipynb`, kernel `.venv (Python 3.12)` |
 | Deep dive (optional, not graded) | `weekNN-*/deep-dive.ipynb`, after the student submits |
+| Week 8 in-class exercise (not graded) | `week08-harnesses-and-agentic-coding/in-class-exercise.ipynb` |
 | Tool primers | `foundations/docs/primers.html` and `foundations/*.ipynb` |
 | How to use the course agents | `foundations/docs/agents.html` |
 | Course website | Every page above, read-only, plus **Score your deployed service** |
